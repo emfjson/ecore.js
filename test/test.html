@@ -1,0 +1,34 @@
+<html>
+<head>
+<script src="../ecore.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<script type="text/javascript">
+	var Person = new EClass;
+
+	Person.include({
+		save: function(id) {
+			document.write("save "+id);
+			return;
+		},
+		destroy: function(id) {
+			document.write("destroy "+id);
+			return;
+		}
+	});
+	
+	var person = new Person;
+	person.save(1);
+	document.write("</br>");
+	person.destroy(1);
+	document.write("</br>");
+	document.write(person.eClass);
+	
+	var package = new EPackage('org.example');
+	document.write(package);
+	document.write("</br>");
+	document.write(package.name);
+	document.write("</br>");
+	document.write(package.hello());
+	document.write("</br>");
+</script>
+</html>
