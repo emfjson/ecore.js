@@ -1,0 +1,74 @@
+<!DOCTYPE html>  <html> <head>   <title>ecore.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               ecore.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>ecore.js 0.1
+(c) 2012 Guillaume Hillairet.</p>
+
+<p>ecore.js: Consuming ecore models in JavaScript.</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>Establish the root object, <code>window</code> in the browser, or <code>global</code> on the server.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">root = </span><span class="k">this</span>
+
+<span class="nv">ecore = </span><span class="p">{}</span>
+<span class="nx">root</span><span class="p">[</span><span class="s1">&#39;ecore&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nx">ecore</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>Represents a persistent collection.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">Resource</span>
+    <span class="nv">constructor: </span><span class="nf">(@url, @content) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>ResourceSet holds a Collection of Resource, and provides methods for loading
+Resource.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">ResourceSet</span>
+    <span class="vi">@resources = </span><span class="p">[]</span>
+    <span class="vi">@indexes = </span><span class="p">{}</span>
+    <span class="nv">load: </span><span class="nf">(url, callback) -&gt;</span>
+        <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isString</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span> <span class="o">and</span> <span class="nx">callback</span> <span class="o">and</span> <span class="k">typeof</span> <span class="nx">callback</span> <span class="o">is</span> <span class="s1">&#39;function&#39;</span>
+            <span class="nx">httpGet</span> <span class="nx">url</span><span class="p">,</span> <span class="nf">(result) -&gt;</span>
+                <span class="nv">resource = </span><span class="k">new</span> <span class="nx">Resource</span> <span class="nx">url</span><span class="p">,</span> <span class="nx">result</span>
+                <span class="vi">@resources = </span><span class="p">[]</span> <span class="nx">unless</span> <span class="nx">@resources</span>
+                <span class="nx">@resources</span><span class="p">.</span><span class="nx">push</span> <span class="nx">resource</span>
+                <span class="nx">callback</span> <span class="nx">resource</span>
+
+<span class="nv">refAttribute = </span><span class="s1">&#39;$ref&#39;</span>
+<span class="nv">indexAttribute = </span><span class="s1">&#39;_index&#39;</span>
+<span class="nv">indexes = </span><span class="p">{}</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>Return the Index of the current object, based
+on its parent Index and is current position in
+the given property.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">getIndex = </span><span class="nf">(parent, property, position) -&gt;</span>
+    <span class="nv">index = </span><span class="nx">parent</span><span class="p">[</span><span class="nx">indexAttribute</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/@&#39;</span> <span class="o">+</span> <span class="nx">property</span>
+    <span class="nv">index = </span><span class="nx">index</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="nx">position</span>  <span class="k">if</span> <span class="nx">position</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="nx">index</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>Traverse the current object tree and assign to
+each object an Index.
+The root object has for Index /.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">buildIndexes = </span><span class="nf">(object, func) -&gt;</span>
+    <span class="nv">current = </span><span class="kc">false</span>
+    <span class="nv">index = </span><span class="kc">false</span>
+    <span class="nv">keys = </span><span class="nx">_</span><span class="p">.</span><span class="nx">without</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">object</span><span class="p">),</span> <span class="nx">refAttribute</span><span class="p">,</span> <span class="nx">indexAttribute</span><span class="p">)</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">keys</span><span class="p">,</span> <span class="nf">(key) -&gt;</span>
+        <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span>
+            <span class="nv">i = </span><span class="mi">0</span>
+            <span class="nv">l = </span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">].</span><span class="nx">length</span>
+            <span class="k">while</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span>
+                <span class="nv">current = </span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">][</span><span class="nx">i</span><span class="p">]</span>
+                <span class="nv">index = </span><span class="nx">func</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="p">[</span> <span class="nx">object</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">i</span> <span class="p">])</span>
+                <span class="nx">current</span><span class="p">[</span><span class="nx">indexAttribute</span><span class="p">]</span> <span class="o">=</span> <span class="nx">index</span>
+                <span class="nx">indexes</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="nx">current</span>
+                <span class="nx">buildIndexes</span> <span class="nx">current</span><span class="p">,</span> <span class="nx">func</span>
+                <span class="nx">i</span><span class="o">++</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="k">typeof</span> <span class="p">(</span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span> <span class="o">is</span> <span class="s1">&#39;object&#39;</span>
+            <span class="nv">current = </span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span>
+            <span class="nv">index = </span><span class="nx">func</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="p">[</span> <span class="nx">object</span><span class="p">,</span> <span class="nx">key</span> <span class="p">])</span>
+            <span class="nx">current</span><span class="p">[</span><span class="nx">indexAttribute</span><span class="p">]</span> <span class="o">=</span> <span class="nx">index</span>
+            <span class="nx">indexes</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="nx">current</span>
+            <span class="nx">buildIndexes</span> <span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">],</span> <span class="nx">func</span>
+    <span class="kc">true</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>Resolves references based on Index assigned to each
+objects.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">resolveReferences = </span><span class="nf">(object) -&gt;</span>
+    <span class="nv">keys = </span><span class="nx">_</span><span class="p">.</span><span class="nx">without</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">object</span><span class="p">),</span> <span class="nx">indexAttribute</span><span class="p">)</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">keys</span><span class="p">,</span> <span class="nf">(key) -&gt;</span>
+        <span class="nx">unless</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isUndefined</span><span class="p">(</span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">],</span> <span class="nx">refAttribute</span><span class="p">)</span>
+                <span class="nv">ref = </span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">][</span><span class="nx">refAttribute</span><span class="p">]</span>
+                <span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">indexes</span><span class="p">[</span><span class="nx">ref</span><span class="p">]</span> <span class="nx">unless</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isUndefined</span><span class="p">(</span><span class="nx">ref</span><span class="p">)</span>
+        <span class="nx">resolveReferences</span> <span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="k">if</span> <span class="k">typeof</span> <span class="p">(</span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span> <span class="o">is</span> <span class="s1">&#39;object&#39;</span>
+    <span class="kc">true</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>Load data.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">httpGet = </span><span class="nf">(url, callback) -&gt;</span>
+    <span class="k">if</span> <span class="nx">$</span>
+        <span class="nx">$</span><span class="p">.</span><span class="nx">getJSON</span> <span class="nx">url</span><span class="p">,</span> <span class="nf">(data) -&gt;</span>
+            <span class="nv">root = </span><span class="nx">data</span>
+            <span class="k">if</span> <span class="nx">root</span>
+                <span class="nx">root</span><span class="p">[</span><span class="nx">indexAttribute</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
+                <span class="nx">indexes</span><span class="p">[</span><span class="s1">&#39;/&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nx">root</span>
+                <span class="nx">buildIndexes</span> <span class="nx">root</span><span class="p">,</span> <span class="nx">getIndex</span>
+                <span class="nx">resolveReferences</span> <span class="nx">root</span>
+                <span class="nx">root</span>
+        <span class="nx">callback</span> <span class="nx">root</span>
+
+<span class="nv">ecore.Resource = </span><span class="nx">Resource</span>
+<span class="nv">ecore.ResourceSet = </span><span class="nx">ResourceSet</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
