@@ -1,45 +1,17 @@
 <html>
-<head>
-<script src="../lib/json2-min.js" type="text/javascript" charset="utf-8"></script>
-<script src="../lib/underscore.js" type="text/javascript" charset="utf-8"></script>
-<script src="../ecore.js" type="text/javascript" charset="utf-8"></script>
-</head>
-<script type="text/javascript">
-
-	var data = '{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//Diagram","type":"Graph","name":"default.graph_diagram","children":[{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//Shape","type":"2002","fontName":"Lucida Grande","children":[{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//DecorationNode","type":"5002"}],"element":{"$ref":"file:/Users/guillaume/Workspaces/runtime-geoshape/geoshape/default.graph#//@elements.0"},"layoutConstraint":{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//Bounds","x":191,"y":55}},{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//Shape","type":"2002","fontName":"Lucida Grande","children":[{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//DecorationNode","type":"5002"}],"element":{"$ref":"file:/Users/guillaume/Workspaces/runtime-geoshape/geoshape/default.graph#//@elements.1"},"layoutConstraint":{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//Bounds","x":243,"y":297}},{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//Shape","type":"2002","fontName":"Lucida Grande","children":[{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//DecorationNode","type":"5002"}],"element":{"$ref":"file:/Users/guillaume/Workspaces/runtime-geoshape/geoshape/default.graph#//@elements.3"},"layoutConstraint":{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//Bounds","x":527,"y":100}}],"styles":[{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//DiagramStyle"}],"element":{"$ref":"file:/Users/guillaume/Workspaces/runtime-geoshape/geoshape/default.graph#/"},"edges":[{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//Connector","type":"4004","children":[{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//DecorationNode","type":"6001","layoutConstraint":{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//Location","y":40}}],"styles":[{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//FontStyle","fontName":"Lucida Grande"}],"element":{"$ref":"file:/Users/guillaume/Workspaces/runtime-geoshape/geoshape/default.graph#//@elements.2"},"source":{"$ref":"//@children.0"},"target":{"$ref":"//@children.1"},"bendpoints":{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//RelativeBendpoints","points":"[org.eclipse.gmf.runtime.notation.datatype.RelativeBendpoint@172db6 (sourceX: 20, sourceY: 4, targetX: -133, targetY: -32), org.eclipse.gmf.runtime.notation.datatype.RelativeBendpoint@4a1d52 (sourceX: 131, sourceY: 33, targetX: -22, targetY: -3)]"}},{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//Connector","type":"4004","children":[{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//DecorationNode","type":"6001","layoutConstraint":{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//Location","y":40}}],"styles":[{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//FontStyle","fontName":"Lucida Grande"}],"element":{"$ref":"file:/Users/guillaume/Workspaces/runtime-geoshape/geoshape/default.graph#//@elements.4"},"source":{"$ref":"#//@children.0"},"target":{"$ref":"#//@children.2"},"bendpoints":{"eClass":"http://www.eclipse.org/gmf/runtime/1.0.2/notation#//RelativeBendpoints","points":"[org.eclipse.gmf.runtime.notation.datatype.RelativeBendpoint@1713c2 (sourceX: 20, sourceY: 3, targetX: -316, targetY: -42), org.eclipse.gmf.runtime.notation.datatype.RelativeBendpoint@a581d0 (sourceX: 331, sourceY: 65, targetX: -5, targetY: 20)]"}}]}';
-	var json = '{"children": [{"userId":"1","name":"Paul","likes":{"type":"apple"},"knows":[{"$ref":"//@children.1"}]},{"userId":"2","name":"John"}]}';
-
-	var res = ecore.resourceSet.createResource(json);
-	console.log(res);
-	var res2 = ecore.resourceSet.createResource(data);
-	console.log(res2);
-//	res.load(json);
-//	console.log(res.content);
-/*	
-	var diagram = ecore.load(data);
-	console.log(diagram);
-	console.log(diagram.edges);
-	console.log(diagram.edges[0]);
-	console.log(diagram.edges[0].source);
-	
-
-	console.log("res: "+myObject);
-	console.log("res: "+myObject.eClass);
-	console.log("res: "+myObject.name);
-
-	var Person = EClass.create('Person');
-	Person.eAttributes([
-		{name: 'firstName', upper: -1, type: 'EString'},
-		{name: 'lastName'}
-	]);
-	Person.eReferences([
-		{name: 'knows', upper: -1, type: 'Person'}
-	]);
-	console.log("attrs "+Person.eAttributes().map(function(a){return a.name;}));
-	
-	var p = Person.create({firstName: 'Paul', lastName: 'Smith'});
-	console.log(p.eClass());
-	console.log("name "+p.eClass().name);
-*/
-</script>
+	<head>
+        <!--        <script data-main="../scripts/main" src="../scripts/require-jquery.js"></script> -->
+       <script src="../scripts/jquery-1.7.2.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../scripts/underscore.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../scripts/ecore.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../scripts/main.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+<!--	<script type="text/javascript">
+		var json = '{"children": [{"userId":"1","name":"Paul","likes":{"type":"apple"},"knows":[{"$ref":"//@children.1"}]},{"userId":"2","name":"John"}]}';
+        console.log(ecore);
+        var resourceSet = new ecore.ResourceSet();
+        console.log(resourceSet);
+        var res = resourceSet.createResource(json);
+		console.log(res);
+    </script> -->
 </html>
