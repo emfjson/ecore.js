@@ -1,74 +1,734 @@
-<!DOCTYPE html>  <html> <head>   <title>ecore.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               ecore.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>ecore.js 0.1
-(c) 2012 Guillaume Hillairet.</p>
+<!DOCTYPE html>  <html> <head>   <title>ecore.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="ecore.html">                 ecore.js               </a>                                           <a class="source" href="resource.html">                 resource.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               ecore.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 
-<p>ecore.js: Consuming ecore models in JavaScript.</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>Establish the root object, <code>window</code> in the browser, or <code>global</code> on the server.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">root = </span><span class="k">this</span>
+<span class="kd">var</span> <span class="nx">Ecore</span> <span class="o">=</span> <span class="p">{</span>
 
-<span class="nv">ecore = </span><span class="p">{}</span>
-<span class="nx">root</span><span class="p">[</span><span class="s1">&#39;ecore&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nx">ecore</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>Represents a persistent collection.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">Resource</span>
-    <span class="nv">constructor: </span><span class="nf">(@url, @content) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>ResourceSet holds a Collection of Resource, and provides methods for loading
-Resource.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">ResourceSet</span>
-    <span class="vi">@resources = </span><span class="p">[]</span>
-    <span class="vi">@indexes = </span><span class="p">{}</span>
-    <span class="nv">load: </span><span class="nf">(url, callback) -&gt;</span>
-        <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isString</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span> <span class="o">and</span> <span class="nx">callback</span> <span class="o">and</span> <span class="k">typeof</span> <span class="nx">callback</span> <span class="o">is</span> <span class="s1">&#39;function&#39;</span>
-            <span class="nx">httpGet</span> <span class="nx">url</span><span class="p">,</span> <span class="nf">(result) -&gt;</span>
-                <span class="nv">resource = </span><span class="k">new</span> <span class="nx">Resource</span> <span class="nx">url</span><span class="p">,</span> <span class="nx">result</span>
-                <span class="vi">@resources = </span><span class="p">[]</span> <span class="nx">unless</span> <span class="nx">@resources</span>
-                <span class="nx">@resources</span><span class="p">.</span><span class="nx">push</span> <span class="nx">resource</span>
-                <span class="nx">callback</span> <span class="nx">resource</span>
+    <span class="nx">create</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">eClass</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">eClass</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s1">&#39;Cannot create EObject from undefined EClass&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
 
-<span class="nv">refAttribute = </span><span class="s1">&#39;$ref&#39;</span>
-<span class="nv">indexAttribute = </span><span class="s1">&#39;_index&#39;</span>
-<span class="nv">indexes = </span><span class="p">{}</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>Return the Index of the current object, based
-on its parent Index and is current position in
-the given property.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">getIndex = </span><span class="nf">(parent, property, position) -&gt;</span>
-    <span class="nv">index = </span><span class="nx">parent</span><span class="p">[</span><span class="nx">indexAttribute</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/@&#39;</span> <span class="o">+</span> <span class="nx">property</span>
-    <span class="nv">index = </span><span class="nx">index</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="nx">position</span>  <span class="k">if</span> <span class="nx">position</span> <span class="o">&gt;=</span> <span class="mi">0</span>
-    <span class="nx">index</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>Traverse the current object tree and assign to
-each object an Index.
-The root object has for Index /.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">buildIndexes = </span><span class="nf">(object, func) -&gt;</span>
-    <span class="nv">current = </span><span class="kc">false</span>
-    <span class="nv">index = </span><span class="kc">false</span>
-    <span class="nv">keys = </span><span class="nx">_</span><span class="p">.</span><span class="nx">without</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">object</span><span class="p">),</span> <span class="nx">refAttribute</span><span class="p">,</span> <span class="nx">indexAttribute</span><span class="p">)</span>
-    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">keys</span><span class="p">,</span> <span class="nf">(key) -&gt;</span>
-        <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span>
-            <span class="nv">i = </span><span class="mi">0</span>
-            <span class="nv">l = </span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">].</span><span class="nx">length</span>
-            <span class="k">while</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span>
-                <span class="nv">current = </span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">][</span><span class="nx">i</span><span class="p">]</span>
-                <span class="nv">index = </span><span class="nx">func</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="p">[</span> <span class="nx">object</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">i</span> <span class="p">])</span>
-                <span class="nx">current</span><span class="p">[</span><span class="nx">indexAttribute</span><span class="p">]</span> <span class="o">=</span> <span class="nx">index</span>
-                <span class="nx">indexes</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="nx">current</span>
-                <span class="nx">buildIndexes</span> <span class="nx">current</span><span class="p">,</span> <span class="nx">func</span>
-                <span class="nx">i</span><span class="o">++</span>
-        <span class="k">else</span> <span class="k">if</span> <span class="k">typeof</span> <span class="p">(</span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span> <span class="o">is</span> <span class="s1">&#39;object&#39;</span>
-            <span class="nv">current = </span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span>
-            <span class="nv">index = </span><span class="nx">func</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="p">[</span> <span class="nx">object</span><span class="p">,</span> <span class="nx">key</span> <span class="p">])</span>
-            <span class="nx">current</span><span class="p">[</span><span class="nx">indexAttribute</span><span class="p">]</span> <span class="o">=</span> <span class="nx">index</span>
-            <span class="nx">indexes</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="o">=</span> <span class="nx">current</span>
-            <span class="nx">buildIndexes</span> <span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">],</span> <span class="nx">func</span>
-    <span class="kc">true</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>Resolves references based on Index assigned to each
-objects.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">resolveReferences = </span><span class="nf">(object) -&gt;</span>
-    <span class="nv">keys = </span><span class="nx">_</span><span class="p">.</span><span class="nx">without</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">object</span><span class="p">),</span> <span class="nx">indexAttribute</span><span class="p">)</span>
-    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">keys</span><span class="p">,</span> <span class="nf">(key) -&gt;</span>
-        <span class="nx">unless</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isUndefined</span><span class="p">(</span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span>
-            <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">],</span> <span class="nx">refAttribute</span><span class="p">)</span>
-                <span class="nv">ref = </span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">][</span><span class="nx">refAttribute</span><span class="p">]</span>
-                <span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">indexes</span><span class="p">[</span><span class="nx">ref</span><span class="p">]</span> <span class="nx">unless</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isUndefined</span><span class="p">(</span><span class="nx">ref</span><span class="p">)</span>
-        <span class="nx">resolveReferences</span> <span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="k">if</span> <span class="k">typeof</span> <span class="p">(</span><span class="nx">object</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span> <span class="o">is</span> <span class="s1">&#39;object&#39;</span>
-    <span class="kc">true</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>Load data.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">httpGet = </span><span class="nf">(url, callback) -&gt;</span>
-    <span class="k">if</span> <span class="nx">$</span>
-        <span class="nx">$</span><span class="p">.</span><span class="nx">getJSON</span> <span class="nx">url</span><span class="p">,</span> <span class="nf">(data) -&gt;</span>
-            <span class="nv">root = </span><span class="nx">data</span>
-            <span class="k">if</span> <span class="nx">root</span>
-                <span class="nx">root</span><span class="p">[</span><span class="nx">indexAttribute</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
-                <span class="nx">indexes</span><span class="p">[</span><span class="s1">&#39;/&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nx">root</span>
-                <span class="nx">buildIndexes</span> <span class="nx">root</span><span class="p">,</span> <span class="nx">getIndex</span>
-                <span class="nx">resolveReferences</span> <span class="nx">root</span>
-                <span class="nx">root</span>
-        <span class="nx">callback</span> <span class="nx">root</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EObject</span><span class="p">({</span> <span class="nx">eClass</span><span class="o">:</span> <span class="nx">eClass</span> <span class="p">});</span>
+    <span class="p">},</span>
 
-<span class="nv">ecore.Resource = </span><span class="nx">Resource</span>
-<span class="nv">ecore.ResourceSet = </span><span class="nx">ResourceSet</span>
+    <span class="nx">VERSION</span><span class="o">:</span> <span class="s1">&#39;0.1.0&#39;</span>
+
+<span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>The root object, <code>window</code> in the browser, or <code>global</code> on the server.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">exports</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">module</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">exports</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nx">exports</span><span class="p">.</span><span class="nx">Ecore</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">root</span><span class="p">[</span><span class="s1">&#39;Ecore&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">EObjectPrototype</span> <span class="o">=</span> <span class="p">{</span>
+
+    <span class="nx">has</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="o">||</span> <span class="k">this</span><span class="p">.</span><span class="nx">_isStructuralFeature</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+    <span class="p">},</span>
+
+    <span class="nx">set</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">values</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+    <span class="p">},</span>
+
+    <span class="nx">get</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nx">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">values</span><span class="p">[</span><span class="nx">name</span><span class="p">];</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+    <span class="p">},</span>
+
+    <span class="nx">isTypeOf</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">===</span> <span class="nx">type</span><span class="p">;</span>
+    <span class="p">},</span>
+
+    <span class="nx">isKindOf</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">eClass</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">eClass</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">eClass</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">any</span><span class="p">(</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">eAllSuperTypes</span><span class="p">(),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">eSuper</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">eSuper</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">===</span> <span class="nx">type</span><span class="p">;</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">},</span>
+
+    <span class="nx">uri</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">eContainer</span> <span class="k">instanceof</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">Model</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">eContainer</span><span class="p">.</span><span class="nx">uri</span> <span class="o">+</span> <span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+        <span class="p">}</span>
+    <span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>private</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">_getDefaultAttributeValue</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">eFeature</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">eType</span> <span class="o">=</span> <span class="nx">eFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eType&#39;</span><span class="p">),</span>
+            <span class="nx">eFeatureUpperBound</span> <span class="o">=</span> <span class="nx">eFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;upperBound&#39;</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">eFeatureUpperBound</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nx">eFeatureUpperBound</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">eType</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">switch</span><span class="p">(</span><span class="nx">eType</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="k">case</span> <span class="s1">&#39;EString&#39;</span><span class="o">:</span>
+                        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="k">case</span> <span class="s1">&#39;EBoolean&#39;</span><span class="o">:</span>
+                        <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="k">case</span> <span class="s1">&#39;EInteger&#39;</span><span class="o">:</span>
+                        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="k">default</span><span class="o">:</span>
+                        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+                        <span class="k">break</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">[];</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+
+    <span class="nx">_getDefaultReferenceValue</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">eFeature</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">eFeatureUpperBound</span> <span class="o">=</span> <span class="nx">eFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;upperBound&#39;</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">eFeatureUpperBound</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nx">eFeatureUpperBound</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nx">EList</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">eFeature</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+
+    <span class="nx">_initFeature</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">eFeature</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">eFeatureName</span> <span class="o">=</span> <span class="nx">eFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nx">eFeature</span><span class="p">.</span><span class="nx">isTypeOf</span><span class="p">(</span><span class="s1">&#39;EAttribute&#39;</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">values</span><span class="p">[</span><span class="nx">eFeatureName</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_getDefaultAttributeValue</span><span class="p">(</span><span class="nx">eFeature</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">values</span><span class="p">[</span><span class="nx">eFeatureName</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_getDefaultReferenceValue</span><span class="p">(</span><span class="nx">eFeature</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+
+    <span class="nx">_isStructuralFeature</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">eClass</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">eClass</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">eClass</span><span class="p">)</span>  <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="kd">var</span> <span class="nx">eFeatures</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">.</span><span class="nx">eAllStructuralFeatures</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">eFeatures</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="kd">var</span> <span class="nx">eFeature</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="nx">eFeatures</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">values</span> <span class="o">?</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">values</span><span class="p">.</span><span class="nx">name</span> <span class="o">===</span> <span class="nx">name</span> <span class="o">:</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">});</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nx">eFeature</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">_</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">values</span><span class="p">,</span> <span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">_initFeature</span><span class="p">(</span> <span class="nx">eFeature</span> <span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>EClass methods</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">eAllStructuralFeatures</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">[];</span>
+        <span class="p">}</span>
+        <span class="kd">var</span> <span class="nx">superTypes</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">);</span>
+
+        <span class="kd">var</span> <span class="nx">eSuperFeatures</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">flatten</span><span class="p">(</span>
+            <span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">superTypes</span><span class="p">.</span><span class="nx">_internal</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">sup</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">sup</span><span class="p">.</span><span class="nx">eAllStructuralFeatures</span><span class="p">();</span>
+            <span class="p">})</span>
+        <span class="p">);</span>
+
+        <span class="kd">var</span> <span class="nx">eAllFeatures</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">union</span><span class="p">(</span><span class="nx">eSuperFeatures</span><span class="p">,</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">_internal</span>
+        <span class="p">);</span>
+
+        <span class="k">return</span> <span class="nx">eAllFeatures</span><span class="p">;</span>
+    <span class="p">},</span>
+
+    <span class="nx">eAllSuperTypes</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">superTypes</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">_internal</span><span class="p">;</span>
+
+        <span class="kd">var</span> <span class="nx">eAllSuperTypes</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">union</span><span class="p">(</span><span class="nx">superTypes</span><span class="p">,</span>
+            <span class="nx">_</span><span class="p">.</span><span class="nx">flatten</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">superTypes</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">eSuper</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">eSuper</span><span class="p">.</span><span class="nx">eAllSuperTypes</span><span class="p">();</span>
+            <span class="p">}))</span>
+        <span class="p">);</span>
+
+        <span class="k">return</span> <span class="nx">eAllSuperTypes</span><span class="p">;</span>
+    <span class="p">}</span>
+
+<span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>EList</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">var</span> <span class="nx">EList</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EList</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">owner</span><span class="p">,</span> <span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_internal</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_owner</span> <span class="o">=</span> <span class="nx">owner</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_index</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_setFeature</span><span class="p">(</span><span class="nx">feature</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>@private</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">_setFeature</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">_feature</span> <span class="o">=</span> <span class="nx">feature</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">_isContainment</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;isContainment&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">add</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">eObject</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_isContainment</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">eObject</span><span class="p">.</span><span class="nx">eContainingFeature</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_feature</span><span class="p">;</span>
+        <span class="nx">eObject</span><span class="p">.</span><span class="nx">eContainer</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_owner</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">_index</span><span class="p">[</span><span class="k">this</span><span class="p">.</span><span class="nx">_size</span><span class="p">]</span> <span class="o">=</span> <span class="nx">eObject</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_size</span><span class="o">++</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_internal</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">eObject</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">remove</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">eObject</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">values</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">values</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_index</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">size</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_size</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">at</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">position</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_size</span> <span class="o">&lt;</span> <span class="nx">position</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_internal</span><span class="p">[</span><span class="nx">position</span><span class="p">];</span>
+<span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>underscore methods.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">first</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">first</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_internal</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">last</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">last</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_internal</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">rest</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">rest</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_internal</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">each</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">iterator</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_internal</span><span class="p">,</span> <span class="nx">iterator</span><span class="p">,</span> <span class="nx">context</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">filter</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">iterator</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_internal</span><span class="p">,</span> <span class="nx">iterator</span><span class="p">,</span> <span class="nx">context</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">find</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">iterator</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_internal</span><span class="p">,</span> <span class="nx">iterator</span><span class="p">,</span> <span class="nx">context</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">reject</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">iterator</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">reject</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_internal</span><span class="p">,</span> <span class="nx">iterator</span><span class="p">,</span> <span class="nx">context</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">contains</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">object</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">contains</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_internal</span><span class="p">,</span> <span class="nx">object</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">EList</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">indexOf</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">object</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_internal</span><span class="p">,</span> <span class="nx">object</span><span class="p">);</span>
+<span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>EObject</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">var</span> <span class="nx">EObject</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EObject</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">attributes</span> <span class="o">||</span> <span class="p">(</span><span class="nx">attributes</span> <span class="o">=</span> <span class="p">{});</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">||</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">values</span> <span class="o">=</span> <span class="p">{};</span>
+
+    <span class="kd">var</span> <span class="nx">instance</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+
+    <span class="p">(</span><span class="kd">function</span> <span class="nx">initValues</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">eClass</span> <span class="o">=</span> <span class="nx">instance</span><span class="p">.</span><span class="nx">eClass</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">eStructuralFeatures</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">.</span><span class="nx">eAllStructuralFeatures</span><span class="p">();</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">eStructuralFeatures</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">eStructuralFeatures</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">eFeature</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">eFeatureName</span> <span class="o">=</span> <span class="nx">eFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">eFeature</span><span class="p">.</span><span class="nx">isTypeOf</span><span class="p">(</span><span class="s1">&#39;EAttribute&#39;</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">instance</span><span class="p">.</span><span class="nx">values</span><span class="p">[</span><span class="nx">eFeatureName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">instance</span><span class="p">.</span><span class="nx">_getDefaultAttributeValue</span><span class="p">(</span><span class="nx">eFeature</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">instance</span><span class="p">.</span><span class="nx">values</span><span class="p">[</span><span class="nx">eFeatureName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">instance</span><span class="p">.</span><span class="nx">_getDefaultReferenceValue</span><span class="p">(</span><span class="nx">eFeature</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+    <span class="p">})();</span>
+
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">EObject</span><span class="p">.</span><span class="nx">prototype</span><span class="p">,</span> <span class="nx">EObjectPrototype</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">EPackage</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">attributes</span> <span class="o">||</span> <span class="p">(</span><span class="nx">attributes</span> <span class="o">=</span> <span class="p">{});</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EPackage</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span>
+        <span class="nx">nsURI</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">nsURI</span><span class="p">,</span>
+        <span class="nx">nsPrefix</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">nsPrefix</span><span class="p">,</span>
+        <span class="nx">eClassifiers</span><span class="o">:</span> <span class="k">new</span> <span class="nx">EList</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+    <span class="p">};</span>
+
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">EPackage</span><span class="p">.</span><span class="nx">prototype</span><span class="p">,</span> <span class="nx">EObjectPrototype</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">EClass</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">attributes</span> <span class="o">||</span> <span class="p">(</span><span class="nx">attributes</span> <span class="o">=</span> <span class="p">{});</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EClass</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span>
+        <span class="kr">abstract</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="kr">abstract</span> <span class="o">||</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="kr">interface</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="kr">interface</span> <span class="o">||</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="nx">eSuperTypes</span><span class="o">:</span> <span class="k">new</span> <span class="nx">EList</span><span class="p">(</span><span class="k">this</span><span class="p">),</span>
+        <span class="nx">eStructuralFeatures</span><span class="o">:</span> <span class="k">new</span> <span class="nx">EList</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+    <span class="p">};</span>
+
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">EClass</span><span class="p">.</span><span class="nx">prototype</span><span class="p">,</span> <span class="nx">EObjectPrototype</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">EDataType</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">attributes</span> <span class="o">||</span> <span class="p">(</span><span class="nx">attributes</span> <span class="o">=</span> <span class="p">{});</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EDataType</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">name</span>
+    <span class="p">};</span>
+
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">EDataType</span><span class="p">.</span><span class="nx">prototype</span><span class="p">,</span> <span class="nx">EObjectPrototype</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">EReference</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">attributes</span> <span class="o">||</span> <span class="p">(</span><span class="nx">attributes</span> <span class="o">=</span> <span class="p">{});</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EReference</span><span class="p">;</span>
+    <span class="p">}</span>
+
+     <span class="k">this</span><span class="p">.</span><span class="nx">values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span>
+        <span class="nx">lowerBound</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">lowerBound</span> <span class="o">||</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nx">upperBound</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">upperBound</span> <span class="o">||</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nx">isContainment</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">isContainment</span> <span class="o">||</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">eType</span> <span class="o">||</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nx">eOpposite</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">eOpposite</span> <span class="o">||</span> <span class="kc">null</span>
+     <span class="p">};</span>
+
+     <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">EReference</span><span class="p">.</span><span class="nx">prototype</span><span class="p">,</span> <span class="nx">EObjectPrototype</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">EAttribute</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">attributes</span> <span class="o">||</span> <span class="p">(</span><span class="nx">attributes</span> <span class="o">=</span> <span class="p">{});</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EAttribute</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span>
+        <span class="nx">lowerBound</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">lowerBound</span> <span class="o">||</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nx">upperBound</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">upperBound</span> <span class="o">||</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">eType</span> <span class="o">||</span> <span class="kc">null</span>
+    <span class="p">};</span>
+
+     <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">EAttribute</span><span class="p">.</span><span class="nx">prototype</span><span class="p">,</span> <span class="nx">EObjectPrototype</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">EFactory</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">attributes</span> <span class="o">||</span> <span class="p">(</span><span class="nx">attributes</span> <span class="o">=</span> <span class="p">{});</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EFactory</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">ePackage</span><span class="o">:</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">ePackage</span>
+    <span class="p">};</span>
+
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="kd">function</span> <span class="nx">initEcore</span><span class="p">(</span><span class="nx">ecorePackage</span><span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p>EClass</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eClass</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EClass</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EClass&#39;</span>
+    <span class="p">});</span>
+    <span class="nx">eClass</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>DataTypes</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eString</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EDataType</span><span class="p">({</span><span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EString&#39;</span><span class="p">});</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EString</span> <span class="o">=</span> <span class="nx">eString</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">eInteger</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EDataType</span><span class="p">({</span><span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EInteger&#39;</span><span class="p">});</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EInteger</span> <span class="o">=</span> <span class="nx">eInteger</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">eBoolean</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EDataType</span><span class="p">({</span><span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EBoolean&#39;</span><span class="p">});</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EBoolean</span> <span class="o">=</span> <span class="nx">eBoolean</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p>EModelElement</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eModelElement</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EModelElement</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EModelElement&#39;</span><span class="p">,</span>
+        <span class="kr">abstract</span><span class="o">:</span> <span class="kc">true</span>
+    <span class="p">});</span>
+    <span class="nx">eModelElement</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p>ENamedElement</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eNamedElement</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">ENamedElement</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;ENamedElement&#39;</span><span class="p">,</span>
+        <span class="kr">abstract</span><span class="o">:</span> <span class="kc">true</span>
+    <span class="p">});</span>
+    <span class="nx">eNamedElement</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span>
+
+    <span class="nx">eNamedElement</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eModelElement</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p>EAttribute</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eAttribute</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EAttribute</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EAttribute&#39;</span>
+    <span class="p">});</span>
+    <span class="nx">eAttribute</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>EAttribute.iD</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eAttribute_iD</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;iD&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eAttribute_iD</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EAttribute_iD</span> <span class="o">=</span> <span class="nx">eAttribute_iD</span><span class="p">;</span>
+
+    <span class="nx">eAttribute</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eAttribute_iD</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <p>EReference</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eReference</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EReference</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EReference&#39;</span>
+    <span class="p">});</span>
+    <span class="nx">eReference</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <p>EReference.isContainment</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eReference_isContainment</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;isContainment&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eReference_isContainment</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EReference_isContainment</span> <span class="o">=</span> <span class="nx">eReference_isContainment</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <p>EReference.container</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eReference_container</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;container&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eReference_container</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EReference_container</span> <span class="o">=</span> <span class="nx">eReference_container</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <p>EReference.resolveProxies</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eReference_resolveProxies</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;resolveProxies&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eReference_resolveProxies</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EReference_resolveProxies</span> <span class="o">=</span> <span class="nx">eReference_resolveProxies</span><span class="p">;</span>
+
+    <span class="nx">eReference</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eReference_isContainment</span><span class="p">);</span>
+    <span class="nx">eReference</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eReference_container</span><span class="p">);</span>
+    <span class="nx">eReference</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eReference_resolveProxies</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-19">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-19">&#182;</a>               </div>               <p>EPackage</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">ePackage</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EPackage</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EPackage&#39;</span>
+    <span class="p">});</span>
+    <span class="nx">ePackage</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span>
+    <span class="nx">ePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eNamedElement</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-20">&#182;</a>               </div>               <p>EPackage.nsURI</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">ePackage_nsURI</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;nsURI&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eString</span>
+    <span class="p">});</span>
+    <span class="nx">ePackage_nsURI</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EPackage_nsURI</span> <span class="o">=</span> <span class="nx">ePackage_nsURI</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-21">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-21">&#182;</a>               </div>               <p>EPackage.nsPrefix</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">ePackage_nsPrefix</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;nsPrefix&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eString</span>
+    <span class="p">});</span>
+    <span class="nx">ePackage_nsPrefix</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EPackage_nsPrefix</span> <span class="o">=</span> <span class="nx">ePackage_nsPrefix</span><span class="p">;</span>
+
+    <span class="nx">ePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">ePackage_nsURI</span><span class="p">);</span>
+    <span class="nx">ePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">ePackage_nsPrefix</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-22">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-22">&#182;</a>               </div>               <p>ENamedElement.name</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eNamedElement_name</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eString</span>
+    <span class="p">});</span>
+    <span class="nx">eNamedElement_name</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">ENamedElement_name</span> <span class="o">=</span> <span class="nx">eNamedElement_name</span><span class="p">;</span>
+
+    <span class="nx">eNamedElement</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eNamedElement_name</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-23">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-23">&#182;</a>               </div>               <p>EClass.abstract</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eClass_abstract</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;abstract&#39;</span><span class="p">,</span>
+        <span class="nx">lowerBound</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nx">upperBound</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eClass_abstract</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EClass_abstract</span> <span class="o">=</span> <span class="nx">eClass_abstract</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-24">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-24">&#182;</a>               </div>               <p>EClass.interface</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eClass_interface</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;interface&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eClass_interface</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EClass_interface</span> <span class="o">=</span> <span class="nx">eClass_interface</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-25">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-25">&#182;</a>               </div>               <p>EClass.eStructuralFeatures</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eClass_eStructuralFeatures</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EReference</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">,</span>
+        <span class="nx">lowerBound</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nx">upperBound</span><span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="nx">isContainment</span><span class="o">:</span> <span class="kc">true</span>
+    <span class="p">});</span>
+    <span class="nx">eClass_eStructuralFeatures</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eReference</span><span class="p">;</span>
+    <span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">_feature</span> <span class="o">=</span> <span class="nx">eClass_eStructuralFeatures</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-26">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-26">&#182;</a>               </div>               <p>EClass.eSuperTypes</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eClass_eSuperTypes</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EReference</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;eSuperTypes&#39;</span><span class="p">,</span>
+        <span class="nx">lowerBound</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nx">upperBound</span><span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="nx">isContainment</span><span class="o">:</span> <span class="kc">false</span>
+    <span class="p">});</span>
+    <span class="nx">eClass_eSuperTypes</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eReference</span><span class="p">;</span>
+    <span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">_feature</span> <span class="o">=</span> <span class="nx">eClass_eSuperTypes</span><span class="p">;</span>
+
+    <span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eClass_abstract</span><span class="p">);</span>
+    <span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eClass_interface</span><span class="p">);</span>
+    <span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eClass_eStructuralFeatures</span><span class="p">);</span>
+    <span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eClass_eSuperTypes</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-27">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-27">&#182;</a>               </div>               <p>ETypedElement</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eTypedElement</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">ETypedElement</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;ETypedElement&#39;</span><span class="p">,</span>
+        <span class="kr">abstract</span><span class="o">:</span> <span class="kc">true</span>
+    <span class="p">});</span>
+    <span class="nx">eTypedElement</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span>
+    <span class="nx">eTypedElement</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eNamedElement</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-28">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-28">&#182;</a>               </div>               <p>ETypedElement.ordered</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eTypedElement_ordered</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;ordered&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eTypedElement_ordered</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">ETypedElement_ordered</span> <span class="o">=</span> <span class="nx">eTypedElement_ordered</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-29">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-29">&#182;</a>               </div>               <p>ETypedElement.unique</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eTypedElement_unique</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;unique&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eTypedElement_unique</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">ETypedElement_unique</span> <span class="o">=</span> <span class="nx">eTypedElement_unique</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-30">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-30">&#182;</a>               </div>               <p>ETypedElement.lowerBound</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eTypedElement_lowerBound</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;lowerBound&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eInteger</span>
+    <span class="p">});</span>
+    <span class="nx">eTypedElement_lowerBound</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">ETypedElement_lowerBound</span> <span class="o">=</span> <span class="nx">eTypedElement_lowerBound</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-31">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-31">&#182;</a>               </div>               <p>ETypedElement.upperBound</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eTypedElement_upperBound</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;upperBound&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eInteger</span>
+    <span class="p">});</span>
+    <span class="nx">eTypedElement_upperBound</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">ETypedElement_upperBound</span> <span class="o">=</span> <span class="nx">eTypedElement_upperBound</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-32">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-32">&#182;</a>               </div>               <p>ETypedElement.many</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eTypedElement_many</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;many&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eTypedElement_many</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">ETypedElement_many</span> <span class="o">=</span> <span class="nx">eTypedElement_many</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-33">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-33">&#182;</a>               </div>               <p>ETypedElement.required</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eTypedElement_required</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;required&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eTypedElement_required</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">ETypedElement_required</span> <span class="o">=</span> <span class="nx">eTypedElement_required</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-34">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-34">&#182;</a>               </div>               <p>ETypedElement.eType</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eTypedElement_eType</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EReference</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;eType&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eClassifier</span>
+    <span class="p">});</span>
+    <span class="nx">eTypedElement_eType</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eReference</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">ETypedElement_eType</span> <span class="o">=</span> <span class="nx">eTypedElement_eType</span><span class="p">;</span>
+
+    <span class="nx">eTypedElement</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eTypedElement_ordered</span><span class="p">);</span>
+    <span class="nx">eTypedElement</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eTypedElement_unique</span><span class="p">);</span>
+    <span class="nx">eTypedElement</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eTypedElement_lowerBound</span><span class="p">);</span>
+    <span class="nx">eTypedElement</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eTypedElement_upperBound</span><span class="p">);</span>
+    <span class="nx">eTypedElement</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eTypedElement_many</span><span class="p">);</span>
+    <span class="nx">eTypedElement</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eTypedElement_required</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-35">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-35">&#182;</a>               </div>               <p>EStructuralFeature</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eStructuralFeature</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EStructuralFeature</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EStructuralFeature&#39;</span>
+    <span class="p">});</span>
+    <span class="nx">eStructuralFeature</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span>
+    <span class="nx">eStructuralFeature</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;abstract&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+    <span class="nx">eStructuralFeature</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;interface&#39;</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+    <span class="nx">eStructuralFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eTypedElement</span><span class="p">);</span>
+
+    <span class="nx">eAttribute</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eStructuralFeature</span><span class="p">);</span>
+    <span class="nx">eReference</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eStructuralFeature</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-36">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-36">&#182;</a>               </div>               <p>EStructuralFeature.changeable</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eStructuralFeature_changeable</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;changeable&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eStructuralFeature_changeable</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EStructuralFeature_changeable</span> <span class="o">=</span> <span class="nx">eStructuralFeature_changeable</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-37">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-37">&#182;</a>               </div>               <p>EStructuralFeature.volatile</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eStructuralFeature_volatile</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;volatile&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eStructuralFeature_volatile</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EStructuralFeature_volatile</span> <span class="o">=</span> <span class="nx">eStructuralFeature_volatile</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-38">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-38">&#182;</a>               </div>               <p>EStructuralFeature.transient</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eStructuralFeature_transient</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;transient&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eStructuralFeature_transient</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EStructuralFeature_transient</span> <span class="o">=</span> <span class="nx">eStructuralFeature_transient</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-39">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-39">&#182;</a>               </div>               <p>EStructuralFeature.defaultValueLiteral</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eStructuralFeature_defaultValueLiteral</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;defaultValueLiteral&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eString</span>
+    <span class="p">});</span>
+    <span class="nx">eStructuralFeature_defaultValueLiteral</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EStructuralFeature_defaultValueLiteral</span> <span class="o">=</span> <span class="nx">eStructuralFeature_defaultValueLiteral</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-40">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-40">&#182;</a>               </div>               <p>EStructuralFeature.defaultValue</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eStructuralFeature_defaultValue</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;defaultValue&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eString</span>
+    <span class="p">});</span>
+    <span class="nx">eStructuralFeature_defaultValue</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EStructuralFeature_defaultValue</span> <span class="o">=</span> <span class="nx">eStructuralFeature_defaultValue</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-41">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-41">&#182;</a>               </div>               <p>EStructuralFeature.unsettable</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eStructuralFeature_unsettable</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;unsettable&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eStructuralFeature_unsettable</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EStructuralFeature_unsettable</span> <span class="o">=</span> <span class="nx">eStructuralFeature_unsettable</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-42">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-42">&#182;</a>               </div>               <p>EStructuralFeature.derived</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eStructuralFeature_derived</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;derived&#39;</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eBoolean</span>
+    <span class="p">});</span>
+    <span class="nx">eStructuralFeature_derived</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eAttribute</span><span class="p">;</span>
+    <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EStructuralFeature_derived</span> <span class="o">=</span> <span class="nx">eStructuralFeature_derived</span><span class="p">;</span>
+
+    <span class="nx">eStructuralFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eStructuralFeature_changeable</span><span class="p">);</span>
+    <span class="nx">eStructuralFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eStructuralFeature_volatile</span><span class="p">);</span>
+    <span class="nx">eStructuralFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eStructuralFeature_transient</span><span class="p">);</span>
+    <span class="nx">eStructuralFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eStructuralFeature_defaultValue</span><span class="p">);</span>
+    <span class="nx">eStructuralFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eStructuralFeature_defaultValueLiteral</span><span class="p">);</span>
+    <span class="nx">eStructuralFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eStructuralFeature_unsettable</span><span class="p">);</span>
+    <span class="nx">eStructuralFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eStructuralFeature_derived</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-43">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-43">&#182;</a>               </div>               <p>EOperation</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eOperation</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EOperation</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EOperation&#39;</span>
+    <span class="p">});</span>
+    <span class="nx">eOperation</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span>
+    <span class="nx">eOperation</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eTypedElement</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-44">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-44">&#182;</a>               </div>               <p>EParameter</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eParameter</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EParameter</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EParameter&#39;</span>
+    <span class="p">});</span>
+    <span class="nx">eParameter</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span>
+    <span class="nx">eParameter</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eTypedElement</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-45">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-45">&#182;</a>               </div>               <p>EClassifier</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eClassifier</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EClassifier</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EClassifier&#39;</span><span class="p">,</span>
+        <span class="kr">abstract</span><span class="o">:</span> <span class="kc">true</span>
+    <span class="p">});</span>
+    <span class="nx">eClassifier</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-46">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-46">&#182;</a>               </div>               <p>EDataType</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eDataType</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EDataType</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EDataType&#39;</span>
+    <span class="p">});</span>
+    <span class="nx">eDataType</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-47">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-47">&#182;</a>               </div>               <p>Setting DataTypes eClass</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">eString</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eDataType</span><span class="p">;</span>
+    <span class="nx">eInteger</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eDataType</span><span class="p">;</span>
+    <span class="nx">eBoolean</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eDataType</span><span class="p">;</span>
+
+    <span class="nx">eClassifier</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eNamedElement</span><span class="p">);</span>
+    <span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eClassifier</span><span class="p">);</span>
+    <span class="nx">eDataType</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eClassifier</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-48">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-48">&#182;</a>               </div>               <p>EFactory</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eFactory</span> <span class="o">=</span> <span class="nx">ecorePackage</span><span class="p">.</span><span class="nx">EFactory</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;EFactory&#39;</span>
+    <span class="p">});</span>
+    <span class="nx">eFactory</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">;</span>
+    <span class="nx">eFactory</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eSuperTypes&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eModelElement</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-49">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-49">&#182;</a>               </div>               <p>EPackage_eFactoryInstance</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">ePackage_eFactoryInstance</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EReference</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;eFactoryInstance&#39;</span><span class="p">,</span>
+        <span class="nx">lowerBound</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nx">upperBound</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">eFactory</span>
+    <span class="p">});</span></pre></div>             </td>           </tr>                               <tr id="section-50">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-50">&#182;</a>               </div>               <p>EFactory.ePackage</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">eFactory_ePackage</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EReference</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;ePackage&#39;</span><span class="p">,</span>
+        <span class="nx">lowerBound</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nx">upperBound</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nx">eType</span><span class="o">:</span> <span class="nx">ePackage</span><span class="p">,</span>
+        <span class="s1">&#39;eOpposite&#39;</span><span class="o">:</span> <span class="nx">ePackage_eFactoryInstance</span>
+    <span class="p">});</span>
+
+    <span class="nx">ePackage_eFactoryInstance</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;eOpposite&#39;</span><span class="p">,</span> <span class="nx">eFactory_ePackage</span><span class="p">);</span>
+
+    <span class="nx">eFactory</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eStructuralFeatures&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eFactory_ePackage</span><span class="p">);</span>
+<span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-51">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-51">&#182;</a>               </div>               <p>Initialize the EcorePackage.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EPackage</span><span class="p">({</span><span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;ecore&#39;</span><span class="p">});</span>
+<span class="nx">initEcore</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EPackage</span><span class="p">;</span>
+
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;nsURI&#39;</span><span class="p">,</span> <span class="s1">&#39;http://www.eclipse.org/emf/2002/Ecore&#39;</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;nsPrefix&#39;</span><span class="p">,</span> <span class="s1">&#39;ecore&#39;</span><span class="p">);</span>
+
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EModelElement</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">ENamedElement</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EPackage</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EClassifier</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EClass</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EDataType</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">ETypedElement</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EStructuralFeature</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EAttribute</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EReference</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EOperation</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EParameter</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eClassifiers&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EFactory</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-52">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-52">&#182;</a>               </div>               <p>Initialize EcoreFactory.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcoreFactory</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EFactory</span><span class="p">();</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcoreFactory</span><span class="p">.</span><span class="nx">eClass</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">EFactory</span><span class="p">;</span>
+
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcorePackage</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;eFactoryInstance&#39;</span><span class="p">,</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcoreFactory</span><span class="p">);</span>
+
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcoreFactory</span><span class="p">.</span><span class="nx">createEPackage</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nx">EPackage</span><span class="p">(</span><span class="nx">attributes</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcoreFactory</span><span class="p">.</span><span class="nx">createEClass</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nx">EClass</span><span class="p">(</span><span class="nx">attributes</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcoreFactory</span><span class="p">.</span><span class="nx">createEAttribute</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nx">EAttribute</span><span class="p">(</span><span class="nx">attributes</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcoreFactory</span><span class="p">.</span><span class="nx">createEReference</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nx">EReference</span><span class="p">(</span><span class="nx">attributes</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">EcoreFactory</span><span class="p">.</span><span class="nx">create</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">eClass</span><span class="p">,</span> <span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="nx">eClass</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="s1">&#39;EPackage&#39;</span><span class="o">:</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">createEPackage</span><span class="p">(</span><span class="nx">attributes</span><span class="p">);</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="s1">&#39;EClass&#39;</span><span class="o">:</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">createEClass</span><span class="p">(</span><span class="nx">attributes</span><span class="p">);</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="s1">&#39;EAttribute&#39;</span><span class="o">:</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">createEAttribute</span><span class="p">(</span><span class="nx">attributes</span><span class="p">);</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="s1">&#39;EReference&#39;</span><span class="o">:</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">createEReference</span><span class="p">(</span><span class="nx">attributes</span><span class="p">);</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">default</span><span class="o">:</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="nx">EClass</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">eURIFragmentSegment</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+
+<span class="p">};</span>
+
+<span class="kd">function</span> <span class="nx">getFragment</span><span class="p">(</span><span class="nx">eModelElement</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">eContainer</span> <span class="o">=</span> <span class="nx">eModelElement</span><span class="p">.</span><span class="nx">eContainer</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">eContainer</span> <span class="o">||</span> <span class="nx">eContainer</span> <span class="k">instanceof</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">Model</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s1">&#39;/&#39;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">getFragment</span><span class="p">(</span><span class="nx">eContainer</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nx">eModelElement</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="nx">EObject</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">eURIFragmentSegment</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">,</span> <span class="nx">parentIndex</span><span class="p">,</span> <span class="nx">position</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s1">&#39;/&#39;</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">eClass</span> <span class="k">instanceof</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EClass</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">getFragment</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">eClass</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">eClass</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">iD</span> <span class="o">=</span> <span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eIDAttribute&#39;</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">_idx</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">iD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">_idx</span> <span class="o">=</span> <span class="nx">val</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">iD</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">_idx</span> <span class="o">=</span> <span class="nx">parentIndex</span> <span class="o">+</span> <span class="s1">&#39;/@&#39;</span> <span class="o">+</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">position</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">_idx</span> <span class="o">+=</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="nx">position</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nx">_idx</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="p">})();</span>
 
 </pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
