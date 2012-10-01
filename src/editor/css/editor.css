@@ -1,0 +1,12 @@
+body {
+    padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+    background: whitesmoke;
+}
+
+.editor {
+    border-style: solid;
+    border-width: 1px;
+    background: white;
+    border-radius: 4px;
+    min-height: 480px;
+}
