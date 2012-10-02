@@ -32,12 +32,20 @@ module.exports = function(grunt) {
                 }
             }
 
+        },
+
+        min: {
+            dist: {
+                src: ['dist/ecore.js'],
+                dest: 'dist/ecore.min.js'
+            }
         }
 
     });
 
     grunt.loadNpmTasks('grunt-simple-mocha');
 
-    grunt.registerTask('default', 'concat simplemocha');
+    grunt.registerTask('test', 'concat simplemocha');
+    grunt.registerTask('build', 'concat simplemocha min');
 
 };
