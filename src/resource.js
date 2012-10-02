@@ -44,7 +44,7 @@ Ecore.JSON = {
                         eObject.set( featureName, parseObject(value) );
                     } else {
                         _.each(value, function(val) {
-                            eObject.get( featureName ).push( parseObject(val) );
+                            eObject.get( featureName ).add( parseObject(val) );
                         });
                     }
                 }
@@ -52,10 +52,9 @@ Ecore.JSON = {
         }
 
         function parseObject(object) {
-
             if (object && object.eClass) {
                 var eClass = Ecore.Registry.getEObject(object.eClass),
-                    features = eClass.get('eStructuralFeatures'),
+                    features = eClass.eAllStructuralFeatures(),
                     eObject = Ecore.create(eClass);
 
                 _.each( features, processFeature(object, eObject) );
@@ -121,9 +120,8 @@ Ecore.JSON = {
 };
 
 // Model or Resource ?
-var Model = Ecore.Model = function(attributes) {
-    attributes || (attributes = {});
-    this.uri = attributes.uri;
+var Model = Ecore.Model = function(uri) {
+    this.uri = uri;
     this.contents = [];
 
     return this;
@@ -133,13 +131,15 @@ Model.prototype = {
 
     clear: function() {
         this.contents.length = 0;
-            return this;
+        return this;
     },
 
     add: function(eObject) {
-        eObject.eModel = this;
-        eObject.eContainer = this;
-        this.contents.push(eObject);
+        if (eObject) {
+            eObject.eModel = this;
+            eObject.eContainer = this;
+            this.contents.push(eObject);
+        }
 
         return this;
     },
@@ -154,6 +154,13 @@ Model.prototype = {
         return this;
     },
 
+    getEObject: function(fragment) {
+        if (fragment) {
+            return buildIndex(this)[fragment];
+        }
+        return null;
+    },
+
     each: function(iterator, context) {
         return _.each(this.contents, iterator, context);
     },
@@ -165,7 +172,8 @@ Model.prototype = {
     load: function(success, error, data) {
         var model = this;
         var loadSuccess = function(data) {
-            model.addAll( Ecore.JSON.parse(data) );
+            var content = Ecore.JSON.parse(data);
+            model.addAll(content);
             return success(model);
         };
 
@@ -207,12 +215,13 @@ ModelRegistry.prototype = {
 
     register: function(model) {
         this.models[model.uri] = model;
+
         return this;
     },
 
     getEObject: function(uri) {
         var split = uri.split('#');
-        var base = uri.split[0];
+        var base = split[0];
         var fragment;
         if (split.length === 2) {
             fragment = split[1];
@@ -230,32 +239,26 @@ ModelRegistry.prototype = {
 
 };
 
-
 Ecore.Registry = new Ecore.ModelRegistry();
+initEcoreModel();
 
 function buildIndex(model) {
-    var base = model.uri;
-    var index = {};
-
-    var contents = model.contents;
+    var base = model.uri,
+        index = {},
+        contents = model.contents;
 
     if (contents.length === 1) {
         var root = contents[0];
 
         function _buildIndex(object, idx) {
-            var values = _.values(index);
-            if (_.find(values, function(o) { return o === object; })) {
-                return;
-            }
-
-            var eClass = object.eClass;
-            var eFeatures = eClass.get('eStructuralFeatures');
+            var eClass = object.eClass,
+                eFeatures = eClass.eAllStructuralFeatures();
             index[idx] = object;
 
-            eFeatures.each(function(feature) {
+            _.each(eFeatures, function(feature) {
+                var value = object.get(feature.get('name'));
 
-                if (feature.isTypeOf('EReference')) {
-                    var value = object.get(feature.get('name'));
+                if (value && feature.isTypeOf('EReference') && feature.get('isContainment')) {
 
                     if (feature.get('upperBound') === 1) {
 
@@ -271,6 +274,7 @@ function buildIndex(model) {
                         });
 
                     }
+
                 }
             });
         }
