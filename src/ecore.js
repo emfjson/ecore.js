@@ -8,11 +8,11 @@ var Ecore = {
         }
 
         return new Ecore.EObject({ eClass: eClass });
-    },
-
-    VERSION: '0.1.0'
+    }
 
 };
+
+Ecore.VERSION = '0.1.0';
 
 // The root object, `window` in the browser, or `global` on the server.
 var root = this;
@@ -25,6 +25,15 @@ if (typeof exports !== 'undefined') {
 } else {
     root['Ecore'] = Ecore;
 }
+
+function getFragment(eModelElement) {
+    var eContainer = eModelElement.eContainer;
+    if (!eContainer || eContainer instanceof Ecore.Model) {
+        return '/'
+    } else {
+        return getFragment(eContainer) + '/' + eModelElement.get('name');
+    }
+};
 
 var EObjectPrototype = {
 
@@ -69,6 +78,31 @@ var EObjectPrototype = {
         } else {
 
         }
+    },
+
+    eURIFragmentSegment: function(feature, parentIndex, position) {
+        if (!feature) {
+            return '/';
+        }
+
+        if (this.eClass instanceof Ecore.EClass) {
+            return getFragment(this);
+        }
+
+        var eClass = this.eClass;
+        var iD = eClass.get('eIDAttribute');
+        var _idx;
+
+        if (iD) {
+            _idx = val.get(iD.name);
+        } else {
+            _idx = parentIndex + '/@' + feature.name;
+            if (position > -1) {
+                _idx += '.' + position;
+            }
+        }
+
+        return _idx;
     },
 
     // private
@@ -200,80 +234,84 @@ var EList = Ecore.EList = function(owner, feature) {
 };
 
 // @private
-EList.prototype._setFeature = function(feature) {
-    if (feature) {
-        this._feature = feature;
-        this._isContainment = this._feature.get('isContainment');
+EList.prototype = {
+
+    _setFeature: function(feature) {
+        if (feature) {
+            this._feature = feature;
+            this._isContainment = this._feature.get('isContainment');
+        }
+    },
+
+    add: function(eObject) {
+        if (this._isContainment) {
+            eObject.eContainingFeature = this._feature;
+            eObject.eContainer = this._owner;
+        }
+
+        this._index[this._size] = eObject;
+        this._size++;
+        this._internal.push(eObject);
+
+        return this;
+    },
+
+    remove: function(eObject) {
+        var values = _.values(this._index);
+
+        return this;
+    },
+
+    size: function() {
+        return this._size;
+    },
+
+    at: function(position) {
+        if (this._size < position) {
+            return null;
+        }
+        return this._internal[position];
+    },
+
+    // underscore methods.
+
+    first: function() {
+        return _.first(this._internal);
+    },
+
+    last: function() {
+        return _.last(this._internal);
+    },
+
+    rest: function(index) {
+        return _.rest(this._internal, index);
+    },
+
+    each: function(iterator, context) {
+        return _.each(this._internal, iterator, context);
+    },
+
+    filter: function(iterator, context) {
+        return _.filter(this._internal, iterator, context);
+    },
+
+    find: function(iterator, context) {
+        return _.find(this._internal, iterator, context);
+    },
+
+    reject: function(iterator, context) {
+        return _.reject(this._internal, iterator, context);
+    },
+
+    contains: function(object) {
+        return _.contains(this._internal, object);
+    },
+
+    indexOf: function(object) {
+        return _.indexOf(this._internal, object);
     }
-};
 
-EList.prototype.add = function(eObject) {
-    if (this._isContainment) {
-        eObject.eContainingFeature = this._feature;
-        eObject.eContainer = this._owner;
-    }
-
-    this._index[this._size] = eObject;
-    this._size++;
-    this._internal.push(eObject);
-
-    return this;
-};
-
-EList.prototype.remove = function(eObject) {
-    var values = _.values(this._index);
-
-    return this;
-};
-
-EList.prototype.size = function() {
-    return this._size;
-};
-
-EList.prototype.at = function(position) {
-    if (this._size < position) {
-        return null;
-    }
-    return this._internal[position];
-};
-
-// underscore methods.
-
-EList.prototype.first = function() {
-    return _.first(this._internal);
-};
-
-EList.prototype.last = function() {
-    return _.last(this._internal);
-};
-
-EList.prototype.rest = function(index) {
-    return _.rest(this._internal, index);
-};
-
-EList.prototype.each = function(iterator, context) {
-    return _.each(this._internal, iterator, context);
-};
-
-EList.prototype.filter = function(iterator, context) {
-    return _.filter(this._internal, iterator, context);
-};
-
-EList.prototype.find = function(iterator, context) {
-    return _.find(this._internal, iterator, context);
-};
-
-EList.prototype.reject = function(iterator, context) {
-    return _.reject(this._internal, iterator, context);
-};
-
-EList.prototype.contains = function(object) {
-    return _.contains(this._internal, object);
-};
-
-EList.prototype.indexOf = function(object) {
-    return _.indexOf(this._internal, object);
-};
+}
 
 
 // EObject
@@ -848,43 +886,3 @@ Ecore.EcoreFactory.create = function(eClass, attributes) {
             return null;
     }
 };
-
-EClass.prototype.eURIFragmentSegment = function(feature) {
-
-};
-
-function getFragment(eModelElement) {
-    var eContainer = eModelElement.eContainer;
-    if (!eContainer || eContainer instanceof Ecore.Model) {
-        return '/'
-    } else {
-        return getFragment(eContainer) + '/' + eModelElement.get('name');
-    }
-};
-
-EObject.prototype.eURIFragmentSegment = function(feature, parentIndex, position) {
-    if (!feature) {
-        return '/';
-    }
-
-    if (this.eClass instanceof Ecore.EClass) {
-        return getFragment(this);
-    }
-
-    var eClass = this.eClass;
-    var iD = eClass.get('eIDAttribute');
-    var _idx;
-
-    if (iD) {
-        _idx = val.get(iD.name);
-    } else {
-        _idx = parentIndex + '/@' + feature.name;
-        if (position > -1) {
-            _idx += '.' + position;
-        }
-    }
-
-    return _idx;
-};
-
-})();
