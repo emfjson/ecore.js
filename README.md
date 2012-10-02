@@ -1,4 +1,4 @@
-Ecore (EMOF) implementation in JavaScirpt. (in development)
+Ecore (EMOF) implementation in JavaScript.
 
 ## Usage
 
