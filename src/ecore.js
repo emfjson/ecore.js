@@ -9,7 +9,7 @@
 var root = this;
 
 var _ = root._ || require('underscore');
-console.log(_.VERSION);
+
 /**
  * Ecore
  *
