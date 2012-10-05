@@ -2,10 +2,20 @@ Ecore (EMOF) implementation in JavaScript.
 
 ## Install
 
-In the browser, download dist/ecore.min.js
-In node, install with npm:
+Browser:
+Download ecore.js from dist/ folder, and include it in your html along with underscore.js.
+
+```
+<script src="underscore.js"></script>
+<script src="ecore.js"></script>
+```
+
+Node:
+
 ```
 npm install ecore
+
+var Ecore = require('ecore');
 ```
 
 ## Usage
