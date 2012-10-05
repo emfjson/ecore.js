@@ -1,5 +1,13 @@
 Ecore (EMOF) implementation in JavaScript.
 
+## Install
+
+In the browser, download dist/ecore.min.js
+In node, install with npm:
+```
+npm install ecore
+```
+
 ## Usage
 
 EClass creation:
@@ -20,6 +28,7 @@ User.get('eStructuralFeatures').add(User_friends);
 ```
 
 EObject creation:
+
 ```javascript
 var u1 = Ecore.create(User);
 u1.set('name', 'u1');
