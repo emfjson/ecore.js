@@ -1,4 +1,3 @@
-_ = require('../lib/underscore.js');
 var Ecore = require('../dist/ecore.js');
 var assert = require("assert");
 

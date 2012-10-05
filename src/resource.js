@@ -1,5 +1,5 @@
 
-EcoreFactory = Ecore.EcoreFactory;
+var EcoreFactory = Ecore.EcoreFactory;
 
 Ecore.$ = root.jQuery || root.Zepto || root.ender || null;
 
@@ -43,9 +43,10 @@ Ecore.JSON = {
                     if (feature.get('upperBound') === 1) {
                         eObject.set( featureName, parseObject(value) );
                     } else {
-                        _.each(value, function(val) {
-                            eObject.get( featureName ).add( parseObject(val) );
-                        });
+                        if (value)
+                            _.each(value, function(val) {
+                                eObject.get( featureName ).add( parseObject(val) );
+                            });
                     }
                 }
             };
@@ -57,7 +58,8 @@ Ecore.JSON = {
                     features = eClass.eAllStructuralFeatures(),
                     eObject = Ecore.create(eClass);
 
-                _.each( features, processFeature(object, eObject) );
+                if (features)
+                    _.each( features, processFeature(object, eObject) );
 
                 return eObject;
             }
@@ -90,9 +92,10 @@ Ecore.JSON = {
                             data[featureName] = jsonObject(value);
                         } else {
                             data[featureName] = [];
-                            _.each(value, function(val) {
-                                data[featureName].push( jsonObject(val) );
-                            });
+                            if (value)
+                                _.each(value, function(val) {
+                                    data[featureName].push( jsonObject(val) );
+                                });
                         }
                     }
                 }
@@ -104,7 +107,8 @@ Ecore.JSON = {
                 features = eClass.get('eStructuralFeatures'),
                 data = {};
 
-            _.each( features, processFeature(object, data) );
+            if (features)
+                _.each( features, processFeature(object, data) );
 
             return data;
         }
@@ -281,7 +285,7 @@ function buildIndex(model) {
 
         var iD = root.eClass.get('eIDAttribute') || null;
         if (iD) {
-            _buildIndex(root, '//' + root.get(iD.name));
+            _buildIndex(root, root.get(iD.name));
         } else {
             _buildIndex(root, '/');
         }

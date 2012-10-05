@@ -1,7 +1,35 @@
+ // Ecore.js.
+ // JavaScript Implementation of Ecore (EMOF).
+ //
+ // Copyright (C) 2012 Guillaume Hillairet.
+ // MIT License.
 (function() {
 
+// The root object, `window` in the browser, or `global` on the server.
+var root = this;
+
+var _ = root._ || require('underscore');
+console.log(_.VERSION);
+/**
+ * Ecore
+ *
+ * @namespace Ecore
+ */
 var Ecore = {
 
+   /**
+    * Creates an instance of the given EClass.
+    *
+    * The resulting object is an EObject having it's properties
+    * initialized from the structural features of the EClass.
+    *
+    * Example:
+    *   var User = Ecore.EcoreFactory.createEClass({name: 'User'});
+    *   var u1 = Ecore.create(User);
+    *
+    * @param {EClass}
+    * @return {EObject}
+    */
     create: function(eClass) {
         if (!eClass.eClass) {
             throw new Error('Cannot create EObject from undefined EClass');
@@ -12,10 +40,7 @@ var Ecore = {
 
 };
 
-Ecore.VERSION = '0.1.0';
-
-// The root object, `window` in the browser, or `global` on the server.
-var root = this;
+Ecore.version = '0.1.1';
 
 if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
@@ -25,6 +50,22 @@ if (typeof exports !== 'undefined') {
 } else {
     root['Ecore'] = Ecore;
 }
+
+/**
+ * EObject
+ *
+ * @constructor
+ */
+var EObject = Ecore.EObject = function(attributes) {
+    attributes || (attributes = {});
+
+    this.eClass = attributes.eClass || null;
+    this.values = {};
+
+    initValues(this);
+
+    return this;
+};
 
 function getFragment(eModelElement) {
     var eContainer = eModelElement.eContainer;
@@ -38,10 +79,23 @@ function getFragment(eModelElement) {
 
 var EObjectPrototype = {
 
+    /**
+     * @method has
+     * @param {String}
+     * @member EObject
+     * @return {Boolean} Returns true if has property
+     */
     has: function(name) {
         return this.values.hasOwnProperty(name) || this._isStructuralFeature(name);
     },
 
+    /**
+     * @method set
+     * @member EObject
+     * @param {String} name
+     * @param {Object} value
+     * @return {EObject} this
+     */
     set: function(name, value) {
         if (this.has(name)) {
             this.values[name] = value;
@@ -50,6 +104,12 @@ var EObjectPrototype = {
         return this;
     },
 
+    /**
+     * @method get
+     * @member EObject
+     * @param {String} name
+     * @return {Object} Returns property value
+     */
     get: function(name) {
         var value;
         if (this.has(name)) {
@@ -59,10 +119,22 @@ var EObjectPrototype = {
         return value;
     },
 
+    /**
+     * @method isTypeOf
+     * @member EObject
+     * @param {String} type
+     * @return {Boolean} Returns true if EObject is a instance of type.
+     */
     isTypeOf: function(type) {
         return this.eClass.get('name') === type;
     },
 
+    /**
+     * @method isTypeOf
+     * @member EObject
+     * @param {String}
+     * @return {Boolean} Returns true if EObject is a kind of type.
+     */
     isKindOf: function(type) {
         var eClass = this.eClass;
         if (eClass) {
@@ -73,6 +145,11 @@ var EObjectPrototype = {
         return false;
     },
 
+    /**
+     * @method uri
+     * @member EObject
+     * @return {String} Returns EObject URI
+     */
     uri: function() {
         if (this.eContainer instanceof Ecore.Model) {
             return this.eContainer.uri + '#' + '/';
@@ -81,6 +158,10 @@ var EObjectPrototype = {
         }
     },
 
+    /**
+     * @method eURIFragmentSegment
+     * @private
+     */
     eURIFragmentSegment: function(feature, parentIndex, position) {
         if (this.isKindOf('EModelElement')) {
 
@@ -189,6 +270,10 @@ var EObjectPrototype = {
 
     // EClass methods
 
+    /**
+     * @method eAllStructuralFeatures
+     * @return {Array} Returns Array of EStructuralFeature
+     */
     eAllStructuralFeatures: function() {
         if (!this.has('eSuperTypes')) {
             return [];
@@ -208,6 +293,10 @@ var EObjectPrototype = {
         return eAllFeatures;
     },
 
+    /**
+     * @method eAllSuperTypes
+     * @return {Array} Returns Array of EClass
+     */
     eAllSuperTypes: function() {
         var superTypes = this.get('eSuperTypes')._internal;
 
@@ -222,7 +311,18 @@ var EObjectPrototype = {
 
 };
 
+_.extend(EObject.prototype, EObjectPrototype);
+
 // EList
+
+/**
+ * EList is a List implementation.
+ *
+ * @class EList
+ * @constructor
+ * @param {EObject} owner - the owner of the feature.
+ * @param {EStructuralFeature} feature - the feature associated.
+ */
 var EList = Ecore.EList = function(owner, feature) {
     this._internal = [];
     this._owner = owner;
@@ -233,9 +333,12 @@ var EList = Ecore.EList = function(owner, feature) {
     return this;
 };
 
-// @private
 EList.prototype = {
 
+    /**
+     * @method _setFeature
+     * @private
+     */
     _setFeature: function(feature) {
         if (feature) {
             this._feature = feature;
@@ -243,6 +346,15 @@ EList.prototype = {
         }
     },
 
+    /*
+     * Adds an EObject.
+     *
+     * @method add
+     * @public
+     * @member EList
+     * @param {EObject} eObject
+     *
+     */
     add: function(eObject) {
         if (this._isContainment) {
             eObject.eContainingFeature = this._feature;
@@ -256,16 +368,33 @@ EList.prototype = {
         return this;
     },
 
+    /*
+     * @method remove
+     * @public
+     * @member EList
+     * @param {EObject}
+     */
     remove: function(eObject) {
         var values = _.values(this._index);
 
         return this;
     },
 
+    /*
+     * @method size
+     * @public
+     * @member EList
+     */
     size: function() {
         return this._size;
     },
 
+    /*
+     * @method at
+     * @public
+     * @member EList
+     * @param {integer}
+     */
     at: function(position) {
         if (this._size < position) {
             return null;
@@ -346,21 +475,6 @@ function initValues(eObject) {
         });
     }
 }
-
-// EObject
-//
-var EObject = Ecore.EObject = function(attributes) {
-    attributes || (attributes = {});
-
-    this.eClass = attributes.eClass || null;
-    this.values = {};
-
-    initValues(this);
-
-    return this;
-};
-
-_.extend(EObject.prototype, EObjectPrototype);
 
 var EPackage = function(attributes) {
     attributes || (attributes = {});
