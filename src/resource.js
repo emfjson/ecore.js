@@ -6,23 +6,38 @@ Ecore.$ = root.jQuery || root.Zepto || root.ender || null;
 var Ajax = {
 
     get: function(url, success, error) {
-        if (Ecore.$) {
-            return Ecore.$.ajax({
-                url: url,
-                dataType: 'json',
-                success: success,
-                error: error
-            });
-        } else {
-            return null;
-        }
+        if (!Ecore.$) return;
+
+        return Ecore.$.ajax({
+            url: url,
+            dataType: 'json',
+            success: success,
+            error: error
+        });
     },
 
-    post: function(url, success, error) {
-            // TODO
+    post: function(url, data, success, error) {
+        if (!Ecore.$) return;
+
+        return Ecore.$.ajax({
+           type: 'POST',
+           url: url,
+           dataType: 'json',
+           data: data,
+           success: success,
+           error: error
+        });
     }
 
 };
+
+/**
+ * JSON serializer and parser
+ *
+ * See https://github.com/ghillairet/emfjson for details
+ * about the JSON format used for EMF Models.
+ *
+**/
 
 Ecore.JSON = {
 
@@ -58,8 +73,8 @@ Ecore.JSON = {
                     features = eClass.eAllStructuralFeatures(),
                     eObject = Ecore.create(eClass);
 
-                if (features)
-                    _.each( features, processFeature(object, eObject) );
+
+                _.each( features, processFeature(object, eObject) );
 
                 return eObject;
             }
@@ -73,7 +88,18 @@ Ecore.JSON = {
     },
 
     toJSON: function(model) {
-        var contents = model.contents;
+        var contents = model.contents,
+            index = buildIndex(model);
+
+        function uri(object) {
+            for (key in index) {
+                if (index[key] === object) {
+                    return key;
+                }
+            }
+
+            return null;
+        }
 
         function processFeature( object, data ) {
             if (!object || !data) {
@@ -82,20 +108,31 @@ Ecore.JSON = {
 
             return function( feature ) {
                 var featureName = feature.get('name');
-                var value = object.get(featureName);
+
+                if (!object.isSet(featureName)) return;
+
+                var value = object.get(featureName),
+                    isMany = feature.get('upperBound') !== 1;
 
                 if (feature.isTypeOf('EAttribute')) {
                     data[featureName] = value;
                 } else {
                     if (feature.get('isContainment')) {
-                        if (feature.get('upperBound') === 1) {
-                            data[featureName] = jsonObject(value);
-                        } else {
+                        if (isMany) {
                             data[featureName] = [];
-                            if (value)
-                                _.each(value, function(val) {
-                                    data[featureName].push( jsonObject(val) );
-                                });
+                            value.each(function(val) {
+                                data[featureName].push( jsonObject(val) );
+                            });
+                        } else {
+                            data[featureName] = jsonObject(value);
+                        }
+                    } else {
+                        if (isMany) {
+                            value.each(function(val) {
+                               data[featureName].push({'$ref': uri(val)});
+                            });
+                        } else {
+                            data[featureName] = {'$ref': uri(value)};
                         }
                     }
                 }
@@ -104,11 +141,10 @@ Ecore.JSON = {
 
         function jsonObject(object) {
             var eClass = object.eClass,
-                features = eClass.get('eStructuralFeatures'),
+                features = eClass.eAllStructuralFeatures(),
                 data = {};
 
-            if (features)
-                _.each( features, processFeature(object, data) );
+            _.each( features, processFeature(object, data) );
 
             return data;
         }
@@ -169,8 +205,15 @@ Model.prototype = {
         return _.each(this.contents, iterator, context);
     },
 
+    toJSON: function() {
+        return Ecore.JSON.toJSON(this);
+    },
+
     save: function(success, error) {
-        var data = Ecore.JSON.toJSON(this);
+        var data = this.toJSON();
+        if (data) {
+            Ajax.post(this.uri, data, success, error);
+        }
     },
 
     load: function(success, error, data) {
