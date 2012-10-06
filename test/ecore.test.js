@@ -67,6 +67,20 @@ describe('Ecore', function() {
             assert.strictEqual(required.eClass, EcorePackage.EAttribute);
         });
 
+        it('should contain ETypedElement references', function() {
+            var find = EcorePackage.ETypedElement.get('eStructuralFeatures').find(function(feature) {
+               return feature.get('name') === 'eType';
+            });
+
+            assert.strictEqual(find.eClass, EcorePackage.EReference);
+            assert.strictEqual(find.get('eType'), EcorePackage.EClassifier);
+
+            // eType
+            var eType = EcorePackage.ETypedElement_eType;
+            assert.ok(eType);
+            assert.strictEqual(eType, find);
+        });
+
         it('should contain EPackage', function() {
             assert.ok(EcorePackage.EPackage);
             assert.strictEqual(EcorePackage.EPackage.eClass, EcorePackage.EClass);

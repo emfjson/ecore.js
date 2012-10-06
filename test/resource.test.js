@@ -55,9 +55,9 @@ describe('Model', function() {
 
     });
 
-    describe('loading model from local filesystem', function() {
+    describe('load model from filesystem', function() {
 
-        it('should work', function(done) {
+        it('should build the model', function(done) {
 
             var model = new Ecore.Model('simple.json');
 
@@ -95,6 +95,24 @@ describe('Model', function() {
                 }, function(){}, JSON.parse(data));
             });
 
+        });
+
+    }); //end load
+
+    describe('toJSON', function() {
+        var model = new Ecore.Model('simple.json');
+
+        fs.readFile('./test/simple.json', 'utf8', function (err,data) {
+            if (err) {
+                return console.log(err);
+            }
+
+            model.load(function(model) {
+
+                var json = model.toJSON();
+
+
+            }, function(){}, JSON.parse(data));
         });
     });
 
