@@ -37,6 +37,26 @@ var Ecore = {
         }
 
         return new Ecore.EObject({ eClass: eClass });
+    },
+
+    createEPackage: function(attributes) {
+        return new EPackage(attributes);
+    },
+
+    createEClass: function(attributes) {
+        return new EClass(attributes);
+    },
+
+    createEDataType: function(attributes) {
+        return new EDataType(attributes);
+    },
+
+    createEAttribute: function(attributes) {
+        return new EAttribute(attributes);
+    },
+
+    createEReference: function(attributes) {
+        return new EReference(attributes);
     }
 
 };
@@ -49,7 +69,7 @@ if (typeof exports !== 'undefined') {
     }
     exports.Ecore = Ecore;
 } else {
-    root['Ecore'] = Ecore;
+    root.Ecore = Ecore;
 }
 
 /**
@@ -71,12 +91,12 @@ var EObject = Ecore.EObject = function(attributes) {
 function getFragment(eModelElement) {
     var eContainer = eModelElement.eContainer;
 
-    if (!eContainer || eContainer instanceof Ecore.Model) {
-        return '/'
+    if (!eContainer || eContainer instanceof Ecore.Resource) {
+        return '/';
     } else {
         return getFragment(eContainer) + '/' + eModelElement.get('name');
     }
-};
+}
 
 var EObjectPrototype = {
 
@@ -126,12 +146,16 @@ var EObjectPrototype = {
      * @return {Object} Returns property value
      */
     get: function(name) {
-        var value;
+        var value = null;
         if (this.has(name)) {
             value = this.values[name];
         }
 
-        return value;
+        if (typeof value === 'function') {
+            return value();
+        } else {
+            return value;
+        }
     },
 
     /**
@@ -141,10 +165,9 @@ var EObjectPrototype = {
      * @return {Boolean} Returns true if EObject is a instance of type.
      */
     isTypeOf: function(type) {
-        if (!this.eClass)
-            return false;
-        else
-            return this.eClass.get('name') === type;
+        if (!this.eClass) return false;
+
+        return this.eClass.get('name') === type;
     },
 
     /**
@@ -154,12 +177,18 @@ var EObjectPrototype = {
      * @return {Boolean} Returns true if EObject is a kind of type.
      */
     isKindOf: function(type) {
-        if(!this.eClass)
-            return false;
-        else
-            return _.any(this.eClass.eAllSuperTypes(), function(eSuper) {
-                return eSuper.get('name') === type;
-            });
+        if(!this.eClass) return false;
+
+        return _.any(this.eClass.eAllSuperTypes(), function(eSuper) {
+            return eSuper.get('name') === type;
+        });
+    },
+
+    eResource: function() {
+        if (!this.eContainer) return null;
+        if (this.eContainer instanceof Ecore.Resource) return this.eContainer;
+
+        return this.eContainer.eResource();
     },
 
     /**
@@ -167,12 +196,20 @@ var EObjectPrototype = {
      * @member EObject
      * @return {String} Returns EObject URI
      */
-    uri: function() {
-        if (this.eContainer instanceof Ecore.Model) {
-            return this.eContainer.uri + '#' + '/';
-        } else {
+    eURI: function() {
+        var eModel = this.eResource(),
+            index = buildIndex(eModel),
+            current = this;
 
-        }
+        var fragment = (function() {
+            for (var key in index) {
+                if (index[key] === current)
+                    return key;
+            }
+            return null;
+        })();
+
+        return eModel.uri + '#' + fragment;
     },
 
     /**
@@ -183,14 +220,14 @@ var EObjectPrototype = {
         if (this.isKindOf('EModelElement')) {
             return getFragment(this);
         } else {
-            var eClass = this.eClass;
-            var iD = eClass.get('eIDAttribute');
-            var _idx;
+            var eClass = this.eClass,
+                iD = eClass.get('eIDAttribute'),
+                _idx;
 
             if (iD) {
-                _idx = val.get(iD.name);
+                _idx = val.get(iD.get('name'));
             } else {
-                _idx = parentIndex + '/@' + feature.name;
+                _idx = parentIndex + '/@' + feature.get('name');
                 if (position > -1) {
                     _idx += '.' + position;
                 }
@@ -213,13 +250,10 @@ var EObjectPrototype = {
                 switch(eType.get('name')) {
                     case 'EBoolean':
                         return false;
-                        break;
                     case 'EInteger':
                         return 0;
-                        break;
                     default:
                         return null;
-                        break;
                 }
             } else {
                 return null;
@@ -317,6 +351,14 @@ var EObjectPrototype = {
         );
 
         return _.isArray(eAllSuperTypes) ? eAllSuperTypes : [];
+    },
+
+    getEStructuralFeature: function(name) {
+        if (!this.has('eStructuralFeatures')) return null;
+
+        return this.get('eStructuralFeatures').find(function(feature) {
+            return feature.get('name') === name;
+        });
     }
 
 };
@@ -365,6 +407,8 @@ EList.prototype = {
      *
      */
     add: function(eObject) {
+        if (!eObject) return this;
+
         if (this._isContainment) {
             eObject.eContainingFeature = this._feature;
             eObject.eContainer = this._owner;
@@ -372,6 +416,15 @@ EList.prototype = {
 
         this._size++;
         this._internal.push(eObject);
+
+        return this;
+    },
+
+    addAll: function(values) {
+        if (!_.isArray(values)) return this.add(values);
+        _.each(values, function(value) {
+            this.add(value);
+        }, this);
 
         return this;
     },
@@ -452,16 +505,12 @@ EList.prototype = {
         return _.indexOf(this._internal, object);
     }
 
-}
+};
 
 function initValues(eObject) {
     var eClass = eObject.eClass;
     if (eClass) {
         var eStructuralFeatures = eClass.eAllStructuralFeatures();
-
-        if (!eStructuralFeatures || eStructuralFeatures.length === 0) {
-            return;
-        }
 
         _.each(eStructuralFeatures, function( eFeature ) {
             var eFeatureName = eFeature.get('name');
@@ -477,7 +526,7 @@ function initValues(eObject) {
                         value._setFeature(eFeature);
                         // reset eContainer
                         if (eFeature.get('isContainment')) {
-                            value.each(function(object) { object.eContainer = eObject });
+                            value.each(function(object) { object.eContainer = eObject; });
                         }
                     } else if (!eObject.has(eFeatureName)) {
                         eObject.values[eFeatureName] = eObject._getDefaultReferenceValue(eFeature);
@@ -486,6 +535,21 @@ function initValues(eObject) {
             }
         });
     }
+}
+
+function setValues(eObject, attributes) {
+    if (!eObject.eClass) return;
+
+    _.each(attributes, function(value, key) {
+        var eFeature = this.eClass.getEStructuralFeature(key);
+        if (eFeature) {
+            if (eFeature.get('upperBound') === 1) {
+                this.set(key, value);
+            } else {
+                this.get(key).addAll(value);
+            }
+        }
+    }, eObject);
 }
 
 var EPackage = function(attributes) {
@@ -502,6 +566,7 @@ var EPackage = function(attributes) {
     this.values.eClassifiers = new EList(this);
 
     initValues(this);
+    setValues(this, attributes);
 
     return this;
 };
@@ -522,6 +587,7 @@ var EClass = function(attributes) {
     this.values.eStructuralFeatures = new EList(this);
 
     initValues(this);
+    setValues(this, attributes);
 
     return this;
 };
@@ -538,6 +604,7 @@ var EDataType = function(attributes) {
     this.values.name = attributes.name;
 
     initValues(this);
+    setValues(this, attributes);
 
     return this;
 };
@@ -550,16 +617,16 @@ var EReference = function(attributes) {
         this.eClass = Ecore.EcorePackage.EReference;
     }
 
-    this.values = {
-        name: attributes.name,
-        lowerBound: attributes.lowerBound || 0,
-        upperBound: attributes.upperBound || 1,
-        isContainment: attributes.isContainment || false,
-        eType: attributes.eType || null,
-        eOpposite: attributes.eOpposite || null
-    };
+    this.values = {};
+    this.values.name = attributes.name;
+    this.values.lowerBound = attributes.lowerBound || 0;
+    this.values.upperBound = attributes.upperBound || 1;
+    this.values.isContainment = attributes.isContainment || false;
+    this.values.eType = attributes.eType || null;
+    this.values.eOpposite = attributes.eOpposite || null;
 
     initValues(this);
+    setValues(this, attributes);
 
     return this;
 };
@@ -572,14 +639,14 @@ var EAttribute = function(attributes) {
         this.eClass = Ecore.EcorePackage.EAttribute;
     }
 
-    this.values = {
-        name: attributes.name,
-        lowerBound: attributes.lowerBound || 0,
-        upperBound: attributes.upperBound || 1,
-        eType: attributes.eType || null
-    };
+    this.values = {};
+    this.values.name = attributes.name;
+    this.values.lowerBound = attributes.lowerBound || 0;
+    this.values.upperBound = attributes.upperBound || 1;
+    this.values.eType = attributes.eType || null;
 
     initValues(this);
+    setValues(this, attributes);
 
      return this;
 };
@@ -592,11 +659,11 @@ var EFactory = function(attributes) {
         this.eClass = Ecore.EcorePackage.EFactory;
     }
 
-    this.values = {
-        ePackage: attributes.ePackage
-    };
+    this.values = {};
+    this.values.ePackage = attributes.ePackage;
 
     initValues(this);
+    setValues(this, attributes);
 
     return this;
 };
@@ -987,11 +1054,10 @@ function initEcore(ecorePackage) {
         eType: ePackage,
         'eOpposite': ePackage_eFactoryInstance
     });
+
     eFactory_ePackage.eClass = eReference;
     ecorePackage.EFactory_ePackage = eFactory_ePackage;
-
     ePackage_eFactoryInstance.set('eOpposite', eFactory_ePackage);
-
     eFactory.get('eStructuralFeatures').add(eFactory_ePackage);
 
     // setting internal features for EList.
@@ -1010,7 +1076,7 @@ function initEcore(ecorePackage) {
     initValues(eParameter);
     initValues(ePackage);
     initValues(eFactory);
-};
+}
 
 // Initialize the EcorePackage.
 Ecore.EcorePackage = new EPackage({name: 'ecore'});
@@ -1041,36 +1107,18 @@ Ecore.EcoreFactory.eClass = Ecore.EcorePackage.EFactory;
 
 Ecore.EcorePackage.set('eFactoryInstance', Ecore.EcoreFactory);
 
-Ecore.EcoreFactory.createEPackage = function(attributes) {
-    return new EPackage(attributes);
-};
-
-Ecore.EcoreFactory.createEClass = function(attributes) {
-    return new EClass(attributes);
-};
-
-Ecore.EcoreFactory.createEAttribute = function(attributes) {
-    return new EAttribute(attributes);
-};
-
-Ecore.EcoreFactory.createEReference = function(attributes) {
-    return new EReference(attributes);
-};
-
 Ecore.EcoreFactory.create = function(eClass, attributes) {
     switch (eClass) {
         case 'EPackage':
-            return this.createEPackage(attributes);
-            break;
+            return Ecore.createEPackage(attributes);
         case 'EClass':
-            return this.createEClass(attributes);
-            break;
+            return Ecore.createEClass(attributes);
+        case 'EDataType':
+            return Ecore.createEDataType(attributes);
         case 'EAttribute':
-            return this.createEAttribute(attributes);
-            break;
+            return Ecore.createEAttribute(attributes);
         case 'EReference':
-            return this.createEReference(attributes);
-            break;
+            return Ecore.createEReference(attributes);
         default:
             return null;
     }
