@@ -20,7 +20,63 @@ var Ecore = require('ecore');
 
 ## Usage
 
-EClass creation:
+Defining a Model:
+
+```javascript
+
+// Resources contain model elements and are identified by a URI.
+
+var model = new Ecore.Resource('/model.json');
+
+// EClass are used to define domain elements, they are identified
+// by name and a set of structural features (attributes and references).
+
+var User = Ecore.createEClass({
+    name: 'User',
+    eStructuralFeatures: [
+        // EAttributes are used to define domain elements
+        // elements properties.
+        Ecore.createEAttribute({
+            name: 'name',
+            upperBound: 1,
+            eType: Ecore.EcorePackage.EString
+        }),
+        // EReferences are used to define links between domain
+        // elements.
+        Ecore.createEReference({
+            name: 'friends',
+            upperBound: -1,
+            isContainment: false,
+            // If reference non previously defined variables,
+            // use a function that will return it a posteriori.
+            eType: function() { return User; }
+        })
+    ]
+});
+
+// EPackages represent namespaces for a set of EClasses.
+// It's properties name, nsURI and nsPrefix must be set.
+
+var SamplePackage = Ecore.createEPackage({
+    name: 'sample',
+    nsURI: 'http://www.example.org/sample',
+    nsPrefix: 'sample',
+    eClassifiers: [
+        User
+    ]
+});
+
+// Packages must be added directly to the model's Resource.
+
+model.add(SamplePackage);
+
+// Once created the model can be regitered.
+
+Ecore.Registry.register(model);
+
+```
+
+Model Elements can also be created separately.
 
 ```javascript
 var User = Ecore.EcoreFactory.createEClass({name: 'User'});
@@ -48,4 +104,53 @@ u1.get('friends').add(u2);
 
 u1.get('friends').each(function(friend) { console.log(friend) });
 ```
+
+## API
+
+### Ecore
+ - create(eClass)
+ - createEClass(attributes)
+ - createEDataType(attributes)
+ - createEAttribute(attributes)
+ - createEReference(attributes)
+
+### Resource
+ - add(value)
+ - addAll(values)
+ - clear()
+ - each(iterator, [context])
+ - save([sucess], [error])
+ - load([sucess], [error], [data])
+ - toJSON()
+ - getEObject(fragment)
+
+### EObject
+ - has(property)
+ - isSet(property)
+ - set(property, value)
+ - get(property)
+ - isTypeOf(type)
+ - isKindOf(type)
+ - eResource()
+ - eURI()
+ - eAllStructuralFeatures()
+ - eAllSuperTypes()
+ - getEStructuralFeature(name)
+
+### EList
+ - add(element)
+ - addAll(elements)
+ - remove(element)
+ - size()
+ - at(position)
+ - first()
+ - last()
+ - rest(index)
+ - each(iterator, [context])
+ - filter(iterator, [context])
+ - find(iterator, [context])
+ - map(iterator, [context])
+ - reject(iterator, [context])
+ - contains(iterator, [context])
+ - indexOf(iterator, [context])
 
