@@ -105,6 +105,22 @@ u1.get('friends').add(u2);
 u1.get('friends').each(function(friend) { console.log(friend) });
 ```
 
+## JSON
+
+JSON is the default serialization format supported by ecore.js. The JSON format is
+described [here](https://github.com/ghillairet/emfjson) and looks like this:
+
+```javascript
+{
+    "eClass" : "/model.json#//User",
+    "name" : "u1",
+    "friends" : [
+        { "$ref" : '/u2.json#/', eClass: '/model.json#//User' },
+        { "$ref" : '/u3.json#/', eClass: '/model.json#//User' }
+    ]
+}
+```
+
 ## API
 
 ### Ecore
@@ -153,4 +169,17 @@ u1.get('friends').each(function(friend) { console.log(friend) });
  - reject(iterator, [context])
  - contains(iterator, [context])
  - indexOf(iterator, [context])
+
+
+## History
+
+### 0.2.0
+ - add Resource support
+ - add JSON parsing serialization
+ - add new syntax to define EModelElements
+ - move create methods to Ecore
+
+### 0.1.1
+ - initial version
+ - bootstraps ecore model
 
