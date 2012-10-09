@@ -57,12 +57,12 @@ describe('Usage', function() {
         var User;
 
         before(function() {
-            User = Ecore.EcoreFactory.createEClass({name: 'User'});
-            var User_name = Ecore.EcoreFactory.createEAttribute({
+            User = Ecore.createEClass({name: 'User'});
+            var User_name = Ecore.createEAttribute({
                 name: 'name',
                 eType: Ecore.EcorePackage.EString
             });
-            var User_friends = Ecore.EcoreFactory.createEReference({
+            var User_friends = Ecore.createEReference({
                 name: 'friends',
                 eType: User
             });
