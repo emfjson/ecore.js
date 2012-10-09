@@ -1,4 +1,4 @@
-[Ecore](http://www.eclipse.org/modeling/emf/?project=emf) (EMOF) implementation in JavaScript.
+[Ecore](http://www.eclipse.org/modeling/emf/?project=emf) ([EMOF](http://en.wikipedia.org/wiki/Meta-Object_Facility)) implementation in JavaScript.
 
 ## Install
 
