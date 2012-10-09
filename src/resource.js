@@ -89,12 +89,23 @@ Ecore.JSON = {
 
     toJSON: function(model) {
         var contents = model.contents,
-            index = buildIndex(model);
+            indexes = {};
+            indexes[model.uri] = buildIndex(model);
 
-        function uri(object) {
-            for (key in index) {
-                if (index[key] === object) {
-                    return key;
+        function uri(owner, value) {
+            var valueModel = value.eResource(),
+                ownerModel = owner.eResource(),
+                external = valueModel !== ownerModel;
+
+            if (!valueModel || !ownerModel) return;
+            if (!indexes[valueModel.uri]) {
+                indexes[valueModel.uri] = buildIndex(valueModel);
+            }
+
+            var index = indexes[valueModel.uri];
+            for (var key in index) {
+                if (index[key] === value) {
+                    return external ? valueModel.uri + '#' + key : key;
                 }
             }
 
@@ -102,9 +113,7 @@ Ecore.JSON = {
         }
 
         function processFeature( object, data ) {
-            if (!object || !data) {
-                return function(feature) {};
-            }
+            if (!object || !data) return function() {};
 
             return function( feature ) {
                 var featureName = feature.get('name');
@@ -128,11 +137,18 @@ Ecore.JSON = {
                         }
                     } else {
                         if (isMany) {
+                            data[featureName] = [];
                             value.each(function(val) {
-                               data[featureName].push({'$ref': uri(val)});
+                               data[featureName].push({
+                                   '$ref': uri(object, val),
+                                   'eClass': val.eClass.eURI()
+                               });
                             });
                         } else {
-                            data[featureName] = {'$ref': uri(value)};
+                            data[featureName] = {
+                                '$ref': uri(object, value),
+                                'eClass': value.eClass.eURI()
+                            };
                         }
                     }
                 }
@@ -142,7 +158,7 @@ Ecore.JSON = {
         function jsonObject(object) {
             var eClass = object.eClass,
                 features = eClass.eAllStructuralFeatures(),
-                data = {};
+                data = {eClass: eClass.eURI()};
 
             _.each( features, processFeature(object, data) );
 
@@ -159,15 +175,16 @@ Ecore.JSON = {
 
 };
 
-// Model or Resource ?
-var Model = Ecore.Model = function(uri) {
+// Resource
+//
+var Resource = Ecore.Resource = function(uri) {
     this.uri = uri;
     this.contents = [];
 
     return this;
 };
 
-Model.prototype = {
+Resource.prototype = {
 
     clear: function() {
         this.contents.length = 0;
@@ -176,7 +193,6 @@ Model.prototype = {
 
     add: function(eObject) {
         if (eObject) {
-            eObject.eModel = this;
             eObject.eContainer = this;
             this.contents.push(eObject);
         }
@@ -195,10 +211,9 @@ Model.prototype = {
     },
 
     getEObject: function(fragment) {
-        if (fragment) {
-            return buildIndex(this)[fragment];
-        }
-        return null;
+        if (!fragment) return null;
+
+        return buildIndex(this)[fragment];
     },
 
     each: function(iterator, context) {
@@ -233,7 +248,7 @@ Model.prototype = {
 };
 
 function initEcoreModel() {
-    var model = new Model('http://www.eclipse.org/emf/2002/Ecore');
+    var model = new Resource('http://www.eclipse.org/emf/2002/Ecore');
     model.add(Ecore.EcorePackage);
 
     Ecore.Registry.register(model);
@@ -241,24 +256,24 @@ function initEcoreModel() {
     return model;
 }
 
-var ModelRegistry = Ecore.ModelRegistry = function() {
+var Registry = function() {
     var instance;
 
-    ModelRegistry = function ModelRegistry() {
+    Registry = function Registry() {
         return instance;
     };
 
-    ModelRegistry.prototype = this;
+    Registry.prototype = this;
 
-    instance = new ModelRegistry();
+    instance = new Registry();
 
-    instance.constructor = ModelRegistry;
+    instance.constructor = Registry;
     instance.models = {};
 
     return instance;
 };
 
-ModelRegistry.prototype = {
+Registry.prototype = {
 
     register: function(model) {
         this.models[model.uri] = model;
@@ -286,7 +301,7 @@ ModelRegistry.prototype = {
 
 };
 
-Ecore.Registry = new Ecore.ModelRegistry();
+Ecore.Registry = new Registry();
 initEcoreModel();
 
 function buildIndex(model) {
