@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <link type="text/css" rel="stylesheet" href="css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="css/editor.css">
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,200italic' rel='stylesheet' type='text/css'>
     <script src="../../lib/jquery-1.8.1.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="../../lib/underscore.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/backbone-min.js" type="text/javascript" charset="utf-8"></script>
     <script src="../../dist/ecore.js" type="text/javascript" charset="utf-8"></script>
     <script src="editor.js" type="text/javascript" charset="utf-8"></script>
 </head>
@@ -15,8 +17,10 @@
 <div class="navbar navbar-fixed-top" id="menu">
     <div class="navbar-inner">
         <div class="container">
-            <a class="brand" href="#">MOF Editor</a>
+            <a class="brand" href="#">Ecore.js Editor</a>
+            <!--
             <a href="#create-model-modal" role="button" class="btn" data-toggle="modal">New Model</a>
+            -->
             <!-- modals -->
             <div class="modal hide" id="create-model-modal"
                  tabindex="-1" role="dialog" aria-labelledby="create-model-modal"
@@ -44,16 +48,39 @@
     </div>
 </div>
 
-<div class="container-fluid">
-    <div class="row-fluid">
-        <div class="span2">
-            <!--Sidebar content-->
-            <a href="#create-model-modal" role="button" class="btn" data-toggle="modal">Create</a>
-        </div>
-        <div class="span10">
-            <div class="container-fluid editor">
-
+<div class="container">
+    <div class="row">
+        <div class="span6 browser-column">
+            <div class="row-fluid shadow" id="class-columns">
+                <!--
+                <div class="row-fluid">
+                    <div class="browser-menu">
+                        <a class=""><i class="icon-plus icon-white"></i></a>
+                        <a class=""><i class="icon-remove icon-white"></i></a>
+                    </div>
+                </div>
+                -->
             </div>
+        </div>
+
+        <div class="span6 browser-column">
+            <div class="row-fluid shadow" id="obj-columns">
+                <div class="row-fluid">
+                    <div class="browser-menu">
+                        <a class=""><i class="icon-plus"></i></a>
+                        <a class=""><i class="icon-remove"></i></a>
+                    </div>
+                </div>
+                <div class="row-fluid"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row-fluid separator"></div>
+
+    <div class="row-fluid shadow">
+        <div class="span12 property" id="property-view">
         </div>
     </div>
 </div>
