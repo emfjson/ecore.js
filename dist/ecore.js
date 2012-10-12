@@ -1,59 +1,124 @@
- // Ecore.js.
- // Ecore (EMOF) Implementation in JavaScript.
- //
- // Copyright (C) 2012 Guillaume Hillairet.
- // EPL License.
- //
+//     Ecore.js 0.2.0
+//     Ecore (EMOF) Implementation in JavaScript.
+//
+//     © 2012 Guillaume Hillairet.
+//     EPL License (http://www.eclipse.org/legal/epl-v10.html)
+
 (function() {
+
 
 // The root object, `window` in the browser, or `global` on the server.
 var root = this;
 
+// Load underscore from the `window` object in the browser or via the require function
+// on the server.
 var _ = root._ || require('underscore');
 
-/**
- * Ecore
- *
- * @namespace Ecore
- */
+// Ecore
+// -------
+
+// Base object providing common methods for the creation of model elements such as
+// `EPackage`, `EClass`, `EDataType`, `EAttribute` and `EReference`. As well as the
+// method `create` for the creation of domain objects, `EObject`, from a predefined
+// `EClass`.
+
 var Ecore = {
 
-   /**
-    * Creates an instance of the given EClass.
-    *
-    * The resulting object is an EObject having it's properties
-    * initialized from the structural features of the EClass.
-    *
-    * Example:
-    *   var User = Ecore.EcoreFactory.createEClass({name: 'User'});
-    *   var u1 = Ecore.create(User);
-    *
-    * @param {EClass}
-    * @return {EObject}
-    */
+    // Returns an instance of the given EClass.
+    //
+    // The resulting object is an EObject having it's properties
+    // initialized from the structural features of the EClass.
+    //
+    // Example:
+    //
+    //      var User = Ecore.createEClass({
+    //          name: 'User',
+    //          eStructuralFeatures: [
+    //              Ecore.createEAttribute({
+    //                  name: 'userName',
+    //                  eType: Ecore.EcorePackage.EString
+    //              })
+    //          ]
+    //      });
+    //
+    //      var u1 = Ecore.create(User);
+    //      u1.set('userName', 'Randy');
+    //      u1.get('userName'); -> Randy
+
     create: function(eClass) {
-        if (!eClass.eClass) {
+        if (!eClass || !eClass.eClass) {
             throw new Error('Cannot create EObject from undefined EClass');
         }
 
         return new Ecore.EObject({ eClass: eClass });
     },
 
+    // Returns an instance of `EPackage`.
+    //
+    // Example:
+    //
+    //      var sample = Ecore.createEPackage({
+    //          name: 'sample',
+    //          nsPrefix: 'sample',
+    //          nsURI: 'http://www.example.org/sample',
+    //          eClassifiers: [ User ]
+    //      });
+
     createEPackage: function(attributes) {
         return new EPackage(attributes);
     },
+
+    // Returns an instance of EClass.
+    //
+    // Example:
+    //
+    //      var User = Ecore.createEClass({
+    //          name: 'User',
+    //          eStructuralFeatures: [
+    //              Ecore.createEAttribute({
+    //                  name: 'userName',
+    //                  eType: Ecore.EcorePackage.EString
+    //              })
+    //          ]
+    //      });
 
     createEClass: function(attributes) {
         return new EClass(attributes);
     },
 
+    // Returns an instance of EDataType
+
     createEDataType: function(attributes) {
         return new EDataType(attributes);
     },
 
+    // Returns an instance of EAttribute
+    //
+    // Example:
+    //
+    //      var User_userName = Ecore.createEAttribute({
+    //          name: 'userName',
+    //          iD: false,
+    //          lowerBound: 0,
+    //          upperBound: 1,
+    //          eType: Ecore.EcorePackage.EString
+    //      });
+
     createEAttribute: function(attributes) {
         return new EAttribute(attributes);
     },
+
+    // Returns an instance of EReference
+    //
+    // Example:
+    //
+    //      var User_friends = Ecore.createEReference({
+    //          name: 'friends',
+    //          lowerBound: 0,
+    //          upperBound: -1,
+    //          isContainment: false
+    //          eType: User
+    //      });
 
     createEReference: function(attributes) {
         return new EReference(attributes);
@@ -61,8 +126,10 @@ var Ecore = {
 
 };
 
-Ecore.version = '0.1.1';
+// Current version
+Ecore.version = '0.2.0';
 
+// Export Ecore
 if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
         exports = module.exports = Ecore;
@@ -72,21 +139,26 @@ if (typeof exports !== 'undefined') {
     root.Ecore = Ecore;
 }
 
-/**
- * EObject
- *
- * @constructor
- */
+// EObject
+//
+// Implementation of EObject. The constructor takes as parameter a hash
+// containing values to be set. Values must be defined accordingly to the
+// eClass features.
+//
+
 var EObject = Ecore.EObject = function(attributes) {
     attributes || (attributes = {});
 
-    this.eClass = attributes.eClass || null;
+    this.eClass = attributes.eClass;
     this.values = {};
 
+    // Initialize values according to the eClass features.
     initValues(this);
 
     return this;
 };
+
+// Computes fragment identifier for EModelElements.
 
 function getFragment(eModelElement) {
     var eContainer = eModelElement.eContainer;
@@ -98,17 +170,27 @@ function getFragment(eModelElement) {
     }
 }
 
+// EObjectPrototype
+//
+// Prototype object for EObject and EModelElements.
+
 var EObjectPrototype = {
 
-    /**
-     * @method has
-     * @param {String}
-     * @member EObject
-     * @return {Boolean} Returns true if has property
-     */
+    // Returns true if property if a feature of the EObject.
+    //
+    //      @method has
+    //      @param {String} name
+    //      @return {Boolean}
+
     has: function(name) {
         return this.values.hasOwnProperty(name) || this._isStructuralFeature(name);
     },
+
+    // Returns true if property has its value set.
+    //
+    //      @method isSet
+    //      @param {String} name
+    //      @return {Boolean}
 
     isSet: function(name) {
         if (!this.has(name)) return false;
@@ -124,27 +206,27 @@ var EObjectPrototype = {
         }
     },
 
-    /**
-     * @method set
-     * @member EObject
-     * @param {String} name
-     * @param {Object} value
-     * @return {EObject} this
-     */
+    // Setter for the property identified by the first parameter.
+    //
+    //      @method set
+    //      @param {String} name
+    //      @param {Object} value
+    //      @return {EObject}
+
     set: function(name, value) {
-        if (this.has(name)) {
+        if (typeof value !== 'undefined' && this.has(name)) {
             this.values[name] = value;
         }
 
         return this;
     },
 
-    /**
-     * @method get
-     * @member EObject
-     * @param {String} name
-     * @return {Object} Returns property value
-     */
+    // Getter for the property identified by the first parameter.
+    //
+    //      @method get
+    //      @param {String} name
+    //      @return {Object}
+
     get: function(name) {
         var value = null;
         if (this.has(name)) {
@@ -158,24 +240,25 @@ var EObjectPrototype = {
         }
     },
 
-    /**
-     * @method isTypeOf
-     * @member EObject
-     * @param {String} type
-     * @return {Boolean} Returns true if EObject is a instance of type.
-     */
+    // Returns true if the EObject is a direct instance of the EClass.
+    //
+    //      @method isTypeOf
+    //      @param {String} type
+    //      @return {Boolean}
+
     isTypeOf: function(type) {
         if (!this.eClass) return false;
 
         return this.eClass.get('name') === type;
     },
 
-    /**
-     * @method isTypeOf
-     * @member EObject
-     * @param {String}
-     * @return {Boolean} Returns true if EObject is a kind of type.
-     */
+    // Returns true if the EObject is an direct instance of the EClass or
+    // if it is part of the class hierarchy.
+    //
+    //      @method isKindOf
+    //      @param {String}
+    //      @return {Boolean}
+
     isKindOf: function(type) {
         if(!this.eClass) return false;
 
@@ -184,6 +267,11 @@ var EObjectPrototype = {
         });
     },
 
+    // Returns the Resource containing the EObject.
+    //
+    //      @method eResource
+    //      @return {Resource}
+
     eResource: function() {
         if (!this.eContainer) return null;
         if (this.eContainer instanceof Ecore.Resource) return this.eContainer;
@@ -191,50 +279,72 @@ var EObjectPrototype = {
         return this.eContainer.eResource();
     },
 
-    /**
-     * @method uri
-     * @member EObject
-     * @return {String} Returns EObject URI
-     */
-    eURI: function() {
-        var eModel = this.eResource(),
-            index = buildIndex(eModel),
-            current = this;
+    // Returns the content of an EObject.
+    //
+    //      @method eContents
+    //      @return {Array}
 
-        var fragment = (function() {
-            for (var key in index) {
-                if (index[key] === current)
-                    return key;
-            }
-            return null;
-        })();
+    eContents: function() {
+        if (!this.eClass) return [];
 
-        return eModel.uri + '#' + fragment;
+        var eAllFeatures = this.eClass.eAllStructuralFeatures(),
+            eContainments = _.filter(eAllFeatures, function(feature) {
+                return feature.isTypeOf('EReference') &&
+                    feature.get('isContainment') &&
+                    this.isSet(feature.get('name'));
+            }, this);
+
+        return _.flatten(_.map(eContainments, function(c) {
+            var value = this.get(c.get('name'));
+            return value instanceof Ecore.EList ? value._internal : value;
+        }, this));
     },
 
-    /**
-     * @method eURIFragmentSegment
-     * @private
-     */
-    eURIFragmentSegment: function(feature, parentIndex, position) {
-        if (this.isKindOf('EModelElement')) {
-            return getFragment(this);
-        } else {
-            var eClass = this.eClass,
-                iD = eClass.get('eIDAttribute'),
-                _idx;
+    // Returns the URI of the EObject.
+    //
+    // URI is made of the containing Resource URI and EObject
+    // identifier has fragment.
+    //
+    //      @method eURI
+    //      @return {String}
+    //
 
-            if (iD) {
-                _idx = val.get(iD.get('name'));
-            } else {
-                _idx = parentIndex + '/@' + feature.get('name');
-                if (position > -1) {
-                    _idx += '.' + position;
+    eURI: function() {
+        var eModel = this.eResource(),
+            current = this;
+
+        return eModel.uri + '#' + this.fragment();
+    },
+
+    // Returns the fragment identifier of the EObject.
+    //
+    //      @return {String}
+
+    fragment: function() {
+        var eContainer = this.eContainer,
+            eClass = this.eClass,
+            iD = eClass.get('eIDAttribute');
+
+        // Must be at least contain in a Resource or EObject.
+        if (!eContainer) return null;
+        if (iD) return this.get(iD.get('name'));
+        if (this.isKindOf('EModelElement')) return getFragment(this);
+
+        var fragment;
+        if (this.eContainer instanceof Ecore.Resource) {
+            fragment = '/';
+        } else {
+            var eFeature = this.eContainingFeature;
+            if (eFeature) {
+                fragment = this.eContainer.fragment() + '/@' + eFeature.get('name');
+                if (eFeature.get('upperBound') !== 1) {
+                    var position = this.eContainer.get(eFeature.get('name')).indexOf(this);
+                    fragment += '.' + position;
                 }
             }
-
-            return _idx;
         }
+
+        return fragment;
     },
 
     // private
@@ -263,6 +373,8 @@ var EObjectPrototype = {
         }
     },
 
+    // private
+
     _getDefaultReferenceValue: function(eFeature) {
         var eFeatureUpperBound = eFeature.get('upperBound');
         if (!eFeatureUpperBound) return null;
@@ -274,6 +386,8 @@ var EObjectPrototype = {
         }
     },
 
+    // private
+
     _initFeature: function(eFeature) {
         var eFeatureName = eFeature.get('name');
 
@@ -283,6 +397,8 @@ var EObjectPrototype = {
             this.values[eFeatureName] = this._getDefaultReferenceValue(eFeature);
         }
     },
+
+    // private
 
     _isStructuralFeature: function(name) {
         var eClass = this.eClass;
@@ -311,11 +427,16 @@ var EObjectPrototype = {
 
     // EClass methods
 
-    /**
-     * @method eAllStructuralFeatures
-     * @return {Array} Returns Array of EStructuralFeature
-     */
+    // Returns array of all structural features of the EClass. The array is
+    // made of direct eStructuralFeatures and of all super types eStructuralFeatures.
+    //
+    //
+    //      @method eAllStructuralFeatures
+    //      @return {Array}
+    //
+
     eAllStructuralFeatures: function() {
+        // Returns empty array if not an EClass.
         if (!this.has('eSuperTypes')) return [];
 
         var superTypes = this.eAllSuperTypes();
@@ -330,14 +451,17 @@ var EObjectPrototype = {
             this.get('eStructuralFeatures')._internal
         );
 
+        // Returns all or an empty array.
         return _.isArray(eAllFeatures) ? eAllFeatures : [];
     },
 
-    /**
-     * @method eAllSuperTypes
-     * @return {Array} Returns Array of EClass
-     */
+    // Returns an Array containing all super types of the EClass.
+    //
+    //      @method eAllSuperTypes
+    //      @return {Array}
+
     eAllSuperTypes: function() {
+        // Returns empty array if not an EClass.
         if (!this.has('eSuperTypes')) return [];
 
         var superTypes = this.get('eSuperTypes')._internal;
@@ -350,8 +474,14 @@ var EObjectPrototype = {
             }))
         );
 
+        // Returns all or an empty array.
         return _.isArray(eAllSuperTypes) ? eAllSuperTypes : [];
     },
+
+    // Returns the EStructuralFeature identified by it's name.
+    //
+    //      @param {String}
+    //      @return {EStructuralFeature}
 
     getEStructuralFeature: function(name) {
         if (!this.has('eStructuralFeatures')) return null;
@@ -363,18 +493,15 @@ var EObjectPrototype = {
 
 };
 
+// EObject has for prototype EObjectPrototype.
+
 _.extend(EObject.prototype, EObjectPrototype);
 
-// EList
+// EList, A List implementation.
+//
+//      @param {EObject} owner - the owner of the feature.
+//      @param {EStructuralFeature} feature - the feature associated.
 
-/**
- * EList is a List implementation.
- *
- * @class EList
- * @constructor
- * @param {EObject} owner - the owner of the feature.
- * @param {EStructuralFeature} feature - the feature associated.
- */
 var EList = Ecore.EList = function(owner, feature) {
     this._internal = [];
     this._owner = owner;
@@ -386,10 +513,10 @@ var EList = Ecore.EList = function(owner, feature) {
 
 EList.prototype = {
 
-    /**
-     * @method _setFeature
-     * @private
-     */
+    //
+    //      @method _setFeature
+    //      @private
+
     _setFeature: function(feature) {
         if (feature) {
             this._feature = feature;
@@ -1100,6 +1227,9 @@ Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EReference);
 Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EOperation);
 Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EParameter);
 Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EFactory);
+Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EString);
+Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EBoolean);
+Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EInteger);
 
 // Initialize EcoreFactory.
 Ecore.EcoreFactory = new EFactory();
@@ -1167,8 +1297,8 @@ var Ajax = {
 
 Ecore.JSON = {
 
-    parse: function(data) {
-        var contents = [];
+    parse: function(model, data) {
+        var toResolve = [];
 
         function processFeature(object, eObject) {
             if (!object || !eObject)
@@ -1178,39 +1308,85 @@ Ecore.JSON = {
                 var featureName = feature.get('name'),
                     value = object[featureName];
 
-                if ( feature.isTypeOf('EAttribute') ) {
-                    eObject.set( featureName, value );
-                } else {
-                    if (feature.get('upperBound') === 1) {
-                        eObject.set( featureName, parseObject(value) );
-                    } else {
-                        if (value)
-                            _.each(value, function(val) {
+                if (typeof value !== 'undefined') {
+                    if ( feature.isTypeOf('EAttribute') ) {
+                        eObject.set( featureName, value );
+                    } else if (feature.get('isContainment')) {
+                        if (feature.get('upperBound') === 1) {
+                            eObject.set( featureName, parseObject(value) );
+                        } else {
+                            _.each(value || [], function(val) {
                                 eObject.get( featureName ).add( parseObject(val) );
                             });
+                        }
+                    } else {
+                        toResolve.push({ parent: eObject, feature: feature, value: value });
                     }
                 }
             };
         }
 
-        function parseObject(object) {
-            if (object && object.eClass) {
-                var eClass = Ecore.Registry.getEObject(object.eClass),
-                    features = eClass.eAllStructuralFeatures(),
-                    eObject = Ecore.create(eClass);
-
-
-                _.each( features, processFeature(object, eObject) );
-
-                return eObject;
-            }
-
-            return null;
+        function isLocal(uri) {
+            return uri.substring(0, 1) === '/';
         }
 
-        contents.push( parseObject(data) );
+        function resolveReferences() {
+            var index = buildIndex(model);
 
-        return contents;
+            function setReference(parent, feature, value, isMany) {
+                var ref = value.$ref,
+                    resolved;
+
+                if (isLocal(ref)) {
+                    resolved = index[ref];
+                } else {
+                    resolved = Ecore.Registry.getEObject(ref);
+                }
+
+                if (resolved) {
+                    if (isMany) {
+                        parent.get(feature.get('name')).add(resolved);
+                    } else {
+                        parent.set(feature.get('name'), resolved);
+                    }
+                }
+            }
+
+            _.each(toResolve, function(resolving) {
+                var parent = resolving.parent,
+                    feature = resolving.feature,
+                    value = resolving.value;
+
+                if (feature.get('upperBound') === 1) {
+                    setReference(parent, feature, value, false);
+                } else {
+                    _.each(value, function(val) {
+                        setReference(parent, feature, val, true);
+                    });
+                }
+            });
+        }
+
+        function parseObject(object) {
+            var eObject;
+
+            if (object && object.eClass) {
+                var eClass = Ecore.Registry.getEObject(object.eClass),
+                    features = eClass.eAllStructuralFeatures();
+
+                eObject = Ecore.create(eClass);
+
+                _.each( features, processFeature(object, eObject) );
+            }
+
+            return eObject;
+        }
+
+        var parsed = parseObject(data);
+        if (parsed) {
+            model.add(parsed);
+            resolveReferences();
+        }
     },
 
     toJSON: function(model) {
@@ -1350,6 +1526,11 @@ Resource.prototype = {
         return Ecore.JSON.toJSON(this);
     },
 
+    parse: function(data) {
+        Ecore.JSON.parse(this, data);
+        return this;
+    },
+
     save: function(success, error) {
         var data = this.toJSON();
         if (data) {
@@ -1360,8 +1541,7 @@ Resource.prototype = {
     load: function(success, error, data) {
         var model = this;
         var loadSuccess = function(data) {
-            var content = Ecore.JSON.parse(data);
-            model.addAll(content);
+            model.parse(data);
             return success(model);
         };
 
@@ -1401,28 +1581,39 @@ var Registry = function() {
 
 Registry.prototype = {
 
+    /**
+     * Registers a model to the Registry by it's URI.
+     *
+    **/
+
     register: function(model) {
         this.models[model.uri] = model;
 
         return this;
     },
 
+    /**
+     * Returns the EObject corresponding to the given URI.
+     *
+    **/
+
     getEObject: function(uri) {
-        var split = uri.split('#');
-        var base = split[0];
-        var fragment;
+        var split = uri.split('#'),
+            base = split[0],
+            model = this.models[base],
+            fragment,
+            eObject;
+
         if (split.length === 2) {
             fragment = split[1];
         }
 
-        var model = this.models[base];
         if (model && fragment) {
             var index = buildIndex(model);
-            var found = index[fragment];
-            return found;
+            eObject = index[fragment];
         }
 
-        return null;
+        return eObject;
     }
 
 };
@@ -1447,22 +1638,16 @@ function buildIndex(model) {
                 var value = object.get(feature.get('name'));
 
                 if (value && feature.isTypeOf('EReference') && feature.get('isContainment')) {
-
                     if (feature.get('upperBound') === 1) {
-
-                        var _idx = value.eURIFragmentSegment(feature, idx, -1);
+                        var _idx = value.fragment();
                         _buildIndex(value, _idx);
-
                     } else {
-
                         value.each(function(val) {
                             var position = value.indexOf( val );
-                            var _idx = val.eURIFragmentSegment(feature, idx, position);
+                            var _idx = val.fragment();
                             _buildIndex(val, _idx);
                         });
-
                     }
-
                 }
             });
         }
