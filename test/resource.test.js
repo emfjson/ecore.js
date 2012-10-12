@@ -118,19 +118,28 @@ describe('Model', function() {
                     assert.strictEqual(root.get('nsPrefix'), 'example');
                     assert.strictEqual(root.get('nsURI'), 'http://www.example.org/example');
 
-                    assert.equal(root.get('eClassifiers').size(), 1);
+                    assert.equal(root.get('eClassifiers').size(), 2);
 
-                    var eClass = root.get('eClassifiers').at(0);
-                    assert.ok(eClass);
-                    assert.strictEqual(eClass.eClass, Ecore.EcorePackage.EClass);
-                    assert.strictEqual(eClass.get('name'), 'EClass');
+                    var eClassA = root.get('eClassifiers').at(0);
+                    assert.ok(eClassA);
+                    assert.strictEqual(eClassA.eClass, Ecore.EcorePackage.EClass);
+                    assert.strictEqual(eClassA.get('name'), 'A');
 
-                    assert.equal(eClass.get('eStructuralFeatures').size(), 1);
+                    assert.equal(eClassA.get('eStructuralFeatures').size(), 1);
 
-                    var eClass_name = eClass.get('eStructuralFeatures').at(0);
-                    assert.ok(eClass_name);
-                    assert.strictEqual(eClass_name.eClass, Ecore.EcorePackage.EAttribute);
-                    assert.strictEqual(eClass_name.get('name'), 'name');
+                    var eClassA_name = eClassA.get('eStructuralFeatures').at(0);
+                    assert.ok(eClassA_name);
+                    assert.strictEqual(eClassA_name.eClass, Ecore.EcorePackage.EAttribute);
+                    assert.strictEqual(eClassA_name.get('name'), 'name');
+                    assert.strictEqual(eClassA_name.get('eType'), Ecore.EcorePackage.EString);
+
+                    var eClassB = root.get('eClassifiers').at(1);
+                    assert.ok(eClassB);
+                    assert.strictEqual(eClassB.eClass, Ecore.EcorePackage.EClass);
+                    assert.strictEqual(eClassB.get('name'), 'B');
+
+                    assert.equal(eClassB.get('eSuperTypes').size(), 1);
+                    assert.strictEqual(eClassB.get('eSuperTypes').at(0), eClassA);
 
                     done();
                 }, function(){}, JSON.parse(data));
