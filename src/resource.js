@@ -41,8 +41,8 @@ var Ajax = {
 
 Ecore.JSON = {
 
-    parse: function(data) {
-        var contents = [];
+    parse: function(model, data) {
+        var toResolve = [];
 
         function processFeature(object, eObject) {
             if (!object || !eObject)
@@ -52,39 +52,85 @@ Ecore.JSON = {
                 var featureName = feature.get('name'),
                     value = object[featureName];
 
-                if ( feature.isTypeOf('EAttribute') ) {
-                    eObject.set( featureName, value );
-                } else {
-                    if (feature.get('upperBound') === 1) {
-                        eObject.set( featureName, parseObject(value) );
-                    } else {
-                        if (value)
-                            _.each(value, function(val) {
+                if (typeof value !== 'undefined') {
+                    if ( feature.isTypeOf('EAttribute') ) {
+                        eObject.set( featureName, value );
+                    } else if (feature.get('isContainment')) {
+                        if (feature.get('upperBound') === 1) {
+                            eObject.set( featureName, parseObject(value) );
+                        } else {
+                            _.each(value || [], function(val) {
                                 eObject.get( featureName ).add( parseObject(val) );
                             });
+                        }
+                    } else {
+                        toResolve.push({ parent: eObject, feature: feature, value: value });
                     }
                 }
             };
         }
 
-        function parseObject(object) {
-            if (object && object.eClass) {
-                var eClass = Ecore.Registry.getEObject(object.eClass),
-                    features = eClass.eAllStructuralFeatures(),
-                    eObject = Ecore.create(eClass);
-
-
-                _.each( features, processFeature(object, eObject) );
-
-                return eObject;
-            }
-
-            return null;
+        function isLocal(uri) {
+            return uri.substring(0, 1) === '/';
         }
 
-        contents.push( parseObject(data) );
+        function resolveReferences() {
+            var index = buildIndex(model);
 
-        return contents;
+            function setReference(parent, feature, value, isMany) {
+                var ref = value.$ref,
+                    resolved;
+
+                if (isLocal(ref)) {
+                    resolved = index[ref];
+                } else {
+                    resolved = Ecore.Registry.getEObject(ref);
+                }
+
+                if (resolved) {
+                    if (isMany) {
+                        parent.get(feature.get('name')).add(resolved);
+                    } else {
+                        parent.set(feature.get('name'), resolved);
+                    }
+                }
+            }
+
+            _.each(toResolve, function(resolving) {
+                var parent = resolving.parent,
+                    feature = resolving.feature,
+                    value = resolving.value;
+
+                if (feature.get('upperBound') === 1) {
+                    setReference(parent, feature, value, false);
+                } else {
+                    _.each(value, function(val) {
+                        setReference(parent, feature, val, true);
+                    });
+                }
+            });
+        }
+
+        function parseObject(object) {
+            var eObject;
+
+            if (object && object.eClass) {
+                var eClass = Ecore.Registry.getEObject(object.eClass),
+                    features = eClass.eAllStructuralFeatures();
+
+                eObject = Ecore.create(eClass);
+
+                _.each( features, processFeature(object, eObject) );
+            }
+
+            return eObject;
+        }
+
+        var parsed = parseObject(data);
+        if (parsed) {
+            model.add(parsed);
+            resolveReferences();
+        }
     },
 
     toJSON: function(model) {
@@ -224,6 +270,11 @@ Resource.prototype = {
         return Ecore.JSON.toJSON(this);
     },
 
+    parse: function(data) {
+        Ecore.JSON.parse(this, data);
+        return this;
+    },
+
     save: function(success, error) {
         var data = this.toJSON();
         if (data) {
@@ -234,8 +285,7 @@ Resource.prototype = {
     load: function(success, error, data) {
         var model = this;
         var loadSuccess = function(data) {
-            var content = Ecore.JSON.parse(data);
-            model.addAll(content);
+            model.parse(data);
             return success(model);
         };
 
@@ -275,28 +325,39 @@ var Registry = function() {
 
 Registry.prototype = {
 
+    /**
+     * Registers a model to the Registry by it's URI.
+     *
+    **/
+
     register: function(model) {
         this.models[model.uri] = model;
 
         return this;
     },
 
+    /**
+     * Returns the EObject corresponding to the given URI.
+     *
+    **/
+
     getEObject: function(uri) {
-        var split = uri.split('#');
-        var base = split[0];
-        var fragment;
+        var split = uri.split('#'),
+            base = split[0],
+            model = this.models[base],
+            fragment,
+            eObject;
+
         if (split.length === 2) {
             fragment = split[1];
         }
 
-        var model = this.models[base];
         if (model && fragment) {
             var index = buildIndex(model);
-            var found = index[fragment];
-            return found;
+            eObject = index[fragment];
         }
 
-        return null;
+        return eObject;
     }
 
 };
@@ -321,22 +382,16 @@ function buildIndex(model) {
                 var value = object.get(feature.get('name'));
 
                 if (value && feature.isTypeOf('EReference') && feature.get('isContainment')) {
-
                     if (feature.get('upperBound') === 1) {
-
-                        var _idx = value.eURIFragmentSegment(feature, idx, -1);
+                        var _idx = value.fragment();
                         _buildIndex(value, _idx);
-
                     } else {
-
                         value.each(function(val) {
                             var position = value.indexOf( val );
-                            var _idx = val.eURIFragmentSegment(feature, idx, position);
+                            var _idx = val.fragment();
                             _buildIndex(val, _idx);
                         });
-
                     }
-
                 }
             });
         }
