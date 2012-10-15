@@ -875,9 +875,20 @@ function initEcore(ecorePackage) {
     eReference_resolveProxies.eClass = eAttribute;
     ecorePackage.EReference_resolveProxies = eReference_resolveProxies;
 
+    var eReference_eOpposite = new EReference({
+        name: 'eOpposite',
+        lowerBound: 0,
+        upperBound: 1,
+        isContainment: false,
+        eType: eReference
+    });
+    eReference_eOpposite.eClass = eReference;
+    ecorePackage.EReference_eOpposite = eReference_eOpposite;
+
     eReference.get('eStructuralFeatures').add(eReference_isContainment);
     eReference.get('eStructuralFeatures').add(eReference_container);
     eReference.get('eStructuralFeatures').add(eReference_resolveProxies);
+    eReference.get('eStructuralFeatures').add(eReference_eOpposite);
 
     // EPackage
     var ePackage = ecorePackage.EPackage = new EClass({
