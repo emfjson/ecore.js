@@ -68,17 +68,16 @@ describe('Ecore', function() {
         });
 
         it('should contain ETypedElement references', function() {
-            var find = EcorePackage.ETypedElement.get('eStructuralFeatures').find(function(feature) {
-               return feature.get('name') === 'eType';
-            });
-
-            assert.strictEqual(find.eClass, EcorePackage.EReference);
-            assert.strictEqual(find.get('eType'), EcorePackage.EClassifier);
+            var eTypedElement = EcorePackage.ETypedElement;
+            var eType = EcorePackage.ETypedElement_eType;
 
             // eType
-            var eType = EcorePackage.ETypedElement_eType;
             assert.ok(eType);
-            assert.strictEqual(eType, find);
+            assert.equal(eType.get('lowerBound'), 0);
+            assert.equal(eType.get('upperBound'), 1);
+            assert.strictEqual(eType.eClass, EcorePackage.EReference);
+            assert.strictEqual(eType.get('eType'), EcorePackage.EClassifier);
+            assert.strictEqual(eTypedElement.getEStructuralFeature('eType'), eType);
         });
 
         it('should contain EPackage', function() {
@@ -98,6 +97,30 @@ describe('Ecore', function() {
             assert.strictEqual(nsPrefix.eClass, EcorePackage.EAttribute);
         });
 
+        it('should contain EPackage references', function() {
+            var ePackage = EcorePackage.EPackage;
+
+            // eClassifiers
+            var eClassifiers = EcorePackage.EPackage_eClassifiers;
+            assert.ok(eClassifiers);
+            assert.equal(eClassifiers.get('lowerBound'), 0);
+            assert.equal(eClassifiers.get('upperBound'), -1);
+            assert.equal(eClassifiers.get('isContainment'), true);
+            assert.strictEqual(eClassifiers.get('eType'), EcorePackage.EClassifier);
+
+            assert.strictEqual(ePackage.getEStructuralFeature('eClassifiers'), eClassifiers);
+
+            // eSubPackages
+            var eSubPackages = EcorePackage.EPackage_eSubPackages;
+            assert.ok(eSubPackages);
+            assert.equal(eSubPackages.get('lowerBound'), 0);
+            assert.equal(eSubPackages.get('upperBound'), -1);
+            assert.equal(eSubPackages.get('isContainment'), true);
+            assert.strictEqual(eSubPackages.get('eType'), EcorePackage.EPackage);
+
+            assert.strictEqual(ePackage.getEStructuralFeature('eSubPackages'), eSubPackages);
+        });
+
         it('should contain EClassifier', function() {
             assert.ok(EcorePackage.EClassifier);
             assert.strictEqual(EcorePackage.EClassifier.eClass, EcorePackage.EClass);
@@ -109,15 +132,52 @@ describe('Ecore', function() {
         });
 
         it('should contain EClass attributes', function() {
+             var eClass = EcorePackage.EClass;
+
             // abstract
             var abstract = EcorePackage.EClass_abstract;
             assert.ok(abstract);
             assert.strictEqual(abstract.eClass, EcorePackage.EAttribute);
 
+            assert.strictEqual(eClass.getEStructuralFeature('abstract'), abstract);
+
             // interface
-            var interface = EcorePackage.EClass_interface;
-            assert.ok(interface);
-            assert.strictEqual(interface.eClass, EcorePackage.EAttribute);
+            var _interface = EcorePackage.EClass_interface;
+            assert.ok(_interface);
+            assert.strictEqual(_interface.eClass, EcorePackage.EAttribute);
+
+            assert.strictEqual(eClass.getEStructuralFeature('interface'), _interface);
+        });
+
+        it('should contain EClass references', function() {
+            var eClass = EcorePackage.EClass;
+            // eStructuralFeatures
+            var eStructuralFeatures = EcorePackage.EClass_eStructuralFeatures;
+            assert.ok(eStructuralFeatures);
+            assert.equal(eStructuralFeatures.get('lowerBound'), 0);
+            assert.equal(eStructuralFeatures.get('upperBound'), -1);
+            assert.equal(eStructuralFeatures.get('isContainment'), true);
+            assert.strictEqual(eStructuralFeatures.get('eType'), EcorePackage.EStructuralFeature);
+
+            assert.strictEqual(eClass.getEStructuralFeature('eStructuralFeatures'), eStructuralFeatures);
+
+            var eSuperTypes = EcorePackage.EClass_eSuperTypes;
+            assert.ok(eSuperTypes);
+            assert.equal(eSuperTypes.get('lowerBound'), 0);
+            assert.equal(eSuperTypes.get('upperBound'), -1);
+            assert.equal(eSuperTypes.get('isContainment'), false);
+            assert.strictEqual(eSuperTypes.get('eType'), EcorePackage.EClass);
+
+            assert.strictEqual(eClass.getEStructuralFeature('eSuperTypes'), eSuperTypes);
+
+            var eOperations = EcorePackage.EClass_eOperations;
+            assert.ok(eOperations);
+            assert.equal(eOperations.get('lowerBound'), 0);
+            assert.equal(eOperations.get('upperBound'), -1);
+            assert.equal(eOperations.get('isContainment'), false);
+            assert.strictEqual(eOperations.get('eType'), EcorePackage.EOperation);
+
+            assert.strictEqual(eClass.getEStructuralFeature('eOperations'), eOperations);
         });
 
         it('should contain EDataType', function() {
@@ -201,9 +261,32 @@ describe('Ecore', function() {
             assert.strictEqual(resolveProxies.eClass, EcorePackage.EAttribute);
         });
 
+        it('should contain EReference references', function() {
+            var eReference = EcorePackage.EReference;
+            // eOpposite
+            var eOpposite = EcorePackage.EReference_eOpposite;
+
+            assert.ok(eOpposite);
+            assert.equal(eOpposite.get('lowerBound'), 0);
+            assert.equal(eOpposite.get('upperBound'), 1);
+            assert.equal(eOpposite.get('eType'), eReference);
+            assert.strictEqual(eReference.getEStructuralFeature('eOpposite'), eOpposite);
+        });
+
         it('should contain EOperation', function() {
             assert.ok(EcorePackage.EOperation);
             assert.strictEqual(EcorePackage.EOperation.eClass, EcorePackage.EClass);
+        });
+
+        it('should contain EOperation references', function() {
+            var eOperation = EcorePackage.EOperation;
+            var eParameters = EcorePackage.EOperation_eParameters;
+
+            assert.ok(eParameters);
+            assert.equal(eParameters.get('lowerBound'), 0);
+            assert.equal(eParameters.get('upperBound'), -1);
+            assert.equal(eParameters.get('eType'), EcorePackage.EParameter);
+            assert.strictEqual(eOperation.getEStructuralFeature('eParameters'), eParameters);
         });
 
         it('should contain EParameter', function() {
@@ -215,7 +298,6 @@ describe('Ecore', function() {
             assert.ok(EcorePackage.EFactory);
             assert.strictEqual(EcorePackage.EFactory.eClass, EcorePackage.EClass);
         });
-
 
         describe('#EModelElement', function() {
             var EModelElement = EcorePackage.EModelElement;
