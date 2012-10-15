@@ -150,19 +150,49 @@ describe('Model', function() {
     }); // end load
 
     describe('toJSON', function() {
-        var model = new Ecore.Resource('simple.json');
 
-        fs.readFile('./test/simple.json', 'utf8', function (err,data) {
-            if (err) {
-                return console.log(err);
-            }
+        it('should produce a valid JSON', function(done) {
+            var model = new Ecore.Resource('simple.json');
 
-            model.load(function(model) {
+            fs.readFile('./test/simple.json', 'utf8', function (err,data) {
+                if (err) {
+                    return console.log(err);
+                }
 
-                var json = model.toJSON();
+                model.load(function(model) {
 
+                    var json = model.toJSON();
 
-            }, function(){}, JSON.parse(data));
+                    assert.ok(json);
+                    assert.strictEqual(json.eClass, 'http://www.eclipse.org/emf/2002/Ecore#//EPackage');
+                    assert.strictEqual(json.name, 'example');
+                    assert.strictEqual(json.nsURI, 'http://www.example.org/example');
+                    assert.strictEqual(json.nsPrefix, 'example');
+
+                    assert.equal(json.eClassifiers.length, 2);
+
+                    var first = json.eClassifiers[0];
+                    assert.equal(first.eClass, 'http://www.eclipse.org/emf/2002/Ecore#//EClass');
+                    assert.equal(first.name, 'A');
+                    assert.equal(first.eStructuralFeatures.length, 1);
+
+                    var first_features = first.eStructuralFeatures[0];
+                    assert.equal(first_features.eClass,'http://www.eclipse.org/emf/2002/Ecore#//EAttribute');
+                    assert.equal(first_features.name, 'name');
+                    assert.equal(first_features.eType.$ref, 'http://www.eclipse.org/emf/2002/Ecore#//EString');
+                    assert.equal(first_features.eType.eClass, 'http://www.eclipse.org/emf/2002/Ecore#//EDataType');
+
+                    var second = json.eClassifiers[1];
+                    assert.equal(second.eClass, 'http://www.eclipse.org/emf/2002/Ecore#//EClass');
+                    assert.equal(second.name, 'B');
+                    assert.equal(second.eSuperTypes.length, 1);
+                    assert.equal(second.eSuperTypes[0].$ref, '//A');
+                    assert.equal(second.eSuperTypes[0].eClass, 'http://www.eclipse.org/emf/2002/Ecore#//EClass');
+                    assert.equal(second.eStructuralFeatures, undefined);
+
+                    done();
+                }, function(){}, JSON.parse(data));
+            });
         });
     }); // end toJSON
 
