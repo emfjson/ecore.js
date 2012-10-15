@@ -486,7 +486,7 @@ var EObjectPrototype = {
     getEStructuralFeature: function(name) {
         if (!this.has('eStructuralFeatures')) return null;
 
-        return this.get('eStructuralFeatures').find(function(feature) {
+        return _.find(this.eAllStructuralFeatures(), function(feature) {
             return feature.get('name') === name;
         });
     }
@@ -875,9 +875,20 @@ function initEcore(ecorePackage) {
     eReference_resolveProxies.eClass = eAttribute;
     ecorePackage.EReference_resolveProxies = eReference_resolveProxies;
 
+    var eReference_eOpposite = new EReference({
+        name: 'eOpposite',
+        lowerBound: 0,
+        upperBound: 1,
+        isContainment: false,
+        eType: eReference
+    });
+    eReference_eOpposite.eClass = eReference;
+    ecorePackage.EReference_eOpposite = eReference_eOpposite;
+
     eReference.get('eStructuralFeatures').add(eReference_isContainment);
     eReference.get('eStructuralFeatures').add(eReference_container);
     eReference.get('eStructuralFeatures').add(eReference_resolveProxies);
+    eReference.get('eStructuralFeatures').add(eReference_eOpposite);
 
     // EPackage
     var ePackage = ecorePackage.EPackage = new EClass({
@@ -940,6 +951,7 @@ function initEcore(ecorePackage) {
         upperBound: -1,
         isContainment: true
     });
+    ecorePackage.EClass_eStructuralFeatures = eClass_eStructuralFeatures;
     eClass_eStructuralFeatures.eClass = eReference;
 
     // EClass.eSuperTypes
@@ -947,15 +959,28 @@ function initEcore(ecorePackage) {
         name: 'eSuperTypes',
         lowerBound: 0,
         upperBound: -1,
-        isContainment: false
+        isContainment: false,
+        eType: eClass
     });
+    ecorePackage.EClass_eSuperTypes = eClass_eSuperTypes;
     eClass_eSuperTypes.eClass = eReference;
     eClass.get('eSuperTypes')._setFeature( eClass_eSuperTypes );
+
+    // EClass.eOperations
+    var eClass_eOperations = new EReference({
+        name: 'eOperations',
+        lowerBound: 0,
+        upperBound: -1,
+        isContainment: false
+    });
+    ecorePackage.EClass_eOperations = eClass_eOperations;
+    eClass_eOperations.eClass = eReference;
 
     eClass.get('eStructuralFeatures').add(eClass_abstract);
     eClass.get('eStructuralFeatures').add(eClass_interface);
     eClass.get('eStructuralFeatures').add(eClass_eStructuralFeatures);
     eClass.get('eStructuralFeatures').add(eClass_eSuperTypes);
+    eClass.get('eStructuralFeatures').add(eClass_eOperations);
 
     // EClassifier
     var eClassifier = ecorePackage.EClassifier = new EClass({
@@ -1051,6 +1076,8 @@ function initEcore(ecorePackage) {
     eStructuralFeature.set('interface', false);
     eStructuralFeature.get('eSuperTypes').add(eTypedElement);
 
+    eClass_eStructuralFeatures.set('eType', eStructuralFeature);
+
     eAttribute.get('eSuperTypes').add(eStructuralFeature);
     eReference.get('eSuperTypes').add(eStructuralFeature);
 
@@ -1125,12 +1152,37 @@ function initEcore(ecorePackage) {
     eOperation.eClass = eClass;
     eOperation.get('eSuperTypes').add(eTypedElement);
 
+    eClass_eOperations.set('eType', eOperation);
+
     // EParameter
     var eParameter = ecorePackage.EParameter = new EClass({
         name: 'EParameter'
     });
     eParameter.eClass = eClass;
     eParameter.get('eSuperTypes').add(eTypedElement);
+
+    // EOperation.eParameters
+    var eOperation_eParameters = new EReference({
+        name: 'eParameters',
+        lowerBound: 0,
+        upperBound: -1,
+        isContainment: true,
+        eType: eParameter
+    });
+    ecorePackage.EOperation_eParameters = eOperation_eParameters;
+    eOperation_eParameters.eClass = eReference;
+    eOperation.get('eStructuralFeatures').add(eOperation_eParameters);
+
+    // EEnum
+    var eEnum = new EClass({name: 'EEnum'});
+    eEnum.eClass = eClass;
+    eEnum.get('eSuperTypes').add(eDataType);
+    ecorePackage.EEnum = eEnum;
+
+    var eEnumLiteral = new EClass({name: 'EEnumLiteral'});
+    eEnumLiteral.eClass = eClass;
+    eEnumLiteral.get('eSuperTypes').add(eNamedElement);
+    ecorePackage.EEnumLiteral = eEnumLiteral;
 
     // Setting DataTypes eClass
     eString.eClass = eDataType;
@@ -1172,6 +1224,18 @@ function initEcore(ecorePackage) {
     ePackage_eFactoryInstance.eClass = eReference;
     ePackage.get('eStructuralFeatures').add(ePackage_eFactoryInstance);
     ecorePackage.EPackage_eFactoryInstance = ePackage_eFactoryInstance;
+
+    // EPackage.eSubPackages
+    var ePackage_eSubPackages = new EReference({
+        name: 'eSubPackages',
+        lowerBound: 0,
+        upperBound: -1,
+        isContainment: true,
+        eType: ePackage
+    });
+    ePackage_eSubPackages.eClass = eReference;
+    ePackage.get('eStructuralFeatures').add(ePackage_eSubPackages);
+    ecorePackage.EPackage_eSubPackages = ePackage_eSubPackages;
 
     // EFactory.ePackage
     var eFactory_ePackage = new EReference({
@@ -1226,6 +1290,8 @@ Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EAttribute);
 Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EReference);
 Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EOperation);
 Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EParameter);
+Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EEnum);
+Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EEnumLiteral);
 Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EFactory);
 Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EString);
 Ecore.EcorePackage.get('eClassifiers').add(Ecore.EcorePackage.EBoolean);
