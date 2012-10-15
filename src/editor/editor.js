@@ -125,7 +125,7 @@ jQuery(function(){
                 this.$el.append(valueHtml);
 
                 var select = $('td > select', this.$el);
-                select.val(value); // init select
+                select.val(value ? 'true' : 'false'); // init select
 
                 select.change(function(){
                     var changed = $('option:selected', select).val() === 'true';
