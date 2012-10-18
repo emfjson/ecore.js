@@ -294,7 +294,9 @@ Resource.prototype = {
         } else {
             return Ajax.get(this.uri, loadSuccess, error);
         }
-    }
+    },
+
+    _index: function() { return buildIndex(this); }
 };
 
 function initEcoreModel() {
