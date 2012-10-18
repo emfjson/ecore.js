@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="../lib/underscore.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../lib/jquery-1.8.1.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../lib/sax.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../dist/ecore.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../src/xmi.js" type="text/javascript" charset="utf-8"></script>
+<script>
+        window.onload = function() {
+            var test = '<?xml version="1.0" encoding="ASCII"?><user:User xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:user="http://www.example.org/user" xsi:schemaLocation="http://www.example.org/user user.ecore" name="Joe"/>';
+            var test2 = '<?xml version="1.0" encoding="ASCII"?><user:Container xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:user="http://www.example.org/user" xsi:schemaLocation="http://www.example.org/user user.ecore"> <users name="u1" friends="//@users.1 //@users.2"/> <users name="u2" friends="//@users.0" /> <users name="u3"/> </user:Container>';
+
+            var userp = Ecore.createEPackage({
+                name: "user",
+                nsPrefix: "user",
+                nsURI: "http://www.example.org/user"
+            });
+
+            var user = Ecore.createEClass({
+                name: "User",
+                eStructuralFeatures: [
+                    Ecore.createEAttribute({name: "name", eType: Ecore.EcorePackage.EString}),
+                    Ecore.createEReference({
+                        name: 'friends',
+                        upperBound: -1,
+                        eType: function() { return user; }
+                    })
+                ]
+            });
+
+            var co = Ecore.createEClass({
+                name: 'Container',
+                eStructuralFeatures: [
+                    Ecore.createEReference({
+                        name: 'users',
+                        upperBound: -1,
+                        isContainment: true,
+                        eType: user
+                    })
+                ]
+            });
+
+            userp.get('eClassifiers').add(co);
+            userp.get('eClassifiers').add(user);
+            var m = new Ecore.Resource('http://www.example.org/user');
+            m.add(userp);
+            Ecore.Registry.register(m);
+
+            var m2 = new Ecore.Resource('model.xmi');
+            Ecore.XMI.parse(m2, test2);
+
+            console.log(m2);
+            console.log(m2.toJSON());
+
+            document.writeln(JSON.stringify(m2.toJSON(), null, 4));
+
+            console.log(Ecore.XMI.toXMI(m2, true));
+        }
+</script>
+</head>
+</html>
