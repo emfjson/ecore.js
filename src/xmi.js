@@ -16,7 +16,7 @@
                     if (key.indexOf(':') !== -1) {
                         var split = key.split(':');
                         if (split[0] === 'xmlns') {
-                            namespaces.push({prefix: split[1], uri: num});
+                            namespaces.push({ prefix: split[1], uri: num });
                         }
                     }
                 });
@@ -142,7 +142,7 @@
 
         toXMI: function(model, format) {
             var docRoot = '',
-                root = model.contents[0],
+                root = model.get('contents').first(),
                 nsPrefix = root.eClass.eContainer.get('nsPrefix'),
                 nsURI = root.eClass.eContainer.get('nsURI');
 
@@ -157,19 +157,17 @@
                 }
                 docRoot += element;
 
-                if (root.eContainer instanceof Ecore.Resource) {
+                if (root.eContainer.isTypeOf('Resource')) {
                     docRoot += ' xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"';
                     docRoot += ' xmlns:' + nsPrefix + '="' + nsURI + '"';
                 }
 
-                var features = root.eClass.eAllStructuralFeatures(),
+                var features = root.eClass.get('eAllStructuralFeatures'),
                     attributes = _.filter(features, function(feature) {
                         return feature.isTypeOf('EAttribute') && root.isSet(feature.get('name'));
                     }),
                     references = _.filter(features, function(feature) {
-                        return feature.isTypeOf('EReference') &&
-                            !feature.get('isContainment') &&
-                            root.isSet(feature.get('name'));
+                        return feature.isTypeOf('EReference') && !feature.get('containment') && root.isSet(feature.get('name'));
                     });
 
                 _.each(attributes, function(feature) {
@@ -178,7 +176,7 @@
 
                 _.each(references, function(feature) {
                     var value = root.get(feature.get('name'));
-                    var refs = _.map(value instanceof Ecore.EList ? value._internal : [value], function(v) {
+                    var refs = _.map(value instanceof Ecore.EList ? value.array() : [value], function(v) {
                         return v.fragment();
                     });
                     docRoot += ' '  + feature.get('name') + '="' + refs.join(' ') + '"';
@@ -190,9 +188,7 @@
                     docRoot += '>';
 
                      var containments = _.filter(features, function(feature) {
-                        return feature.isTypeOf('EReference') &&
-                            feature.get('isContainment') &&
-                            root.isSet(feature.get('name'));
+                        return feature.isTypeOf('EReference') && feature.get('containment') && root.isSet(feature.get('name'));
                      });
 
                     _.each(containments, function(feature) {
