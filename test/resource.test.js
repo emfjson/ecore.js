@@ -7,12 +7,12 @@ describe('Model', function() {
     describe('buildIndex', function() {
 
         it('should build correct index for EModelElements', function() {
-            var m = new Ecore.Resource('http://www.example.org/example');
-            var p = Ecore.createEPackage({name: 'p'});
-            var c1 = Ecore.createEClass({name: 'C1'});
-            var c1_label = Ecore.createEAttribute({
+            var m = Ecore.Resource.create({ uri: 'http://www.example.org/example' });
+            var p = Ecore.EPackage.create({name: 'p'});
+            var c1 = Ecore.EClass.create({name: 'C1'});
+            var c1_label = Ecore.EClass.create({
                 name: 'label',
-                eType: Ecore.EcorePackage.EString
+                eType: Ecore.EString
             });
             p.get('eClassifiers').add(c1);
             c1.get('eStructuralFeatures').add(c1_label);
@@ -24,28 +24,32 @@ describe('Model', function() {
         });
 
         describe('index for instance models', function() {
-                var testModel = new Ecore.Resource('test.json');
-                var testPackage = Ecore.createEPackage({name: 'test',
-                    nsURI: 'http://www.example.org/test', nsPrefix: 'test'});
-                testModel.add(testPackage);
-                var Container = Ecore.createEClass({name: 'Container'});
-                testPackage.get('eClassifiers').add(Container);
-                var Container_child = Ecore.createEReference({
-                    name: 'child',
-                    upperBound: -1,
-                    isContainment: true
-                });
-                Container.get('eStructuralFeatures').add(Container_child);
-                var Child = Ecore.createEClass({name: 'Child'});
-                testPackage.get('eClassifiers').add(Child);
-                Child_manyRefs = Ecore.createEReference({
-                    name: 'manyRefs',
-                    upperBound: -1
-                });
-                Child.get('eStructuralFeatures').add(Child_manyRefs);
+            var testModel = Ecore.Resource.create({ uri: 'test.json' });
+            var testPackage = Ecore.EPackage.create({
+                name: 'test',
+                nsURI: 'http://www.example.org/test',
+                nsPrefix: 'test'
+            });
+            testModel.add(testPackage);
+            var Container = Ecore.EClass.create({ name: 'Container' });
+            testPackage.get('eClassifiers').add(Container);
+            var Container_child = Ecore.EReference.create({
+                name: 'child',
+                upperBound: -1,
+                containment: true
+            });
+
+            Container.get('eStructuralFeatures').add(Container_child);
+            var Child = Ecore.EClass.create({ name: 'Child' });
+            testPackage.get('eClassifiers').add(Child);
+            Child_manyRefs = Ecore.EReference.create({
+                name: 'manyRefs',
+                upperBound: -1
+            });
+            Child.get('eStructuralFeatures').add(Child_manyRefs);
 
             it('should be correct', function() {
-                var m = new Ecore.Resource('instance.json');
+                var m = Ecore.Resource.create({ uri: 'instance.json' });
                 var contain = Ecore.create(Container);
                 var c1 = Ecore.create(Child);
                 var c2 = Ecore.create(Child);
@@ -69,28 +73,27 @@ describe('Model', function() {
 
         it('should contain ecore model', function() {
             assert.ok(Ecore.Registry);
-            assert.ok(Ecore.Registry.models);
+            assert.ok(Ecore.Registry._index);
 
-            assert.ok(Ecore.Registry.models['http://www.eclipse.org/emf/2002/Ecore']);
+            assert.ok(Ecore.Registry._index['http://www.eclipse.org/emf/2002/Ecore']);
         });
 
         describe('#getEObject', function() {
            it('should return EcorePackage as root', function() {
               var ecorePackage = Ecore.Registry.getEObject('http://www.eclipse.org/emf/2002/Ecore#/');
-
               assert.strictEqual(ecorePackage, Ecore.EcorePackage);
            });
 
            it('should return EClass as #//EClass', function() {
               var eClass = Ecore.Registry.getEObject('http://www.eclipse.org/emf/2002/Ecore#//EClass');
 
-              assert.strictEqual(eClass, Ecore.EcorePackage.EClass);
+              assert.strictEqual(eClass, Ecore.EClass);
             });
 
-            it('should return EClass.name as #//EClass/name', function() {
-                var eClass_name = Ecore.Registry.getEObject('http://www.eclipse.org/emf/2002/Ecore#//EClass/name');
+            it('should return ENamedElement.name as #//ENamedElement/name', function() {
+                var _name = Ecore.Registry.getEObject('http://www.eclipse.org/emf/2002/Ecore#//ENamedElement/name');
 
-                assert.strictEqual(eClass_name, Ecore.EcorePackage.EClass_name);
+                assert.strictEqual(_name, Ecore.ENamedElement.getEStructuralFeature('name'));
             });
         });
 
@@ -100,7 +103,7 @@ describe('Model', function() {
 
         it('should build the model', function(done) {
 
-            var model = new Ecore.Resource('simple.json');
+            var model = Ecore.Resource.create({ uri: 'simple.json' });
 
             fs.readFile('./test/simple.json', 'utf8', function (err,data) {
                 if (err) {
@@ -108,12 +111,12 @@ describe('Model', function() {
                 }
 
                 model.load(function(model) {
-                    var contents = model.contents;
+                    var contents = model.get('contents').array();
                     assert.ok(contents);
                     assert.equal(contents.length, 1);
 
                     var root = contents[0];
-                    assert.strictEqual(root.eClass, Ecore.EcorePackage.EPackage);
+                    assert.strictEqual(root.eClass, Ecore.EPackage);
                     assert.strictEqual(root.get('name'), 'example');
                     assert.strictEqual(root.get('nsPrefix'), 'example');
                     assert.strictEqual(root.get('nsURI'), 'http://www.example.org/example');
@@ -122,20 +125,20 @@ describe('Model', function() {
 
                     var eClassA = root.get('eClassifiers').at(0);
                     assert.ok(eClassA);
-                    assert.strictEqual(eClassA.eClass, Ecore.EcorePackage.EClass);
+                    assert.strictEqual(eClassA.eClass, Ecore.EClass);
                     assert.strictEqual(eClassA.get('name'), 'A');
 
                     assert.equal(eClassA.get('eStructuralFeatures').size(), 1);
 
                     var eClassA_name = eClassA.get('eStructuralFeatures').at(0);
                     assert.ok(eClassA_name);
-                    assert.strictEqual(eClassA_name.eClass, Ecore.EcorePackage.EAttribute);
+                    assert.strictEqual(eClassA_name.eClass, Ecore.EAttribute);
                     assert.strictEqual(eClassA_name.get('name'), 'name');
-                    assert.strictEqual(eClassA_name.get('eType'), Ecore.EcorePackage.EString);
+                    assert.strictEqual(eClassA_name.get('eType'), Ecore.EString);
 
                     var eClassB = root.get('eClassifiers').at(1);
                     assert.ok(eClassB);
-                    assert.strictEqual(eClassB.eClass, Ecore.EcorePackage.EClass);
+                    assert.strictEqual(eClassB.eClass, Ecore.EClass);
                     assert.strictEqual(eClassB.get('name'), 'B');
 
                     assert.equal(eClassB.get('eSuperTypes').size(), 1);
@@ -152,7 +155,7 @@ describe('Model', function() {
     describe('toJSON', function() {
 
         it('should produce a valid JSON', function(done) {
-            var model = new Ecore.Resource('simple.json');
+            var model = Ecore.Resource.create({ uri: 'simple.json' });
 
             fs.readFile('./test/simple.json', 'utf8', function (err,data) {
                 if (err) {

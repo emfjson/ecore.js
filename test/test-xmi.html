@@ -12,43 +12,44 @@
             var test = '<?xml version="1.0" encoding="ASCII"?><user:User xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:user="http://www.example.org/user" xsi:schemaLocation="http://www.example.org/user user.ecore" name="Joe"/>';
             var test2 = '<?xml version="1.0" encoding="ASCII"?><user:Container xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:user="http://www.example.org/user" xsi:schemaLocation="http://www.example.org/user user.ecore"> <users name="u1" friends="//@users.1 //@users.2"/> <users name="u2" friends="//@users.0" /> <users name="u3"/> </user:Container>';
 
-            var userp = Ecore.createEPackage({
+            var userp = Ecore.EPackage.create({
                 name: "user",
                 nsPrefix: "user",
                 nsURI: "http://www.example.org/user"
             });
 
-            var user = Ecore.createEClass({
+            var user = Ecore.EClass.create({
                 name: "User",
                 eStructuralFeatures: [
-                    Ecore.createEAttribute({name: "name", eType: Ecore.EcorePackage.EString}),
-                    Ecore.createEReference({
+                    { eClass: Ecore.EAttribute, name: "name", eType: Ecore.EcorePackage.EString },
+                    {
+                        eClass: Ecore.EReference,
                         name: 'friends',
                         upperBound: -1,
                         eType: function() { return user; }
-                    })
+                    }
                 ]
             });
 
-            var co = Ecore.createEClass({
+            var co = Ecore.EClass.create({
                 name: 'Container',
                 eStructuralFeatures: [
-                    Ecore.createEReference({
-                        name: 'users',
-                        upperBound: -1,
-                        isContainment: true,
-                        eType: user
-                    })
-                ]
+                {
+                    eClass: Ecore.EReference,
+                    name: 'users',
+                    upperBound: -1,
+                    containment: true,
+                    eType: user
+                }]
             });
 
             userp.get('eClassifiers').add(co);
             userp.get('eClassifiers').add(user);
-            var m = new Ecore.Resource('http://www.example.org/user');
+            var m = Ecore.Resource.create({ uri: 'http://www.example.org/user' });
             m.add(userp);
             Ecore.Registry.register(m);
 
-            var m2 = new Ecore.Resource('model.xmi');
+            var m2 = Ecore.Resource.create({ uri: 'model.xmi' });
             Ecore.XMI.parse(m2, test2);
 
             console.log(m2);

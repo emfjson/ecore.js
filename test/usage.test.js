@@ -7,11 +7,10 @@ describe('Usage', function() {
     describe('creation of an EClass', function() {
 
         it('should be correctly created', function() {
-            var MyClass = Ecore.create(Ecore.EcorePackage.EClass);
+            var MyClass = Ecore.create(Ecore.EClass);
 
             assert.ok(MyClass);
-            assert.ok(MyClass instanceof Ecore.EObject);
-            assert.strictEqual(MyClass.eClass, Ecore.EcorePackage.EClass);
+            assert.strictEqual(MyClass.eClass, Ecore.EClass);
 
             assert.ok(MyClass.has('eStructuralFeatures'));
             assert.ok(MyClass.has('eSuperTypes'));
@@ -30,10 +29,10 @@ describe('Usage', function() {
         });
 
         it('other', function() {
-            var MyClass = Ecore.EcoreFactory.create('EClass');
+            var MyClass = Ecore.EClass.create();
 
             assert.ok(MyClass);
-            assert.strictEqual(MyClass.eClass, Ecore.EcorePackage.EClass);
+            assert.strictEqual(MyClass.eClass, Ecore.EClass);
             assert.ok(MyClass.has('eStructuralFeatures'));
             assert.ok(MyClass.has('eSuperTypes'));
             assert.ok(MyClass.has('abstract'));
@@ -57,12 +56,12 @@ describe('Usage', function() {
         var User;
 
         before(function() {
-            User = Ecore.createEClass({name: 'User'});
-            var User_name = Ecore.createEAttribute({
+            User = Ecore.EClass.create({name: 'User'});
+            var User_name = Ecore.EAttribute.create({
                 name: 'name',
-                eType: Ecore.EcorePackage.EString
+                eType: Ecore.EString
             });
-            var User_friends = Ecore.createEReference({
+            var User_friends = Ecore.EReference.create({
                 name: 'friends',
                 eType: User
             });

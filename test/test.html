@@ -5,5 +5,119 @@
     <script src="../lib/underscore.js" type="text/javascript" charset="utf-8"></script>
     <script src="../lib/jquery-1.8.1.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="../dist/ecore.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        /**
+ * Figure out how long it takes for a method to execute.
+ *
+ * @param {func} method to test
+ * @param {int} iterations number of executions.
+ * @param {Array} args to pass in.
+ * @param {T} context the context to call the method in.
+ * @return {int} the time it took, in milliseconds to execute.
+ */
+var bench = function (method, iterations, args, context) {
+
+    var time = 0;
+    var timer = function (action) {
+        var d = +(new Date);
+        if (time < 1 || action === 'start') {
+            time = d;
+            return 0;
+        } else if (action === 'stop') {
+            var t = d - time;
+            time = 0;
+            return t;
+        } else {
+            return d - time;
+        }
+    };
+
+    var result = [];
+    var i = 0;
+    timer('start');
+    while (i < iterations) {
+        result.push(method.apply(context, args));
+        i++;
+    }
+
+    var execTime = timer('stop');
+
+    if ( typeof console === "object") {
+        console.log("Mean execution time was: ", execTime / iterations);
+        console.log("Sum execution time was: ", execTime);
+        console.log("Result of the method call was:", result[0]);
+    }
+
+    return execTime;
+};
+
+console.log(Ecore.Registry.models());
+console.log(Ecore.EcorePackage);
+//Ecore.EcorePackage.get('eClassifiers').each(function(c) {
+//    console.log(c.get('name'));
+//    if (c.has('eStructuralFeatures'))
+//    c.get('eStructuralFeatures').each(function(f) {
+//        console.log('   '+f.get('name')+' : '+f.get('eType').get('name'));
+//    });
+//   if (c.has('eOperations'))
+//    c.get('eOperations').each(function(f) {
+//        console.log('   '+f.get('name')+'() : '+f.get('eType').get('name'));
+//   });
+//});
+
+var o = Ecore.EClass.create({ name: 'o' });
+//console.log(o);
+o.setEClass(Ecore.EAttribute);
+//console.log(o);
+//console.log(Ecore.Registry.models()[0]._index());
+//console.log(Ecore.Registry.getEObject('http://www.eclipse.org/emf/2002/Ecore#/'));
+//console.log(Ecore.Registry.getEObject('http://www.eclipse.org/emf/2002/Ecore#//EClass/name'));
+
+        var m = Ecore.Registry.models()[0];
+        var p = Ecore.EPackage.create({
+            name: 'pp',
+            nsPrefix: 'pp',
+            nsURI: '/pp',
+            eClassifiers: [{
+                eClass: Ecore.EClass,
+                name: 'User',
+                eStructuralFeatures: [{
+                    eClass: Ecore.EAttribute,
+                    name: 'fname',
+                    eType: Ecore.EString
+                }]
+            }]
+        });
+
+//        console.log(p.get('eClassifiers').at(0).get('eStructuralFeatures'));
+
+        var m1 = Ecore.Resource.create({ uri: '/pp', contents: [ p ]  });
+//        console.log(m1, m1._index());
+
+//        console.log( m.toJSON() );
+
+       bench(m.toJSON, 10, [], m);
+    bench(m1.toJSON, 10, [], m1);
+
+        var u1 = p.get('eClassifiers').at(0).create({ fname: 'fff' });
+         var i = Ecore.Resource.create({ uri: '/model', contents: [ u1 ] });
+//        console.log(i.toJSON());
+
+        p.get('eClassifiers').at(0).get('eStructuralFeatures').add(
+            Ecore.EAttribute.create({ name: 'label', eType: Ecore.EString })
+        );
+
+//        console.log('e', p.get('eClassifiers').at(0).get('eStructuralFeatures'));
+//        console.log(u1, u1.get('label'));
+        u1.set({ label: 'kk' });
+//        console.log(u1.get('label'));
+
+//        console.log(i.toJSON());
+
+//        console.log(        Ecore.EModelElement.get('abstract') );
+
+//console.log(        Ecore.EAttribute.getEStructuralFeature('iD') );
+
+    </script>
 </head>
 </html>
