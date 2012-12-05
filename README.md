@@ -26,27 +26,28 @@ Defining a Model:
 
 // Resources contain model elements and are identified by a URI.
 
-var model = new Ecore.Resource('/model.json');
+var resourceSet = Ecore.ResourceSet.create();
+var resource = resourceSet.create({ uri: '/model.json' });
 
 // EClass are used to define domain elements, they are identified
 // by name and a set of structural features (attributes and references).
 
-var User = Ecore.createEClass({
+var User = Ecore.EClass.create({
     name: 'User',
     eStructuralFeatures: [
         // EAttributes are used to define domain elements
         // elements properties.
-        Ecore.createEAttribute({
+        Ecore.EAttribute.create({
             name: 'name',
             upperBound: 1,
             eType: Ecore.EcorePackage.EString
         }),
         // EReferences are used to define links between domain
         // elements.
-        Ecore.createEReference({
+        Ecore.EReferences.create({
             name: 'friends',
             upperBound: -1,
-            isContainment: false,
+            containment: false,
             // If reference non previously defined variables,
             // use a function that will return it a posteriori.
             eType: function() { return User; }
@@ -57,7 +58,7 @@ var User = Ecore.createEClass({
 // EPackages represent namespaces for a set of EClasses.
 // It's properties name, nsURI and nsPrefix must be set.
 
-var SamplePackage = Ecore.createEPackage({
+var SamplePackage = Ecore.EPackage.create({
     name: 'sample',
     nsURI: 'http://www.example.org/sample',
     nsPrefix: 'sample',
@@ -68,23 +69,19 @@ var SamplePackage = Ecore.createEPackage({
 
 // Packages must be added directly to the model's Resource.
 
-model.add(SamplePackage);
-
-// Once created the model can be regitered.
-
-Ecore.Registry.register(model);
+resource.add(SamplePackage);
 
 ```
 
 Model Elements can also be created separately.
 
 ```javascript
-var User = Ecore.EcoreFactory.createEClass({name: 'User'});
-var User_name = Ecore.EcoreFactory.createEAttribute({
+var User = Ecore.EClass.create({ name: 'User' });
+var User_name = Ecore.EAttribute.create({
    name: 'name',
    eType: Ecore.EcorePackage.EString
 });
-var User_friends = Ecore.EcoreFactory.createEReference({
+var User_friends = Ecore.EReference.create({
    name: 'friends',
    upperBound: -1,
    eType: User
@@ -96,10 +93,8 @@ User.get('eStructuralFeatures').add(User_friends);
 EObject creation:
 
 ```javascript
-var u1 = Ecore.create(User);
-u1.set('name', 'u1');
-var u2 = Ecore.create(User);
-u2.set('name', 'u2');
+var u1 = User.create({ name: 'u1' });
+var u2 = User.create({ name: 'u2' });
 u1.get('friends').add(u2);
 
 u1.get('friends').each(function(friend) { console.log(friend) });
@@ -124,11 +119,11 @@ described [here](https://github.com/ghillairet/emfjson) and looks like this:
 ## API
 
 ### Ecore
- - create(eClass)
- - createEClass(attributes)
- - createEDataType(attributes)
- - createEAttribute(attributes)
- - createEReference(attributes)
+ - create(eClass): EObject
+
+### ResourceSet
+ - create(): Resource
+ - getEObject(uri): EObject
 
 ### Resource
  - add(value)
@@ -137,20 +132,18 @@ described [here](https://github.com/ghillairet/emfjson) and looks like this:
  - each(iterator, [context])
  - save([sucess], [error])
  - load([sucess], [error], [data])
- - toJSON()
- - getEObject(fragment)
+ - toJSON(): Object
+ - getEObject(fragment): EObject
 
 ### EObject
- - has(property)
- - isSet(property)
+ - has(property): Boolean
+ - isSet(property): Boolean
  - set(property, value)
- - get(property)
- - isTypeOf(type)
- - isKindOf(type)
- - eResource()
- - eURI()
- - eAllStructuralFeatures()
- - eAllSuperTypes()
+ - get(property): EObject or EList
+ - isTypeOf(type): Boolean
+ - isKindOf(type): Boolean
+ - eResource(): Resource
+ - eURI(): String
  - getEStructuralFeature(name)
 
 ### EList
@@ -170,8 +163,14 @@ described [here](https://github.com/ghillairet/emfjson) and looks like this:
  - contains(iterator, [context])
  - indexOf(iterator, [context])
 
-
 ## History
+
+### 0.3.0
+ - add events
+ - add XMI support
+ - add support for derived features
+ - add support for eOperations
+ - add ResourceSet
 
 ### 0.2.0
  - add Resource support
