@@ -388,7 +388,7 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                 var resource = new Ecore.Resource(uri);
                 this.get('resources').add(resource);
 
-                return resources;
+                return resource;
             }
         }
     ]
