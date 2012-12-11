@@ -2,7 +2,7 @@ fs = require('fs');
 var Ecore = require('../dist/ecore.js');
 var assert = require("assert");
 
-describe('Model', function() {
+describe('Resource', function() {
 
     describe('buildIndex', function() {
 
@@ -72,29 +72,10 @@ describe('Model', function() {
     describe('Registry', function() {
 
         it('should contain ecore model', function() {
-            assert.ok(Ecore.Registry);
-            assert.ok(Ecore.Registry._index);
+            assert.ok(Ecore.EPackage.Registry);
+            assert.ok(Ecore.EPackage.Registry._ePackages);
 
-            assert.ok(Ecore.Registry._index['http://www.eclipse.org/emf/2002/Ecore']);
-        });
-
-        describe('#getEObject', function() {
-           it('should return EcorePackage as root', function() {
-              var ecorePackage = Ecore.Registry.getEObject('http://www.eclipse.org/emf/2002/Ecore#/');
-              assert.strictEqual(ecorePackage, Ecore.EcorePackage);
-           });
-
-           it('should return EClass as #//EClass', function() {
-              var eClass = Ecore.Registry.getEObject('http://www.eclipse.org/emf/2002/Ecore#//EClass');
-
-              assert.strictEqual(eClass, Ecore.EClass);
-            });
-
-            it('should return ENamedElement.name as #//ENamedElement/name', function() {
-                var _name = Ecore.Registry.getEObject('http://www.eclipse.org/emf/2002/Ecore#//ENamedElement/name');
-
-                assert.strictEqual(_name, Ecore.ENamedElement.getEStructuralFeature('name'));
-            });
+            assert.ok(Ecore.EPackage.Registry._ePackages['http://www.eclipse.org/emf/2002/Ecore']);
         });
 
     });
@@ -164,7 +145,7 @@ describe('Model', function() {
 
                 model.load(function(model) {
 
-                    var json = model.toJSON();
+                    var json = model.to(Ecore.JSON);
 
                     assert.ok(json);
                     assert.strictEqual(json.eClass, 'http://www.eclipse.org/emf/2002/Ecore#//EPackage');

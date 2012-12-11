@@ -53,5 +53,70 @@ describe('ResourceSet', function() {
 
     });
 
+    describe('#uriConverter', function() {
+
+        it('should return unique URIConverter per resourceSet', function() {
+            var resourceSet = Ecore.ResourceSet.create();
+            var c1 = resourceSet.uriConverter();
+            var c2 = resourceSet.uriConverter();
+
+            assert.strictEqual(c1, c2);
+        });
+
+        it('should work on full uris', function() {
+            var resourceSet = Ecore.ResourceSet.create();
+            var converter = resourceSet.uriConverter();
+            converter.map('http://www.example.org/sample', 'http://www.another.org/sample');
+
+            var normalized = converter.normalize('http://www.example.org/sample');
+            assert.strictEqual('http://www.another.org/sample', normalized);
+        });
+
+        it('should work on uri with fragment', function() {
+            var resourceSet = Ecore.ResourceSet.create();
+            var converter = resourceSet.uriConverter();
+            converter.map('http://www.example.org/sample', 'http://www.another.org/sample');
+
+            var normalized = converter.normalize('http://www.example.org/sample#frag?q=query');
+            assert.strictEqual('http://www.another.org/sample', normalized);
+        });
+
+        it('should work on uri with fragment', function() {
+            var resourceSet = Ecore.ResourceSet.create();
+            var converter = resourceSet.uriConverter();
+            var normalized = converter.normalize('http://www.example.org/sample');
+            assert.strictEqual('http://www.example.org/sample', normalized);
+        });
+
+        it('should work on uri starting with slash', function() {
+            var resourceSet = Ecore.ResourceSet.create();
+            var converter = resourceSet.uriConverter();
+            var normalized = converter.normalize('/sample');
+
+            assert.strictEqual('/sample', normalized);
+
+            converter.map('/models/', 'http://www.example.org/models/');
+            normalized = converter.normalize('/models/sample');
+            assert.strictEqual('http://www.example.org/models/sample', normalized);
+        });
+
+        it('should work on uri with no slashes', function() {
+            var resourceSet = Ecore.ResourceSet.create();
+            var converter = resourceSet.uriConverter();
+            var normalized = converter.normalize('sample');
+            assert.strictEqual('sample', normalized);
+        });
+
+        it('should work on uris with missing segments', function() {
+            var resourceSet = Ecore.ResourceSet.create();
+            var converter = resourceSet.uriConverter();
+            converter.map('http://www.example.org/', 'http://www.another.org/');
+
+            var normalized = converter.normalize('http://www.example.org/sample');
+            assert.strictEqual('http://www.another.org/sample', normalized);
+        });
+
+    });
+
 });
 
