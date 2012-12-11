@@ -1,270 +1,312 @@
-<!DOCTYPE html>  <html> <head>   <title>xmi.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="ecore.html">                 ecore.js               </a>                                           <a class="source" href="resource.html">                 resource.js               </a>                                           <a class="source" href="xmi.html">                 xmi.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               xmi.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<!DOCTYPE html>  <html> <head>   <title>xmi.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="ecore.html">                 ecore.js               </a>                                           <a class="source" href="resource.html">                 resource.js               </a>                                           <a class="source" href="xmi.html">                 xmi.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               xmi.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="kd">var</span> <span class="nx">sax</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">sax</span> <span class="o">||</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;sax&#39;</span><span class="p">);</span>
 
-    <span class="kd">var</span> <span class="nx">sax</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">sax</span> <span class="o">||</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;sax&#39;</span><span class="p">);</span>
+<span class="nx">Ecore</span><span class="p">.</span><span class="nx">XMI</span> <span class="o">=</span> <span class="p">{</span>
 
-    <span class="nx">Ecore</span><span class="p">.</span><span class="nx">XMI</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">dataType</span><span class="o">:</span> <span class="s1">&#39;xml&#39;</span><span class="p">,</span>
+    <span class="nx">contentType</span><span class="o">:</span> <span class="s1">&#39;application/xml&#39;</span><span class="p">,</span>
 
-        <span class="nx">parse</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">parser</span> <span class="o">=</span> <span class="nx">sax</span><span class="p">.</span><span class="nx">parser</span><span class="p">(</span><span class="kc">true</span><span class="p">),</span>
-                <span class="nx">namespaces</span> <span class="o">=</span> <span class="p">[],</span>
-                <span class="nx">current</span><span class="p">;</span>
+    <span class="nx">parse</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">parser</span> <span class="o">=</span> <span class="nx">sax</span><span class="p">.</span><span class="nx">parser</span><span class="p">(</span><span class="kc">true</span><span class="p">),</span>
+            <span class="nx">resourceSet</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;resourceSet&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">ResourceSet</span><span class="p">.</span><span class="nx">create</span><span class="p">(),</span>
+            <span class="nx">namespaces</span> <span class="o">=</span> <span class="p">[],</span>
+            <span class="nx">current</span><span class="p">;</span>
 
-            <span class="kd">function</span> <span class="nx">findNamespaces</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">attributes</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+        <span class="kd">function</span> <span class="nx">findNamespaces</span><span class="p">(</span><span class="nx">attributes</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">attributes</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
 
-                <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">attributes</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="nx">key</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="kd">var</span> <span class="nx">split</span> <span class="o">=</span> <span class="nx">key</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">);</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="nx">split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">===</span> <span class="s1">&#39;xmlns&#39;</span><span class="p">)</span> <span class="p">{</span>
-                            <span class="nx">namespaces</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">prefix</span><span class="o">:</span> <span class="nx">split</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">uri</span><span class="o">:</span> <span class="nx">num</span> <span class="p">});</span>
+            <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">attributes</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">key</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">split</span> <span class="o">=</span> <span class="nx">key</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">===</span> <span class="s1">&#39;xmlns&#39;</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">namespaces</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">prefix</span><span class="o">:</span> <span class="nx">split</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">uri</span><span class="o">:</span> <span class="nx">num</span> <span class="p">});</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+
+        <span class="kd">function</span> <span class="nx">getNamespace</span><span class="p">(</span><span class="nx">prefix</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">ns</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="nx">namespaces</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ns</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">ns</span><span class="p">.</span><span class="nx">prefix</span> <span class="o">===</span> <span class="nx">prefix</span><span class="p">;</span>
+            <span class="p">});</span>
+
+            <span class="k">return</span> <span class="nx">ns</span> <span class="o">?</span> <span class="nx">ns</span><span class="p">.</span><span class="nx">uri</span> <span class="o">:</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="kd">function</span> <span class="nx">findEClass</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">name</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">split</span> <span class="o">=</span> <span class="nx">name</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">),</span>
+                    <span class="nx">prefix</span> <span class="o">=</span> <span class="nx">split</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="nx">className</span> <span class="o">=</span> <span class="nx">split</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="nx">uri</span> <span class="o">=</span> <span class="nx">getNamespace</span><span class="p">(</span><span class="nx">prefix</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;#//&#39;</span> <span class="o">+</span> <span class="nx">className</span><span class="p">;</span>
+
+                <span class="k">return</span> <span class="nx">resourceSet</span><span class="p">.</span><span class="nx">getEObject</span><span class="p">(</span><span class="nx">uri</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">currentNode</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">eObject</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">currentNode</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">eObject</span><span class="p">,</span>
+                        <span class="nx">eFeature</span> <span class="o">=</span> <span class="nx">parent</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">getEStructuralFeature</span><span class="p">(</span><span class="nx">name</span><span class="p">),</span>
+                        <span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eType&#39;</span><span class="p">);</span>
+
+                    <span class="k">return</span> <span class="nx">eClass</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="kd">var</span> <span class="nx">currentNode</span><span class="p">,</span> <span class="nx">rootObject</span><span class="p">,</span> <span class="nx">toResolve</span> <span class="o">=</span> <span class="p">[];</span>
+
+        <span class="nx">parser</span><span class="p">.</span><span class="nx">onopentag</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">eClass</span><span class="p">,</span> <span class="nx">eObject</span><span class="p">,</span> <span class="nx">eFeature</span><span class="p">,</span> <span class="nx">parentObject</span><span class="p">;</span>
+
+            <span class="nx">findNamespaces</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">attributes</span><span class="p">);</span>
+
+            <span class="nx">node</span><span class="p">.</span><span class="nx">children</span> <span class="o">=</span> <span class="p">[];</span>
+            <span class="nx">node</span><span class="p">.</span><span class="nx">parent</span> <span class="o">=</span> <span class="nx">currentNode</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">parent</span><span class="p">)</span> <span class="nx">node</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">children</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">node</span><span class="p">);</span>
+            <span class="nx">currentNode</span> <span class="o">=</span> <span class="nx">node</span><span class="p">;</span>
+
+            <span class="nx">eClass</span> <span class="o">=</span> <span class="nx">findEClass</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">eClass</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">eObject</span> <span class="o">=</span> <span class="nx">currentNode</span><span class="p">.</span><span class="nx">eObject</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">eClass</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">rootObject</span><span class="p">)</span> <span class="nx">rootObject</span> <span class="o">=</span> <span class="nx">eObject</span><span class="p">;</span>
+
+                <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">attributes</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">eObject</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">key</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="nx">eFeature</span> <span class="o">=</span> <span class="nx">eObject</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">getEStructuralFeature</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">eFeature</span><span class="p">.</span><span class="nx">isTypeOf</span><span class="p">(</span><span class="s1">&#39;EAttribute&#39;</span><span class="p">))</span> <span class="p">{</span>
+                            <span class="nx">eObject</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">num</span><span class="p">);</span>
+                        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                            <span class="nx">toResolve</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">parent</span><span class="o">:</span> <span class="nx">eObject</span><span class="p">,</span> <span class="nx">feature</span><span class="o">:</span> <span class="nx">eFeature</span><span class="p">,</span> <span class="nx">value</span><span class="o">:</span> <span class="nx">num</span> <span class="p">});</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">});</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">parent</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">parentObject</span> <span class="o">=</span> <span class="nx">node</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">eObject</span><span class="p">;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">parentObject</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="nx">eFeature</span> <span class="o">=</span> <span class="nx">parentObject</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">getEStructuralFeature</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">eFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;upperBound&#39;</span><span class="p">)</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">parentObject</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">eObject</span><span class="p">);</span>
+                        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                            <span class="nx">parentObject</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eObject</span><span class="p">);</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+
+        <span class="nx">parser</span><span class="p">.</span><span class="nx">onclosetag</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">tagName</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">parentObject</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">currentNode</span> <span class="o">&amp;&amp;</span> <span class="nx">currentNode</span><span class="p">.</span><span class="nx">parent</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">parentObject</span> <span class="o">=</span> <span class="nx">currentNode</span><span class="p">.</span><span class="nx">parent</span><span class="p">;</span>
+                <span class="k">delete</span> <span class="nx">currentNode</span><span class="p">.</span><span class="nx">parent</span><span class="p">;</span>
+                <span class="nx">currentNode</span> <span class="o">=</span> <span class="nx">parentObject</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+
+        <span class="kd">function</span> <span class="nx">resolveReferences</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">_index</span><span class="p">();</span>
+
+            <span class="kd">function</span> <span class="nx">isLocal</span><span class="p">(</span><span class="nx">uri</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">uri</span><span class="p">.</span><span class="nx">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">===</span> <span class="s1">&#39;/&#39;</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="kd">function</span> <span class="nx">setReference</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">feature</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">refs</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s/</span><span class="p">),</span>
+                    <span class="nx">isMany</span> <span class="o">=</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;upperBound&#39;</span><span class="p">)</span> <span class="o">!==</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="nx">resolved</span><span class="p">;</span>
+
+                <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">refs</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ref</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">isLocal</span><span class="p">(</span><span class="nx">ref</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="nx">resolved</span> <span class="o">=</span> <span class="nx">index</span><span class="p">[</span><span class="nx">ref</span><span class="p">];</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="nx">resolved</span> <span class="o">=</span> <span class="nx">resourceSet</span><span class="p">.</span><span class="nx">getEObject</span><span class="p">(</span><span class="nx">ref</span><span class="p">);</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">resolved</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">isMany</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">parent</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)).</span><span class="nx">add</span><span class="p">(</span><span class="nx">resolved</span><span class="p">);</span>
+                        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                            <span class="nx">parent</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span> <span class="nx">resolved</span><span class="p">);</span>
                         <span class="p">}</span>
                     <span class="p">}</span>
                 <span class="p">});</span>
             <span class="p">}</span>
 
-            <span class="kd">function</span> <span class="nx">getNamespace</span><span class="p">(</span><span class="nx">prefix</span><span class="p">)</span> <span class="p">{</span>
-                <span class="kd">var</span> <span class="nx">ns</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="nx">namespaces</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ns</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="k">return</span> <span class="nx">ns</span><span class="p">.</span><span class="nx">prefix</span> <span class="o">===</span> <span class="nx">prefix</span><span class="p">;</span>
+            <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">toResolve</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">resolving</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">resolving</span><span class="p">.</span><span class="nx">parent</span><span class="p">,</span>
+                    <span class="nx">feature</span> <span class="o">=</span> <span class="nx">resolving</span><span class="p">.</span><span class="nx">feature</span><span class="p">,</span>
+                    <span class="nx">value</span> <span class="o">=</span> <span class="nx">resolving</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+
+                <span class="nx">setReference</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">feature</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+
+        <span class="nx">parser</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">data</span><span class="p">).</span><span class="nx">close</span><span class="p">();</span>
+        <span class="nx">model</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">rootObject</span><span class="p">);</span>
+        <span class="nx">resolveReferences</span><span class="p">();</span>
+    <span class="p">},</span>
+
+    <span class="nx">to</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">indent</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">docRoot</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="nx">root</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;contents&#39;</span><span class="p">).</span><span class="nx">first</span><span class="p">(),</span>
+            <span class="nx">nsPrefix</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">eContainer</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;nsPrefix&#39;</span><span class="p">),</span>
+            <span class="nx">nsURI</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">eContainer</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;nsURI&#39;</span><span class="p">),</span>
+            <span class="nx">contentsFeature</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">Resource</span><span class="p">.</span><span class="nx">getEStructuralFeature</span><span class="p">(</span><span class="s1">&#39;contents&#39;</span><span class="p">);</span>
+
+        <span class="kd">function</span> <span class="nx">processElement</span><span class="p">(</span><span class="nx">root</span><span class="p">){</span>
+            <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">;</span>
+
+            <span class="kd">var</span> <span class="nx">element</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">root</span><span class="p">.</span><span class="nx">eContainingFeature</span> <span class="o">&amp;&amp;</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eContainingFeature</span> <span class="o">!==</span> <span class="nx">contentsFeature</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">element</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eContainingFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">element</span> <span class="o">=</span> <span class="nx">nsPrefix</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="nx">docRoot</span> <span class="o">+=</span> <span class="nx">element</span><span class="p">;</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">root</span><span class="p">.</span><span class="nx">eContainer</span><span class="p">.</span><span class="nx">isKindOf</span><span class="p">(</span><span class="s1">&#39;Resource&#39;</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; xmi:version=&quot;2.0&quot; xmlns:xmi=&quot;http://www.omg.org/XMI&quot;&#39;</span><span class="p">;</span>
+                <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&#39;</span><span class="p">;</span>
+                <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; xmlns:&#39;</span> <span class="o">+</span> <span class="nx">nsPrefix</span> <span class="o">+</span> <span class="s1">&#39;=&quot;&#39;</span> <span class="o">+</span> <span class="nx">nsURI</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">root</span><span class="p">.</span><span class="nx">eContainingFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eType&#39;</span><span class="p">).</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;abstract&#39;</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; xsi:type=&quot;&#39;</span><span class="p">;</span>
+                <span class="nx">docRoot</span> <span class="o">+=</span> <span class="nx">nsPrefix</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="kd">var</span> <span class="nx">features</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eAllStructuralFeatures&#39;</span><span class="p">),</span>
+                <span class="nx">attributes</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">features</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="o">!</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;derived&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">isTypeOf</span><span class="p">(</span><span class="s1">&#39;EAttribute&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">root</span><span class="p">.</span><span class="nx">isSet</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">));</span>
+                <span class="p">}),</span>
+                <span class="nx">references</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">features</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="o">!</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;derived&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">isTypeOf</span><span class="p">(</span><span class="s1">&#39;EReference&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                        <span class="o">!</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;containment&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">root</span><span class="p">.</span><span class="nx">isSet</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">));</span>
                 <span class="p">});</span>
 
-                <span class="k">return</span> <span class="nx">ns</span> <span class="o">?</span> <span class="nx">ns</span><span class="p">.</span><span class="nx">uri</span> <span class="o">:</span> <span class="kc">null</span><span class="p">;</span>
-            <span class="p">}</span>
+            <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">attributes</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">featureName</span> <span class="o">=</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span>
+                    <span class="nx">value</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">featureName</span><span class="p">);</span>
 
-            <span class="kd">function</span> <span class="nx">findEClass</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">name</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="o">!==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="kd">var</span> <span class="nx">split</span> <span class="o">=</span> <span class="nx">name</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">),</span>
-                        <span class="nx">prefix</span> <span class="o">=</span> <span class="nx">split</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                        <span class="nx">className</span> <span class="o">=</span> <span class="nx">split</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                        <span class="nx">uri</span> <span class="o">=</span> <span class="nx">getNamespace</span><span class="p">(</span><span class="nx">prefix</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;#//&#39;</span> <span class="o">+</span> <span class="nx">className</span><span class="p">;</span>
-
-                    <span class="k">return</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">Registry</span><span class="p">.</span><span class="nx">getEObject</span><span class="p">(</span><span class="nx">uri</span><span class="p">);</span>
-                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="nx">currentNode</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">eObject</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="kd">var</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">currentNode</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">eObject</span><span class="p">,</span>
-                            <span class="nx">eFeature</span> <span class="o">=</span> <span class="nx">parent</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">getEStructuralFeature</span><span class="p">(</span><span class="nx">name</span><span class="p">),</span>
-                            <span class="nx">eClass</span> <span class="o">=</span> <span class="nx">eFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eType&#39;</span><span class="p">);</span>
-
-                        <span class="k">return</span> <span class="nx">eClass</span><span class="p">;</span>
-                    <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">!==</span> <span class="kc">false</span> <span class="o">&amp;&amp;</span> <span class="nx">value</span> <span class="o">!==</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>  <span class="o">+</span> <span class="nx">featureName</span> <span class="o">+</span> <span class="s1">&#39;=&quot;&#39;</span> <span class="o">+</span> <span class="nx">value</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">;</span>
                 <span class="p">}</span>
-            <span class="p">}</span>
+            <span class="p">});</span>
 
-            <span class="kd">var</span> <span class="nx">currentNode</span><span class="p">,</span> <span class="nx">rootObject</span><span class="p">,</span> <span class="nx">toResolve</span> <span class="o">=</span> <span class="p">[];</span>
+            <span class="kd">var</span> <span class="nx">externals</span> <span class="o">=</span> <span class="p">[];</span>
 
-            <span class="nx">parser</span><span class="p">.</span><span class="nx">onopentag</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">findNamespaces</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">attributes</span><span class="p">);</span>
+            <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">references</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">));</span>
+                <span class="kd">var</span> <span class="nx">arrayValue</span> <span class="o">=</span> <span class="nx">value</span> <span class="k">instanceof</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EList</span> <span class="o">?</span> <span class="nx">value</span><span class="p">.</span><span class="nx">array</span><span class="p">()</span> <span class="o">:</span> <span class="nx">value</span> <span class="o">?</span> <span class="p">[</span><span class="nx">value</span><span class="p">]</span> <span class="o">:</span> <span class="p">[];</span>
+                <span class="kd">var</span> <span class="nx">externs</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">arrayValue</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">v</span><span class="p">.</span><span class="nx">eResource</span><span class="p">()</span> <span class="o">!==</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eResource</span><span class="p">();</span> <span class="p">});</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">externs</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="nx">externals</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">feature</span><span class="o">:</span> <span class="nx">feature</span><span class="p">,</span> <span class="nx">refs</span><span class="o">:</span> <span class="nx">externs</span> <span class="p">});</span>
 
-                <span class="nx">node</span><span class="p">.</span><span class="nx">children</span> <span class="o">=</span> <span class="p">[];</span>
-                <span class="nx">node</span><span class="p">.</span><span class="nx">parent</span> <span class="o">=</span> <span class="nx">currentNode</span><span class="p">;</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">parent</span><span class="p">)</span> <span class="nx">node</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">children</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">node</span><span class="p">);</span>
-                <span class="nx">currentNode</span> <span class="o">=</span> <span class="nx">node</span><span class="p">;</span>
+                <span class="kd">var</span> <span class="nx">internals</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">difference</span><span class="p">(</span><span class="nx">arrayValue</span><span class="p">,</span> <span class="nx">externs</span><span class="p">);</span>
 
-                <span class="kd">var</span> <span class="nx">eClass</span> <span class="o">=</span> <span class="nx">findEClass</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">eClass</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="kd">var</span> <span class="nx">eObject</span> <span class="o">=</span> <span class="nx">currentNode</span><span class="p">.</span><span class="nx">eObject</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">eClass</span><span class="p">);</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">rootObject</span><span class="p">)</span> <span class="nx">rootObject</span> <span class="o">=</span> <span class="nx">eObject</span><span class="p">;</span>
-
-                    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">attributes</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="nx">eObject</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">key</span><span class="p">))</span> <span class="p">{</span>
-                            <span class="kd">var</span> <span class="nx">eFeature</span> <span class="o">=</span> <span class="nx">eObject</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">getEStructuralFeature</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
-                            <span class="k">if</span> <span class="p">(</span><span class="nx">eFeature</span><span class="p">.</span><span class="nx">isTypeOf</span><span class="p">(</span><span class="s1">&#39;EAttribute&#39;</span><span class="p">))</span> <span class="p">{</span>
-                                <span class="nx">eObject</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">num</span><span class="p">);</span>
-                            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                                <span class="nx">toResolve</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">parent</span><span class="o">:</span> <span class="nx">eObject</span><span class="p">,</span> <span class="nx">feature</span><span class="o">:</span> <span class="nx">eFeature</span><span class="p">,</span> <span class="nx">value</span><span class="o">:</span> <span class="nx">num</span> <span class="p">});</span>
-                            <span class="p">}</span>
-                        <span class="p">}</span>
-                    <span class="p">});</span>
-
-                    <span class="k">if</span> <span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">parent</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="nx">node</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">eObject</span><span class="p">;</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
-                            <span class="kd">var</span> <span class="nx">eFeature</span> <span class="o">=</span> <span class="nx">p</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">getEStructuralFeature</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
-                            <span class="k">if</span> <span class="p">(</span><span class="nx">eFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;upperBound&#39;</span><span class="p">)</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-                                <span class="nx">p</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">eObject</span><span class="p">);</span>
-                            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                                <span class="nx">p</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">eObject</span><span class="p">);</span>
-                            <span class="p">}</span>
-                        <span class="p">}</span>
-                    <span class="p">}</span>
+                <span class="kd">var</span> <span class="nx">refs</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">internals</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">v</span><span class="p">.</span><span class="nx">fragment</span><span class="p">();</span> <span class="p">});</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">refs</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>  <span class="o">+</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;=&quot;&#39;</span> <span class="o">+</span> <span class="nx">refs</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">;</span>
                 <span class="p">}</span>
-            <span class="p">};</span>
+            <span class="p">});</span>
 
-            <span class="nx">parser</span><span class="p">.</span><span class="nx">onclosetag</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">tagName</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">currentNode</span> <span class="o">&amp;&amp;</span> <span class="nx">currentNode</span><span class="p">.</span><span class="nx">parent</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="nx">currentNode</span><span class="p">.</span><span class="nx">parent</span><span class="p">;</span>
-                    <span class="k">delete</span> <span class="nx">currentNode</span><span class="p">.</span><span class="nx">parent</span><span class="p">;</span>
-                    <span class="nx">currentNode</span> <span class="o">=</span> <span class="nx">p</span><span class="p">;</span>
-                <span class="p">}</span>
-            <span class="p">};</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">root</span><span class="p">.</span><span class="nx">eContents</span><span class="p">().</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">externals</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39;/&gt;&#39;</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">;</span>
 
-            <span class="kd">function</span> <span class="nx">resolveReferences</span><span class="p">()</span> <span class="p">{</span>
-                <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">_index</span><span class="p">();</span>
-
-                <span class="kd">function</span> <span class="nx">isLocal</span><span class="p">(</span><span class="nx">uri</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="k">return</span> <span class="nx">uri</span><span class="p">.</span><span class="nx">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">===</span> <span class="s1">&#39;/&#39;</span><span class="p">;</span>
-                <span class="p">}</span>
-
-                <span class="kd">function</span> <span class="nx">setReference</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">feature</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="kd">var</span> <span class="nx">refs</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s/</span><span class="p">),</span>
-                        <span class="nx">isMany</span> <span class="o">=</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;upperBound&#39;</span><span class="p">)</span> <span class="o">!==</span> <span class="mi">1</span><span class="p">,</span>
-                        <span class="nx">resolved</span><span class="p">;</span>
+                <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">externals</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ext</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">feature</span> <span class="o">=</span> <span class="nx">ext</span><span class="p">.</span><span class="nx">feature</span><span class="p">,</span>
+                        <span class="nx">refs</span> <span class="o">=</span> <span class="nx">ext</span><span class="p">.</span><span class="nx">refs</span><span class="p">,</span>
+                        <span class="nx">isAbstract</span> <span class="o">=</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eType&#39;</span><span class="p">).</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;abstract&#39;</span><span class="p">);</span>
 
                     <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">refs</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ref</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="nx">isLocal</span><span class="p">(</span><span class="nx">ref</span><span class="p">))</span> <span class="p">{</span>
-                            <span class="nx">resolved</span> <span class="o">=</span> <span class="nx">index</span><span class="p">[</span><span class="nx">ref</span><span class="p">];</span>
-                        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                            <span class="nx">resolved</span> <span class="o">=</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">Registry</span><span class="p">.</span><span class="nx">getEObject</span><span class="p">(</span><span class="nx">ref</span><span class="p">);</span>
+                        <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">isAbstract</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; xsi:type=&quot;&#39;</span> <span class="o">+</span> <span class="nx">ref</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">;</span>
                         <span class="p">}</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="nx">resolved</span><span class="p">)</span> <span class="p">{</span>
-                            <span class="k">if</span> <span class="p">(</span><span class="nx">isMany</span><span class="p">)</span> <span class="p">{</span>
-                                <span class="nx">parent</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)).</span><span class="nx">add</span><span class="p">(</span><span class="nx">resolved</span><span class="p">);</span>
-                            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                                <span class="nx">parent</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span> <span class="nx">resolved</span><span class="p">);</span>
-                            <span class="p">}</span>
-                        <span class="p">}</span>
+                        <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; href=&quot;&#39;</span> <span class="o">+</span> <span class="nx">ref</span><span class="p">.</span><span class="nx">eURI</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="s1">&#39; /&gt;&#39;</span><span class="p">;</span>
                     <span class="p">});</span>
-                <span class="p">}</span>
-
-                <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">toResolve</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">resolving</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="kd">var</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">resolving</span><span class="p">.</span><span class="nx">parent</span><span class="p">,</span>
-                        <span class="nx">feature</span> <span class="o">=</span> <span class="nx">resolving</span><span class="p">.</span><span class="nx">feature</span><span class="p">,</span>
-                        <span class="nx">value</span> <span class="o">=</span> <span class="nx">resolving</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
-
-                    <span class="nx">setReference</span><span class="p">(</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">feature</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
                 <span class="p">});</span>
 
+                <span class="kd">var</span> <span class="nx">containments</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">features</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span>  <span class="nx">feature</span><span class="p">.</span><span class="nx">isTypeOf</span><span class="p">(</span><span class="s1">&#39;EReference&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;containment&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">root</span><span class="p">.</span><span class="nx">isSet</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">));</span>
+                <span class="p">});</span>
+
+                <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">containments</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">values</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">));</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;upperBound&#39;</span><span class="p">)</span> <span class="o">!==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">values</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span> <span class="nx">processElement</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span> <span class="p">});</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="nx">processElement</span><span class="p">(</span><span class="nx">values</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">});</span>
+
+                <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39;&lt;/&#39;</span> <span class="o">+</span> <span class="nx">element</span> <span class="o">+</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">;</span>
             <span class="p">}</span>
-
-            <span class="nx">parser</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">data</span><span class="p">).</span><span class="nx">close</span><span class="p">();</span>
-            <span class="nx">model</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">rootObject</span><span class="p">);</span>
-            <span class="nx">resolveReferences</span><span class="p">();</span>
-        <span class="p">},</span>
-
-        <span class="nx">toXMI</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">format</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">docRoot</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
-                <span class="nx">root</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;contents&#39;</span><span class="p">).</span><span class="nx">first</span><span class="p">(),</span>
-                <span class="nx">nsPrefix</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">eContainer</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;nsPrefix&#39;</span><span class="p">),</span>
-                <span class="nx">nsURI</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">eContainer</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;nsURI&#39;</span><span class="p">);</span>
-
-            <span class="kd">function</span> <span class="nx">processElement</span><span class="p">(</span><span class="nx">root</span><span class="p">){</span>
-                <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">;</span>
-
-                <span class="kd">var</span> <span class="nx">element</span><span class="p">;</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">root</span><span class="p">.</span><span class="nx">eContainingFeature</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">element</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eContainingFeature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
-                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                    <span class="nx">element</span> <span class="o">=</span> <span class="nx">nsPrefix</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">);</span>
-                <span class="p">}</span>
-                <span class="nx">docRoot</span> <span class="o">+=</span> <span class="nx">element</span><span class="p">;</span>
-
-                <span class="k">if</span> <span class="p">(</span><span class="nx">root</span><span class="p">.</span><span class="nx">eContainer</span><span class="p">.</span><span class="nx">isTypeOf</span><span class="p">(</span><span class="s1">&#39;Resource&#39;</span><span class="p">))</span> <span class="p">{</span>
-                    <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; xmi:version=&quot;2.0&quot; xmlns:xmi=&quot;http://www.omg.org/XMI&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&#39;</span><span class="p">;</span>
-                    <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; xmlns:&#39;</span> <span class="o">+</span> <span class="nx">nsPrefix</span> <span class="o">+</span> <span class="s1">&#39;=&quot;&#39;</span> <span class="o">+</span> <span class="nx">nsURI</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">;</span>
-                <span class="p">}</span>
-
-                <span class="kd">var</span> <span class="nx">features</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">eClass</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;eAllStructuralFeatures&#39;</span><span class="p">),</span>
-                    <span class="nx">attributes</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">features</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">return</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">isTypeOf</span><span class="p">(</span><span class="s1">&#39;EAttribute&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">root</span><span class="p">.</span><span class="nx">isSet</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">));</span>
-                    <span class="p">}),</span>
-                    <span class="nx">references</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">features</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">return</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">isTypeOf</span><span class="p">(</span><span class="s1">&#39;EReference&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;containment&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">root</span><span class="p">.</span><span class="nx">isSet</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">));</span>
-                    <span class="p">});</span>
-
-                <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">attributes</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>  <span class="o">+</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;=&quot;&#39;</span> <span class="o">+</span> <span class="nx">root</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">;</span>
-                <span class="p">});</span>
-
-                <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">references</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">));</span>
-                    <span class="kd">var</span> <span class="nx">refs</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">value</span> <span class="k">instanceof</span> <span class="nx">Ecore</span><span class="p">.</span><span class="nx">EList</span> <span class="o">?</span> <span class="nx">value</span><span class="p">.</span><span class="nx">array</span><span class="p">()</span> <span class="o">:</span> <span class="p">[</span><span class="nx">value</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">return</span> <span class="nx">v</span><span class="p">.</span><span class="nx">fragment</span><span class="p">();</span>
-                    <span class="p">});</span>
-                    <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>  <span class="o">+</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;=&quot;&#39;</span> <span class="o">+</span> <span class="nx">refs</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">;</span>
-                <span class="p">});</span>
-
-                <span class="k">if</span> <span class="p">(</span><span class="nx">root</span><span class="p">.</span><span class="nx">eContents</span><span class="p">().</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39;/&gt;&#39;</span><span class="p">;</span>
-                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                    <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">;</span>
-
-                     <span class="kd">var</span> <span class="nx">containments</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">features</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">return</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">isTypeOf</span><span class="p">(</span><span class="s1">&#39;EReference&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;containment&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">root</span><span class="p">.</span><span class="nx">isSet</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">));</span>
-                     <span class="p">});</span>
-
-                    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">containments</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="kd">var</span> <span class="nx">values</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">));</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="nx">feature</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;upperBound&#39;</span><span class="p">)</span> <span class="o">!==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-                            <span class="nx">values</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span> <span class="nx">processElement</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span> <span class="p">});</span>
-                        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                            <span class="nx">processElement</span><span class="p">(</span><span class="nx">values</span><span class="p">);</span>
-                        <span class="p">}</span>
-                    <span class="p">});</span>
-
-                    <span class="nx">docRoot</span> <span class="o">+=</span> <span class="s1">&#39;&lt;/&#39;</span> <span class="o">+</span> <span class="nx">element</span> <span class="o">+</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">;</span>
-                <span class="p">}</span>
-
-                <span class="k">return</span> <span class="nx">docRoot</span><span class="p">;</span>
-            <span class="p">}</span>
-
-            <span class="nx">processElement</span><span class="p">(</span><span class="nx">root</span><span class="p">);</span>
-
-            <span class="nx">docRoot</span> <span class="o">=</span> <span class="nx">format</span> <span class="o">?</span> <span class="nx">formatXml</span><span class="p">(</span><span class="nx">docRoot</span><span class="p">)</span> <span class="o">:</span> <span class="nx">docRoot</span><span class="p">;</span>
-            <span class="nx">docRoot</span> <span class="o">=</span> <span class="s1">&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;\n&#39;</span> <span class="o">+</span> <span class="nx">docRoot</span><span class="p">;</span>
 
             <span class="k">return</span> <span class="nx">docRoot</span><span class="p">;</span>
         <span class="p">}</span>
+
+        <span class="nx">processElement</span><span class="p">(</span><span class="nx">root</span><span class="p">);</span>
+
+        <span class="nx">docRoot</span> <span class="o">=</span> <span class="nx">indent</span> <span class="o">?</span> <span class="nx">formatXml</span><span class="p">(</span><span class="nx">docRoot</span><span class="p">)</span> <span class="o">:</span> <span class="nx">docRoot</span><span class="p">;</span>
+        <span class="nx">docRoot</span> <span class="o">=</span> <span class="s1">&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;\n&#39;</span> <span class="o">+</span> <span class="nx">docRoot</span><span class="p">;</span>
+
+        <span class="k">return</span> <span class="nx">docRoot</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">function</span> <span class="nx">formatXml</span><span class="p">(</span><span class="nx">xml</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">reg</span> <span class="o">=</span> <span class="sr">/(&gt;)(&lt;)(\/*)/g</span><span class="p">,</span>
+        <span class="nx">wsexp</span> <span class="o">=</span> <span class="sr">/ *(.*) +\n/g</span><span class="p">,</span>
+        <span class="nx">contexp</span> <span class="o">=</span> <span class="sr">/(&lt;.+&gt;)(.+\n)/g</span><span class="p">;</span>
+
+    <span class="nx">xml</span> <span class="o">=</span> <span class="nx">xml</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nx">reg</span><span class="p">,</span> <span class="s1">&#39;$1\n$2$3&#39;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="nx">wsexp</span><span class="p">,</span> <span class="s1">&#39;$1\n&#39;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="nx">contexp</span><span class="p">,</span> <span class="s1">&#39;$1\n$2&#39;</span><span class="p">);</span>
+
+    <span class="kd">var</span> <span class="nx">pad</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nx">formatted</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="nx">lines</span> <span class="o">=</span> <span class="nx">xml</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;\n&#39;</span><span class="p">),</span>
+        <span class="nx">indent</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nx">lastType</span> <span class="o">=</span> <span class="s1">&#39;other&#39;</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>4 types of tags - single, closing, opening, other (text, doctype, comment) - 4*4 = 16 transitions</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">transitions</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;single-&gt;single&#39;</span>    <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;single-&gt;closing&#39;</span>   <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;single-&gt;opening&#39;</span>   <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;single-&gt;other&#39;</span>     <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;closing-&gt;single&#39;</span>   <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;closing-&gt;closing&#39;</span>  <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;closing-&gt;opening&#39;</span>  <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;closing-&gt;other&#39;</span>    <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;opening-&gt;single&#39;</span>   <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;opening-&gt;closing&#39;</span>  <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;opening-&gt;opening&#39;</span>  <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;opening-&gt;other&#39;</span>    <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;other-&gt;single&#39;</span>     <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;other-&gt;closing&#39;</span>    <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;other-&gt;opening&#39;</span>    <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;other-&gt;other&#39;</span>      <span class="o">:</span> <span class="mi">0</span>
     <span class="p">};</span>
 
-    <span class="kd">function</span> <span class="nx">formatXml</span><span class="p">(</span><span class="nx">xml</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">reg</span> <span class="o">=</span> <span class="sr">/(&gt;)(&lt;)(\/*)/g</span><span class="p">,</span>
-            <span class="nx">wsexp</span> <span class="o">=</span> <span class="sr">/ *(.*) +\n/g</span><span class="p">,</span>
-            <span class="nx">contexp</span> <span class="o">=</span> <span class="sr">/(&lt;.+&gt;)(.+\n)/g</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">lines</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">ln</span> <span class="o">=</span> <span class="nx">lines</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="kd">var</span> <span class="nx">single</span> <span class="o">=</span> <span class="nb">Boolean</span><span class="p">(</span><span class="nx">ln</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/&lt;.+\/&gt;/</span><span class="p">));</span> <span class="c1">// is this line a single tag? ex. &lt;br /&gt;</span>
+        <span class="kd">var</span> <span class="nx">closing</span> <span class="o">=</span> <span class="nb">Boolean</span><span class="p">(</span><span class="nx">ln</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/&lt;\/.+&gt;/</span><span class="p">));</span> <span class="c1">// is this a closing tag? ex. &lt;/a&gt;</span>
+        <span class="kd">var</span> <span class="nx">opening</span> <span class="o">=</span> <span class="nb">Boolean</span><span class="p">(</span><span class="nx">ln</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/&lt;[^!].*&gt;/</span><span class="p">));</span> <span class="c1">// is this even a tag (that&#39;s not &lt;!something&gt;)</span>
+        <span class="kd">var</span> <span class="nx">type</span> <span class="o">=</span> <span class="nx">single</span> <span class="o">?</span> <span class="s1">&#39;single&#39;</span> <span class="o">:</span> <span class="nx">closing</span> <span class="o">?</span> <span class="s1">&#39;closing&#39;</span> <span class="o">:</span> <span class="nx">opening</span> <span class="o">?</span> <span class="s1">&#39;opening&#39;</span> <span class="o">:</span> <span class="s1">&#39;other&#39;</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">fromTo</span> <span class="o">=</span> <span class="nx">lastType</span> <span class="o">+</span> <span class="s1">&#39;-&gt;&#39;</span> <span class="o">+</span> <span class="nx">type</span><span class="p">;</span>
+        <span class="nx">lastType</span> <span class="o">=</span> <span class="nx">type</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">padding</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
 
-        <span class="nx">xml</span> <span class="o">=</span> <span class="nx">xml</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nx">reg</span><span class="p">,</span> <span class="s1">&#39;$1\n$2$3&#39;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="nx">wsexp</span><span class="p">,</span> <span class="s1">&#39;$1\n&#39;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="nx">contexp</span><span class="p">,</span> <span class="s1">&#39;$1\n$2&#39;</span><span class="p">);</span>
-
-        <span class="kd">var</span> <span class="nx">pad</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="nx">formatted</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
-            <span class="nx">lines</span> <span class="o">=</span> <span class="nx">xml</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;\n&#39;</span><span class="p">),</span>
-            <span class="nx">indent</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="nx">lastType</span> <span class="o">=</span> <span class="s1">&#39;other&#39;</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>4 types of tags - single, closing, opening, other (text, doctype, comment) - 4*4 = 16 transitions</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="kd">var</span> <span class="nx">transitions</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;single-&gt;single&#39;</span>    <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s1">&#39;single-&gt;closing&#39;</span>   <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-            <span class="s1">&#39;single-&gt;opening&#39;</span>   <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s1">&#39;single-&gt;other&#39;</span>     <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s1">&#39;closing-&gt;single&#39;</span>   <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s1">&#39;closing-&gt;closing&#39;</span>  <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-            <span class="s1">&#39;closing-&gt;opening&#39;</span>  <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s1">&#39;closing-&gt;other&#39;</span>    <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s1">&#39;opening-&gt;single&#39;</span>   <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="s1">&#39;opening-&gt;closing&#39;</span>  <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s1">&#39;opening-&gt;opening&#39;</span>  <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="s1">&#39;opening-&gt;other&#39;</span>    <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="s1">&#39;other-&gt;single&#39;</span>     <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s1">&#39;other-&gt;closing&#39;</span>    <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-            <span class="s1">&#39;other-&gt;opening&#39;</span>    <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s1">&#39;other-&gt;other&#39;</span>      <span class="o">:</span> <span class="mi">0</span>
-        <span class="p">};</span>
-
-        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">lines</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">ln</span> <span class="o">=</span> <span class="nx">lines</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
-            <span class="kd">var</span> <span class="nx">single</span> <span class="o">=</span> <span class="nb">Boolean</span><span class="p">(</span><span class="nx">ln</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/&lt;.+\/&gt;/</span><span class="p">));</span> <span class="c1">// is this line a single tag? ex. &lt;br /&gt;</span>
-            <span class="kd">var</span> <span class="nx">closing</span> <span class="o">=</span> <span class="nb">Boolean</span><span class="p">(</span><span class="nx">ln</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/&lt;\/.+&gt;/</span><span class="p">));</span> <span class="c1">// is this a closing tag? ex. &lt;/a&gt;</span>
-            <span class="kd">var</span> <span class="nx">opening</span> <span class="o">=</span> <span class="nb">Boolean</span><span class="p">(</span><span class="nx">ln</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/&lt;[^!].*&gt;/</span><span class="p">));</span> <span class="c1">// is this even a tag (that&#39;s not &lt;!something&gt;)</span>
-            <span class="kd">var</span> <span class="nx">type</span> <span class="o">=</span> <span class="nx">single</span> <span class="o">?</span> <span class="s1">&#39;single&#39;</span> <span class="o">:</span> <span class="nx">closing</span> <span class="o">?</span> <span class="s1">&#39;closing&#39;</span> <span class="o">:</span> <span class="nx">opening</span> <span class="o">?</span> <span class="s1">&#39;opening&#39;</span> <span class="o">:</span> <span class="s1">&#39;other&#39;</span><span class="p">;</span>
-            <span class="kd">var</span> <span class="nx">fromTo</span> <span class="o">=</span> <span class="nx">lastType</span> <span class="o">+</span> <span class="s1">&#39;-&gt;&#39;</span> <span class="o">+</span> <span class="nx">type</span><span class="p">;</span>
-            <span class="nx">lastType</span> <span class="o">=</span> <span class="nx">type</span><span class="p">;</span>
-            <span class="kd">var</span> <span class="nx">padding</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
-
-            <span class="nx">indent</span> <span class="o">+=</span> <span class="nx">transitions</span><span class="p">[</span><span class="nx">fromTo</span><span class="p">];</span>
-            <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">indent</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">padding</span> <span class="o">+=</span> <span class="s1">&#39;    &#39;</span><span class="p">;</span>
-            <span class="p">}</span>
-
-            <span class="nx">formatted</span> <span class="o">+=</span> <span class="nx">padding</span> <span class="o">+</span> <span class="nx">ln</span> <span class="o">+</span> <span class="s1">&#39;\n&#39;</span><span class="p">;</span>
+        <span class="nx">indent</span> <span class="o">+=</span> <span class="nx">transitions</span><span class="p">[</span><span class="nx">fromTo</span><span class="p">];</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">indent</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">padding</span> <span class="o">+=</span> <span class="s1">&#39;    &#39;</span><span class="p">;</span>
         <span class="p">}</span>
 
-        <span class="k">return</span> <span class="nx">formatted</span><span class="p">;</span>
+        <span class="nx">formatted</span> <span class="o">+=</span> <span class="nx">padding</span> <span class="o">+</span> <span class="nx">ln</span> <span class="o">+</span> <span class="s1">&#39;\n&#39;</span><span class="p">;</span>
     <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nx">formatted</span><span class="p">;</span>
+<span class="p">}</span>
 
 <span class="p">})();</span>
 
