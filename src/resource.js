@@ -5,24 +5,24 @@ Ecore.$ = root.jQuery || root.Zepto || root.ender || null;
 
 var Ajax = {
 
-    get: function(url, success, error) {
+    get: function(url, type, success, error) {
         if (!Ecore.$) return;
 
         return Ecore.$.ajax({
             url: url,
-            dataType: 'json',
+            dataType: type,
             success: success,
             error: error
         });
     },
 
-    post: function(url, data, success, error) {
+    post: function(url, data, type, success, error) {
         if (!Ecore.$) return;
 
         return Ecore.$.ajax({
            type: 'POST',
            url: url,
-           dataType: 'json',
+           dataType: type,
            data: data,
            success: success,
            error: error
@@ -40,8 +40,12 @@ var Ajax = {
 
 Ecore.JSON = {
 
+    dataType: 'json',
+    contentType: 'application/json',
+
     parse: function(model, data) {
-        var toResolve = [];
+        var toResolve = [],
+            resourceSet = model.get('resourceSet') || Ecore.ResourceSet.create();
 
         function processFeature(object, eObject) {
             if (!object || !eObject)
@@ -85,7 +89,7 @@ Ecore.JSON = {
                 if (isLocal(ref)) {
                     resolved = index[ref];
                 } else {
-                    resolved = Ecore.Registry.getEObject(ref);
+                    resolved = resourceSet.getEObject(ref);
                 }
 
                 if (resolved) {
@@ -116,7 +120,7 @@ Ecore.JSON = {
             var eObject;
 
             if (object && object.eClass) {
-                var eClass = Ecore.Registry.getEObject(object.eClass),
+                var eClass = resourceSet.getEObject(object.eClass),
                     features = eClass.get('eAllStructuralFeatures');
 
                 eObject = Ecore.create(eClass);
@@ -134,7 +138,7 @@ Ecore.JSON = {
         }
     },
 
-    toJSON: function(model) {
+    to: function(model) {
         var contents = model.get('contents').array(),
             indexes = {};
             indexes[model.get('uri')] = buildIndex(model);
@@ -238,6 +242,13 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             upperBound: -1,
             containment: true,
             eType: Ecore.EObject
+        },
+        {
+            eClass: Ecore.EReference,
+            name: 'resourceSet',
+            upperBound: 1,
+            lowerBound: 0,
+            eType: Ecore.ResourceSet
         }
     ],
     eOperations: [
@@ -310,43 +321,50 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
         },
         {
             eClass: Ecore.EOperation,
-            name: 'toJSON',
-            _: function() {
-                return Ecore.JSON.toJSON(this);
+            name: 'to',
+            _: function(formatter, indent) {
+                if (formatter && typeof formatter.to === 'function')
+                    return formatter.to(this, indent);
+                else
+                    return Ecore.JSON.to(this);
             }
         },
         {
             eClass: Ecore.EOperation,
             name: 'parse',
-            _: function(data) {
-                Ecore.JSON.parse(this, data);
+            _: function(data, loader) {
+                if (loader && typeof loader.parser === 'function')
+                    loader.parse(this, data);
+                else
+                    Ecore.JSON.parse(this, data);
                 return this;
             }
         },
         {
             eClass: Ecore.EOperation,
             name: 'save',
-            _: function(success, error) {
-                var data = this.toJSON();
+            _: function(success, error, formatter) {
+                var data = this.to(formatter);
+                var dataType = formatter ? formatter.dataType : 'json';
                 if (data) {
-                    Ajax.post(this.uri, data, success, error);
+                    Ajax.post(this.uri, data, format, success, error);
                 }
             }
         },
         {
             eClass: Ecore.EOperation,
             name: 'load',
-            _: function(success, error, data) {
+            _: function(success, error, data, loader) {
                 var model = this;
                 var loadSuccess = function(data) {
-                    model.parse(data);
+                    model.parse(data, loader);
                     return success(model);
                 };
 
                 if (data) {
                     return loadSuccess(data);
                 } else {
-                    return Ajax.get(this.uri, loadSuccess, error);
+                    return Ajax.get(this.uri, 'json', loadSuccess, error);
                 }
             }
         },
@@ -360,6 +378,44 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
         }
     ]
 });
+
+
+// URIConverter
+//
+
+var URIConverter = function() {
+    this.uriMap = {};
+};
+
+URIConverter.prototype = {
+
+    map: function(key, value) {
+        this.uriMap[key] = value;
+    },
+
+    normalize: function(uri) {
+        var split = uri.split('#'),
+            base = split[0],
+            normalized = this.uriMap[base];
+
+        if (normalized) return normalized;
+
+        var slashIndex = base.lastIndexOf('/') + 1,
+            sliced, rest;
+
+        sliced = base.slice(0, slashIndex);
+
+        if (sliced === base) return uri;
+
+        rest = base.slice(slashIndex, base.length);
+
+        return this.normalize(sliced) + rest;
+    }
+
+};
+
+// ResourceSet
+//
 
 var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
     name: 'ResourceSet',
@@ -378,17 +434,111 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
     eOperations: [
         {
             eClass: Ecore.EOperation,
+            eType: Ecore.Resource,
+            upperBound: 1,
             name: 'create',
             _: function(uri) {
-                var exists = this.get('resources').find(function(e) {
-                    return e.get('uri') === uri;
-                });
-                if (exists) return exists;
+                var attrs = _.isObject(uri) ? uri : { uri: uri },
+                    ePackage, resource;
 
-                var resource = new Ecore.Resource(uri);
+                if (!attrs.uri)
+                    throw new Error('Cannot create Resource, missing URI parameter');
+
+                resource = this.get('resources').find(function(e) {
+                    return e.get('uri') === attrs.uri;
+                });
+
+                if (resource) return resource;
+
+                ePackage = Ecore.EPackage.Registry.getEPackage(attrs.uri);
+                if (ePackage) {
+                    if (ePackage.eResource()) {
+                        resource = ePackage.eResource();
+                    } else {
+                        resource = Ecore.Resource.create(attrs);
+                        resource.add(ePackage);
+                        resource.set('resourceSet', this);
+                        this.get('resources').add(resource);
+                    }
+
+                    return resource;
+                }
+
+                resource = Ecore.Resource.create(attrs);
+                resource.set('resourceSet', this);
                 this.get('resources').add(resource);
 
                 return resource;
+            }
+        },
+        {
+            eClass: Ecore.EOperation,
+            eType: Ecore.EObject,
+            upperBound: 1,
+            name: 'getEObject',
+            _: function(uri) {
+                var split = uri.split('#'),
+                    base = split[0],
+                    fragment = split[1],
+                    resource;
+
+                if (!fragment) return null;
+
+                resource = this.get('resources').find(function(e) {
+                    return e.get('uri') === base;
+                });
+
+                if (!resource) {
+                    var ePackage = Ecore.EPackage.Registry.getEPackage(base);
+                    if (ePackage) {
+                        if (!ePackage.eResource()) {
+                            var ePackageResource = this.create({ uri: base });
+                            ePackageResource.add(ePackage);
+                        }
+                        ePackage.eResource().set('resourceSet', this);
+                        this.get('resources').add(ePackage.eResource());
+                        return this.getEObject(uri);
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return resource.getEObject(fragment);
+                }
+            }
+        },
+        {
+            eClass: Ecore.EOperation,
+            eType: Ecore.EObject,
+            upperBound: -1,
+            name: 'elements',
+            _: function(type) {
+                var filter = function(el) {
+                    if (!type) return true;
+                    else if (type.eClass) {
+                        return v.eClass === type;
+                    } else {
+                        return v.eClass.get('name') === type;
+                    }
+                };
+                var resources = this.get('resources');
+                var contents = _.flatten(_.map(resources, function(m) {
+                    return _.filter(_.values(m._index()), filter);
+                }));
+
+                return contents;
+            }
+        },
+        {
+            eClass: Ecore.EOperation,
+            eType: Ecore.JSObject,
+            upperBound: 1,
+            name: 'uriConverter',
+            _: function() {
+                if (!this._converter) {
+                    this._converter = new URIConverter();
+                }
+
+                return this._converter;
             }
         }
     ]
@@ -397,118 +547,19 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
 var EPackageResource = Ecore.EPackage.create({
     name: 'resources',
     nsPrefix: 'resources',
-    nsURI: 'http://www.eclipselabs.org/ghillairet/ecore/resources',
+    nsURI: 'http://www.eclipselabs.org/ecore/2012/resources',
     eClassifiers: [
         EClassResourceSet,
         EClassResource
     ]
 });
 
-function initEcoreModel() {
-    var model = Ecore.Resource.create({ uri: 'http://www.eclipse.org/emf/2002/Ecore' });
-    model.add(Ecore.EcorePackage);
+var EcoreResource = Ecore.Resource.create({ uri: Ecore.EcorePackage.get('nsURI') });
+EcoreResource.add(Ecore.EcorePackage);
+var ResourceResource = Ecore.Resource.create({ uri: EPackageResource.get('nsURI') });
+ResourceResource.add(EPackageResource);
 
-    var resources = Ecore.Resource.create({ uri: 'http://www.eclipselabs.org/ghillairet/ecore/resources' });
-    resources.add(EPackageResource);
-
-    Ecore.Registry.register(model);
-    Ecore.Registry.register(resources);
-
-    return model;
-}
-
-// Registry of models
-
-var Registry = function() {
-    var instance;
-
-    Registry = function Registry() {
-        return instance;
-    };
-
-    Registry.prototype = this;
-
-    instance = new Registry();
-
-    instance.constructor = Registry;
-    instance._index = {};
-    instance._models = [];
-
-    return instance;
-};
-
-Registry.prototype = {
-
-    // Returns the Array of models
-    //
-
-    models: function() {
-        return this._models;
-    },
-
-    // Registers a model to the Registry by it's URI.
-    //
-
-    register: function(model) {
-        this._index[model.get('uri')] = model;
-        this._models.push(model);
-
-        return this;
-    },
-
-    unregister: function(model) {
-        this._models = _.without(this._models, model);
-        delete this._index[model.get('uri')];
-
-        return this;
-    },
-
-
-    // Returns the EObject corresponding to the given URI.
-    //
-
-    getEObject: function(uri) {
-        var split = uri.split('#'),
-            base = split[0],
-            model = this._index[base],
-            fragment,
-            eObject;
-
-        if (split.length === 2) {
-            fragment = split[1];
-        }
-
-        if (model && fragment) {
-            eObject = buildIndex(model)[fragment];
-        }
-
-        return eObject;
-    },
-
-    // Returns all EObjects flatten in single array.
-    //
-
-    elements: function(type) {
-        var contents = _.flatten(_.map(this.models(), function(m) {
-            var values = _.values(m._index());
-            if (type) {
-                return _.filter(values, function(v) {
-                    if (type.eClass) {
-                        return v.eClass === type;
-                    } else {
-                        return v.eClass.get('name') === type;
-                    }
-                });
-            }
-        }));
-
-        return contents;
-    }
-
-};
-
-Ecore.Registry = new Registry();
-initEcoreModel();
+Ecore.EPackage.Registry.register(EPackageResource);
 
 // Build index of EObjects contained in a Resource.
 //
@@ -541,4 +592,3 @@ function buildIndex(model) {
     return index;
 }
 
-})();
