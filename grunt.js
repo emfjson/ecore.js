@@ -4,19 +4,19 @@ module.exports = function(grunt) {
 
         concat: {
             dist: {
-                src: ['src/ecore.js', 'src/resource.js'],
+                src: ['src/ecore.js', 'src/resource.js', 'src/xmi.js'],
                 dest: 'dist/ecore.js'
-            },
-            xmi: {
-                src: ['src/xmi.js'],
-                dest: 'dist/ecore.xmi.js'
             },
             edit: {
                 src: [
-                    'src/edit/ecore.edit.js', 'src/edit/windows.js',
-                    'src/edit/menus.js', 'src/edit/explorer.js',
-                    'src/edit/property.js', 'src/edit/tabs.js',
-                    'src/edit/tabeditor.js', 'src/edit/tree.js',
+                    'src/edit/ecore.edit.js',
+                    'src/edit/windows.js',
+                    'src/edit/menus.js',
+                    'src/edit/explorer.js',
+                    'src/edit/property.js',
+                    'src/edit/tabs.js',
+                    'src/edit/tabeditor.js',
+                    'src/edit/tree.js',
                     'src/edit/ecore.edit.end.js'
                 ],
                 dest: 'dist/ecore.edit.js'
@@ -36,7 +36,7 @@ module.exports = function(grunt) {
         simplemocha: {
 
             all: {
-                src: 'test/*.js',
+                src: 'test/*.test.js',
                 options: {
                     globals: ['should'],
                     timeout: 3000,
@@ -52,10 +52,6 @@ module.exports = function(grunt) {
             dist: {
                 src: ['dist/ecore.js'],
                 dest: 'dist/ecore.min.js'
-            },
-            xmi: {
-                src: 'dist/ecore.xmi.js',
-                dest: 'dist/ecore.xmi.min.js'
             },
             edit: {
                 src: ['dist/ecore.edit.js'],
