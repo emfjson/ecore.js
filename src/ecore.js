@@ -30,22 +30,29 @@ var Ecore = {
     //
     // Example:
     //
-    //      var User = Ecore.createEClass({
+    //      var User = Ecore.EClass.create({
     //          name: 'User',
     //          eStructuralFeatures: [
-    //              Ecore.createEAttribute({
+    //              {
+    //                  eClass: Ecore.EAttribute,
     //                  name: 'userName',
     //                  eType: Ecore.EcorePackage.EString
-    //              })
+    //              }
     //          ]
     //      });
     //
     //      var u1 = Ecore.create(User);
     //      u1.set('userName', 'Randy');
+    //
+    //      alternatively
+    //
+    //      var u1 = User.create({ userName: 'Randy' });
+    //
     //      u1.get('userName'); -> Randy
 
     create: function(eClass, attributes) {
-        var attrs;
+        var attrs,
+            eObject;
 
         if (!attributes) {
             if (eClass instanceof EObject) {
@@ -59,7 +66,9 @@ var Ecore = {
             attrs.eClass = eClass;
         }
 
-        return new EObject( attrs );
+        eObject = new EObject( attrs );
+
+        return eObject;
     }
 
 };
@@ -161,7 +170,7 @@ var Events = {
 //
 
 var EObject = function(attributes) {
-    attributes || (attributes = {});
+    if (!attributes) attributes = {};
 
     this.eClass = attributes.eClass;
     this.values = {};
@@ -329,7 +338,7 @@ Ecore.EObjectPrototype = {
         if (value instanceof EList) {
             return value.size() > 0;
         } else {
-            return value !== null;
+            return value !== null && typeof value !== 'undefined';
         }
     },
 
@@ -402,6 +411,7 @@ Ecore.EObjectPrototype = {
 
     isKindOf: function(type) {
         if(!type || !this.eClass) return false;
+        if (this.isTypeOf(type)) return true;
 
         var typeName = type.eClass ? type.get('name') : type,
             superTypes = this.eClass.get('eAllSuperTypes');
@@ -479,7 +489,7 @@ Ecore.EObjectPrototype = {
 
         // ModelElement use names
         if (this.isKindOf('EModelElement')) {
-            if (!eContainer || eContainer.isTypeOf('Resource')) {
+            if (!eContainer || eContainer.isKindOf('Resource')) {
                 return '/';
             } else {
                 return eContainer.fragment() + '/' + this.get('name');
@@ -488,7 +498,7 @@ Ecore.EObjectPrototype = {
 
         // Default fragments
         var fragment;
-        if (this.eContainer.isTypeOf('Resource')) {
+        if (this.eContainer.isKindOf('Resource')) {
             fragment = '/';
         } else {
             var eFeature = this.eContainingFeature;
@@ -716,7 +726,7 @@ EClass.values = {
     eAllSubTypes: function() {
         var eClasses, subTypes;
 
-        eClasses = Ecore.Registry.elements('EClass');
+        eClasses = Ecore.EPackage.Registry.elements('EClass');
         subTypes = _.filter(eClasses, function(c) {
             return _.contains(c.get('eAllSuperTypes'), this);
         }, this);
@@ -1214,7 +1224,7 @@ var EStructuralFeature_changeable = EAttribute.create({ name: 'changeable', eTyp
     EStructuralFeature_volatile = EAttribute.create({ name: 'volatile', eType: EBoolean }),
     EStructuralFeature_transient = EAttribute.create({ name: 'transient', eType: EBoolean }),
     EStructuralFeature_defaultValueLiteral = EAttribute.create({ name: 'defaultValueLiteral', eType: EString }),
-    EStructuralFeature_defaultValue = EAttribute.create({ name: 'defaultValue', eType: JSObject }),
+    EStructuralFeature_defaultValue = EAttribute.create({ name: 'defaultValue', eType: JSObject, derived: true }),
     EStructuralFeature_unsettable = EAttribute.create({ name: 'unsettable', eType: EBoolean }),
     EStructuralFeature_derived = EAttribute.create({ name: 'derived', eType: EBoolean });
 
@@ -1226,6 +1236,8 @@ EStructuralFeature.get('eStructuralFeatures')
     .add(EStructuralFeature_defaultValue)
     .add(EStructuralFeature_unsettable)
     .add(EStructuralFeature_derived);
+
+EStructuralFeature_defaultValue.set({ derived: true });
 
 // EReference
 //  - attributes
@@ -1294,6 +1306,20 @@ var EEnum_eLiterals = EReference.create({
 
 EEnum.get('eStructuralFeatures').add(EEnum_eLiterals);
 
+EEnumLiteral_value = EAttribute.create({
+    name: 'value',
+    eType: EInteger
+});
+
+EEnumLiteral_literal = EAttribute.create({
+    name: 'literal',
+    eType: EString
+});
+
+EEnumLiteral.get('eStructuralFeatures')
+    .add(EEnumLiteral_literal)
+    .add(EEnumLiteral_value);
+
 // DataTypes
 
 EString.eClass = EDataType;
@@ -1308,6 +1334,16 @@ EDouble.eClass = EDataType;
 EDouble.set({ name: 'EDouble' });
 JSObject.eClass = EDataType;
 JSObject.set({ name: 'JSObject' });
+
+Ecore.ELong = EDataType.create({
+    name: 'ELong'
+});
+Ecore.EFloat = EDataType.create({
+    name: 'EFloat'
+});
+Ecore.EShort = EDataType.create({
+    name: 'EShort'
+});
 
 // EPackage
 //  - references
@@ -1365,6 +1401,9 @@ Ecore.EcorePackage.get('eClassifiers')
     .add(EInteger)
     .add(EDouble)
     .add(EDate)
+    .add(Ecore.EShort)
+    .add(Ecore.EFloat)
+    .add(Ecore.ELong)
     .add(JSObject);
 
 Ecore.EObject = EObjectClass;
@@ -1388,4 +1427,59 @@ Ecore.EBoolean = EBoolean;
 Ecore.EInteger = EInteger;
 Ecore.EDouble = EDouble;
 Ecore.EDate = EDate;
+Ecore.JSObject = JSObject;
+
+// EPackage Registry
+//
+// Stores all created EPackages
+
+Ecore.EPackage.Registry = {
+
+    _ePackages: {},
+
+    getEPackage: function(nsURI) {
+        return this._ePackages[nsURI];
+    },
+
+    register: function(ePackage) {
+        if (!ePackage.isSet('nsURI')) {
+            throw new Error('Cannot register EPackage without nsURI');
+        }
+
+        this._ePackages[ePackage.get('nsURI')] = ePackage;
+    },
+
+    ePackages: function() {
+        return _.values(this._ePackages);
+    },
+
+    elements: function(type) {
+        var filter = function(el) {
+            if (!type) return true;
+            else if (type.eClass) {
+                return el.eClass === type;
+            } else {
+                return el.eClass.get('name') === type;
+            }
+        };
+
+        var ePackages = this.ePackages();
+        var content = function(eObject) {
+            return _.map(eObject.eContents(), function(c) {
+                return [c, content(c)];
+            });
+        };
+        var map = function(p) { return content(p); };
+        var contents = [ePackages, _.map(ePackages, map)];
+        contents = _.flatten(contents);
+        contents = _.filter(contents, filter);
+
+        return contents;
+    }
+
+};
+
+// Registers Ecore Package
+
+Ecore.EPackage.Registry.register(Ecore.EcorePackage);
 
