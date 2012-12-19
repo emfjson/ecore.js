@@ -33,22 +33,49 @@ Ecore.XMI = {
             return ns ? ns.uri : null;
         }
 
-        function findEClass(name) {
-            if (name.indexOf(':') !== -1) {
-                var split = name.split(':'),
-                    prefix = split[0],
-                    className = split[1],
-                    uri = getNamespace(prefix) + '#//' + className;
+        function isPrefixed(node) {
+            return node.name.indexOf(':') !== -1;
+        }
 
-                return resourceSet.getEObject(uri);
+        function getClassURIFromPrefix(value) {
+             var split = value.split(':'),
+                 prefix = split[0],
+                 className = split[1],
+                 uri = getNamespace(prefix) + '#//' + className;
+
+             return uri;
+        }
+
+        function getClassURIFromFeatureType(node) {
+            var eClass;
+
+            if (node.parent && node.parent.eObject) {
+                 var parent = currentNode.parent.eObject,
+                     name = node.name,
+                     eFeature = parent.eClass.getEStructuralFeature(name),
+                     eType;
+
+                 if (eFeature && eFeature.get) {
+                      eType = eFeature.get('eType');
+                      if (eType.get('abstract')) {
+                          var aType = node.attributes['xsi:type'];
+                          if (aType) {
+                              eClass = resourceSet.getEObject(getClassURIFromPrefix(aType));
+                          }
+                      } else {
+                          eClass = eType;
+                      }
+                 }
+            }
+
+            return eClass;
+        }
+
+        function findEClass(node) {
+            if (isPrefixed(node)) {
+                return resourceSet.getEObject(getClassURIFromPrefix(node.name));
             } else {
-                if (currentNode.parent.eObject) {
-                    var parent = currentNode.parent.eObject,
-                        eFeature = parent.eClass.getEStructuralFeature(name),
-                        eClass = eFeature.get('eType');
-
-                    return eClass;
-                }
+                return getClassURIFromFeatureType(node);
             }
         }
 
@@ -64,7 +91,7 @@ Ecore.XMI = {
             if (node.parent) node.parent.children.push(node);
             currentNode = node;
 
-            eClass = findEClass(node.name);
+            eClass = findEClass(node);
             if (eClass) {
                 eObject = currentNode.eObject = Ecore.create(eClass);
                 if (!rootObject) rootObject = eObject;
