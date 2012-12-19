@@ -1,213 +1,235 @@
 
-    Ecore.Editor._views = [];
+function lastSegment(uri) {
+    var idx = uri.lastIndexOf('/') + 1;
 
-    function findView(cid) {
-        return _.find(Ecore.Editor._views, function(v) {
-            return v.cid === cid;
-        });
+    return uri.slice(idx, uri.length);
+}
+
+var EditorTabView = Ecore.Editor.EditorTabView = Backbone.View.extend({
+    template: _.template('<ul class="nav nav-tabs"></ul> <div class="tab-content"></div>'),
+
+    initialize: function(attributes) {
+        this.editors = [];
+    },
+
+    render: function() {
+        if (!this.$content && !this.$tabs) {
+            var html = this.template();
+            this.$el.addClass('tabbable');
+
+            this.$el.append(html);
+
+            this.$content = $('.tab-content', this.$el);
+            this.$tabs = $('.nav-tabs', this.$el);
+        }
+
+        _.each(this.editors, function(e) { e.render(); });
+
+        return this;
+    },
+
+    addEditor: function(editor) {
+        if (this.$content && this.$tabs) {
+            editor.$container = this.$content;
+            editor.$tabs = this.$tabs;
+            this.editors.push(editor);
+
+            editor.on('remove', function() { this.suppress(editor); }, this);
+        }
+    },
+
+    getEditor: function(model) {
+        return _.find(this.editors, function(e) { return e.model === model; });
+    },
+
+    suppress: function(editor) {
+        this.editors = _.without(this.editors, editor);
+    },
+
+    show: function(editor) {
+        this.getEditor(editor).show();
     }
 
-    Ecore.Editor.Workbench = {
-        windows: [],
-        add: function(window) {
-            this.windows.push(window);
+});
+
+var TabView = Backbone.View.extend({
+    template: _.template('<li><a href="#tab-<%= id %>" data-toggle="tab"> <%= title %> <i class="icon-remove-circle"></i> </a></li>'),
+
+    events: {
+        'click a > i[class="icon-remove-circle"]': 'remove'
+    },
+
+    initialize: function(attributes) {
+        this.eid = attributes.eid;
+        this._rendered = false;
+    },
+
+    render: function() {
+        if (!this._rendered) {
+            var title = lastSegment(this.model.get('uri'));
+            var html = this.template({ id: this.eid, title: title });
+            this.setElement(html);
+            this._rendered = true;
         }
-    };
+        return this;
+    },
 
-    Ecore.Editor.EditorWindow = Ecore.Editor.Window.extend({
-        intialize: function(attributes) {
-            Ecore.Editor.Window.prototype.initialize.call(this, attributes);
-        },
+    remove: function() {
+        this.trigger('remove');
+        Backbone.View.prototype.remove.apply(this);
+    }
+});
 
-        renderEditor: function() {
-            this.editor = new Ecore.Editor.TreeTabEditor({
-                model: this.model
-            });
-            this.editor.render();
-            this.$content.append(this.editor.$el);
+var EditorView = Ecore.Editor.EditorView = Backbone.View.extend({
+    template: _.template('<div class="tab-pane" id="tab-<%= id %>"></div>'),
 
-            return this;
-        },
-
-        render: function() {
-            Ecore.Editor.Window.prototype.render.call(this);
-            this.renderEditor();
-
-            return this;
+    initialize: function(attributes) {
+        _.bindAll(this, 'render', 'remove');
+        if (attributes && attributes.$container && attributes.$tabs) {
+            this.$container = attributes.container;
+            this.$tabs = attributes.tabs;
         }
-    });
+        this.tab = new TabView({ eid: this.cid, model: this.model });
+        this.tab.on('remove', this.remove);
+        this._rendered = false;
+    },
 
-    Ecore.Editor.TabEditor = Backbone.View.extend({
-        elementTemplate: _.template('<div><div class="tabbable"><ul class="nav nav-tabs"></ul><div class="tab-content"></div></div></div>'),
-        template: _.template('<li><a href="#tab-<%= id %>" data-toggle="tab"> <%= uri %> <i class="icon-remove-circle"></i> </a></li>'),
-        templateTab: _.template('<div class="tab-pane" id="tab-<%= id %>"></div>'),
+    render: function() {
+        if (!this._rendered) {
+            var html = this.template({ id: this.cid });
+            this.setElement(html);
 
-        initialize: function(attributes) {
-            _.bindAll(this, 'render', 'active', 'remove');
-            Ecore.Editor._views.push(this);
-        },
-
-        render: function() {
-            var uri = this.model.uri,
-                elHtml = this.elementTemplate(),
-                html = this.template({ id: this.cid, uri: uri }),
-                tabHtml = this.templateTab({ id: this.cid, uri: uri });
-
-            this.setElement(elHtml);
-
-            $('.tabbable > .nav-tabs', this.$el).append(html);
-            $('.tab-content', this.$el).append(tabHtml);
-
-            this.$content = $('.tab-content > #tab-'+ this.cid, this.$el);
-
-            // render content, extend in subClasses
-            this.renderContent(this.cid);
-
-            this.$a = $('li > a[href="#tab-' + this.cid + '"]', this.$el);
-            this.$tab = $('#tab-' + this.cid, this.$el);
-
-            this.$a.click(this.active);
-            this.$a.on('shown', function(e) {
-                var target = findView(e.target.href.split('-')[1]);
-                if (target) {
-                    target.selected = true;
-                }
-                if (e.relatedTarget) {
-                    var related = findView(e.relatedTarget.href.split('-')[1]);
-                    if (related) {
-                        related.selected = false;
-                    }
-                }
-            });
-
-            var view = this;
-            $('i', this.$a).click(function() {
-                view.remove();
-                $('#editor a:first').tab('show');
-            });
-
-            this.$el.tab('show');
-
-            return this;
-        },
-
-        active: function() {
-            this.$el.tab('show');
-        },
-
-        remove: function() {
-            this.$a.remove();
-            this.$tab.remove();
+            this.$container.append(this.$el);
+            this.$tabs.append(this.tab.render().$el);
+            this._rendered = true;
         }
 
-    });
+        this.renderContent();
 
-    Ecore.Editor.TreeTabEditor = Ecore.Editor.TabEditor.extend({
-        menuBarTemplate: _.template('<div class="row-fluid"></div>'),
-        contentTemplate: _.template('<div class="row-fluid"><div class="pointer tree-node" id="tree-<%= id %>"></div></div>'),
+        return this;
+    },
 
-        initialize: function(attributes) {
-            _.bindAll(this, 'render', 'active');
-            Ecore.Editor._views.push(this);
-            this._window = attributes._window;
-        },
+    renderContent: function() {},
 
-        renderMenuBar: function() {
-            var html = this.menuBarTemplate();
+    show: function() {
+        $('a[href="#tab-' +  this.cid + '"]', this.$tabs).tab('show');
+    },
 
-            var view = this;
-            this.menuBar = new Ecore.Editor.MenuBar({
-                el: html,
-                buttons: [
-                    new Ecore.Editor.MenuBarDropDownButton({
-                        label: 'add',
-                        click: function() {
-                            var selection = view.tree.currentSelection;
-                            if (!selection) return;
+    remove: function() {
+        this.trigger('remove');
+        Backbone.View.prototype.remove.apply(this);
+    }
 
-                            var model = selection.model,
-                                child = model.eClass.eAllContainments(),
-                                eContainingFeature = model.eContainingFeature;
+});
 
-                            this.removeItem();
+/*
+Ecore.Editor.TreeTabEditor = Ecore.Editor.TabEditor.extend({
+    menuBarTemplate: _.template('<div class="row-fluid"></div>'),
+    contentTemplate: _.template('<div class="row-fluid"><div class="pointer tree-node" id="tree-<%= id %>"></div></div>'),
 
-                            _.each(child, function(feature) {
-                                var eType = feature.get('eType'),
-                                    types = eType.get('abstract') ? eType.eAllSubTypes() : [eType];
+    initialize: function(attributes) {
+        _.bindAll(this, 'render', 'active');
+//        Ecore.Editor._views.push(this);
+//        this._window = attributes._window;
+    },
 
-                                _.each(types, function(type) {
-                                    this.addItem(new Ecore.Editor.DropDownItem({ label: 'Child ' + type.get('name') }));
-                                }, this);
+    renderMenuBar: function() {
+        var html = this.menuBarTemplate();
 
+        var view = this;
+        this.menuBar = new Ecore.Editor.MenuBar({
+            el: html,
+            buttons: [
+                new Ecore.Editor.MenuBarDropDownButton({
+                    label: 'add',
+                    click: function() {
+                        var selection = view.tree.currentSelection;
+                        if (!selection) return;
+
+                        var model = selection.model;
+                        var child = model.eClass.eAllContainments();
+                        var eContainingFeature = model.eContainingFeature;
+
+                        this.removeItem();
+
+                        _.each(child, function(feature) {
+                            var eType = feature.get('eType'),
+                                types = eType.get('abstract') ? eType.eAllSubTypes() : [eType];
+
+                            _.each(types, function(type) {
+                                this.addItem(new Ecore.Editor.DropDownItem({ label: 'Child ' + type.get('name') }));
                             }, this);
 
-                            var siblings;
-                            if (eContainingFeature) {
-                                var eType = eContainingFeature.get('eType');
-                                siblings = eType.get('abstract') ? eType.eAllSubTypes() : [eType];
+                        }, this);
 
-                                if (child.length > 0) {
-                                    this.addItem(new Ecore.Editor.Separator());
-                                }
+                var siblings;
+                if (eContainingFeature) {
+                    var eType = eContainingFeature.get('eType');
+                        siblings = eType.get('abstract') ? eType.eAllSubTypes() : [eType];
 
-                                _.each(siblings, function(type) {
-                                    this.addItem(new Ecore.Editor.DropDownItem({ label: 'Sibling ' + type.get('name') }));
-                                }, this);
-                            }
+                    if (child.length > 0) {
+                        this.addItem(new Ecore.Editor.Separator());
+                    }
 
-                            _.each(this.items, this.renderItem, this);
-                        }
-                    }),
-                    new Ecore.Editor.MenuBarButton({
-                        label: 'remove',
-                        click: function() {}
-                    })
-                ]
-            });
+                    _.each(siblings, function(type) {
+                        this.addItem(new Ecore.Editor.DropDownItem({ label: 'Sibling ' + type.get('name') }));
+                    }, this);
+            }
 
-            this.menuBar.render();
-            this.$content.append(this.menuBar.$el);
-        },
+            _.each(this.items, this.renderItem, this);
+            }
+            }),
+                new Ecore.Editor.MenuBarButton({
+                    label: 'remove',
+                click: function() {}
+                })
+        ]
+        });
 
-        renderContent: function(id) {
-            this.renderMenuBar();
+        this.menuBar.render();
+        this.$content.append(this.menuBar.$el);
+    },
 
-            html = this.contentTemplate({ id: id });
+    renderContent: function(id) {
+        this.renderMenuBar();
 
-            this.tree = new Ecore.Editor.TreeView({
-                el: $('#tree-' + id, $(html)),
-                model: this.model
-            });
+        html = this.contentTemplate({ id: id });
 
-            this.tree.render();
-            this.tree.show();
+        this.tree = new Ecore.Editor.TreeView({
+            el: $('#tree-' + id, $(html)),
+            model: this.model
+        });
 
-            this.$content.append(this.tree.$el);
+        this.tree.render();
+        this.tree.show();
 
-            var view = this,
-                add = $('div > div > a[class*="add"]', this.$content);
+        this.$content.append(this.tree.$el);
 
-            add.click(function() {
-                view.showAddMenu(view.tree.currentSelection);
-            });
+        var view = this,
+            add = $('div > div > a[class*="add"]', this.$content);
 
-            return this;
-        },
+        add.click(function() {
+            view.showAddMenu(view.tree.currentSelection);
+        });
 
-        createSibling: function(eClass) {
-            var eo = Ecore.create(eClass);
-            this.tree.currentSelection.eContainer.get(
-                    this.tree.currentSelection.eContainingFeature.get('name')).add(eo);
+        return this;
+    },
 
-            return eo;
-        },
+    createSibling: function(eClass) {
+        var eo = Ecore.create(eClass);
+        this.tree.currentSelection.eContainer.get(
+                this.tree.currentSelection.eContainingFeature.get('name')).add(eo);
 
-        createChild: function(eClass, eFeature) {
-            var eo = Ecore.create(eClass);
-            this.tree.currentSelection.get(eFeature.get('name')).add(eo);
+        return eo;
+    },
 
-            return eo;
-        }
+    createChild: function(eClass, eFeature) {
+        var eo = Ecore.create(eClass);
+        this.tree.currentSelection.get(eFeature.get('name')).add(eo);
 
-    });
+        return eo;
+    }
 
+});
+
+*/
