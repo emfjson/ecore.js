@@ -66,6 +66,10 @@ var Ecore = {
             attrs.eClass = eClass;
         }
 
+        if (!attrs.eClass || attrs.eClass.get('abstract')) {
+            throw new Error('Cannot create EObject from undefined or abstract EClass');
+        }
+
         eObject = new EObject( attrs );
 
         return eObject;
@@ -427,10 +431,9 @@ Ecore.EObjectPrototype = {
     //      @return {Resource}
 
     eResource: function() {
-        if (!this.eContainer) {
-            return this.isTypeOf('Resource') ? this : null;
-        }
-        if (this.eContainer.isTypeOf('Resource')) return this.eContainer;
+        if (this.isKindOf('Resource')) return this;
+        if (!this.eContainer) return null;
+        if (this.eContainer.isKindOf('Resource')) return this.eContainer;
 
         return this.eContainer.eResource();
     },
@@ -1819,7 +1822,7 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             eClass: Ecore.EOperation,
             name: 'parse',
             _: function(data, loader) {
-                if (loader && typeof loader.parser === 'function')
+                if (loader && typeof loader.parse === 'function')
                     loader.parse(this, data);
                 else
                     Ecore.JSON.parse(this, data);
@@ -1940,6 +1943,8 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                 if (ePackage) {
                     if (ePackage.eResource()) {
                         resource = ePackage.eResource();
+                        resource.set('resourceSet', this);
+                        this.get('resources').add(resource);
                     } else {
                         resource = Ecore.Resource.create(attrs);
                         resource.add(ePackage);
@@ -2001,13 +2006,14 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                 var filter = function(el) {
                     if (!type) return true;
                     else if (type.eClass) {
-                        return v.eClass === type;
+                        return el.eClass === type;
                     } else {
-                        return v.eClass.get('name') === type;
+                        return el.eClass.get('name') === type;
                     }
                 };
-                var resources = this.get('resources');
+                var resources = this.get('resources').array();
                 var contents = _.flatten(_.map(resources, function(m) {
+                    console.log(m);
                     return _.filter(_.values(m._index()), filter);
                 }));
 
@@ -2114,22 +2120,49 @@ Ecore.XMI = {
             return ns ? ns.uri : null;
         }
 
-        function findEClass(name) {
-            if (name.indexOf(':') !== -1) {
-                var split = name.split(':'),
-                    prefix = split[0],
-                    className = split[1],
-                    uri = getNamespace(prefix) + '#//' + className;
+        function isPrefixed(node) {
+            return node.name.indexOf(':') !== -1;
+        }
 
-                return resourceSet.getEObject(uri);
+        function getClassURIFromPrefix(value) {
+             var split = value.split(':'),
+                 prefix = split[0],
+                 className = split[1],
+                 uri = getNamespace(prefix) + '#//' + className;
+
+             return uri;
+        }
+
+        function getClassURIFromFeatureType(node) {
+            var eClass;
+
+            if (node.parent && node.parent.eObject) {
+                 var parent = currentNode.parent.eObject,
+                     name = node.name,
+                     eFeature = parent.eClass.getEStructuralFeature(name),
+                     eType;
+
+                 if (eFeature && eFeature.get) {
+                      eType = eFeature.get('eType');
+                      if (eType.get('abstract')) {
+                          var aType = node.attributes['xsi:type'];
+                          if (aType) {
+                              eClass = resourceSet.getEObject(getClassURIFromPrefix(aType));
+                          }
+                      } else {
+                          eClass = eType;
+                      }
+                 }
+            }
+
+            return eClass;
+        }
+
+        function findEClass(node) {
+            if (isPrefixed(node)) {
+                return resourceSet.getEObject(getClassURIFromPrefix(node.name));
             } else {
-                if (currentNode.parent.eObject) {
-                    var parent = currentNode.parent.eObject,
-                        eFeature = parent.eClass.getEStructuralFeature(name),
-                        eClass = eFeature.get('eType');
-
-                    return eClass;
-                }
+                return getClassURIFromFeatureType(node);
             }
         }
 
@@ -2145,7 +2178,7 @@ Ecore.XMI = {
             if (node.parent) node.parent.children.push(node);
             currentNode = node;
 
-            eClass = findEClass(node.name);
+            eClass = findEClass(node);
             if (eClass) {
                 eObject = currentNode.eObject = Ecore.create(eClass);
                 if (!rootObject) rootObject = eObject;
