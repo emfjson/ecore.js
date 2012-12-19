@@ -2013,7 +2013,6 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                 };
                 var resources = this.get('resources').array();
                 var contents = _.flatten(_.map(resources, function(m) {
-                    console.log(m);
                     return _.filter(_.values(m._index()), filter);
                 }));
 
