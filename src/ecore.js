@@ -66,6 +66,10 @@ var Ecore = {
             attrs.eClass = eClass;
         }
 
+        if (!attrs.eClass || attrs.eClass.get('abstract')) {
+            throw new Error('Cannot create EObject from undefined or abstract EClass');
+        }
+
         eObject = new EObject( attrs );
 
         return eObject;
@@ -427,10 +431,9 @@ Ecore.EObjectPrototype = {
     //      @return {Resource}
 
     eResource: function() {
-        if (!this.eContainer) {
-            return this.isTypeOf('Resource') ? this : null;
-        }
-        if (this.eContainer.isTypeOf('Resource')) return this.eContainer;
+        if (this.isKindOf('Resource')) return this;
+        if (!this.eContainer) return null;
+        if (this.eContainer.isKindOf('Resource')) return this.eContainer;
 
         return this.eContainer.eResource();
     },

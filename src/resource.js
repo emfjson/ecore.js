@@ -333,7 +333,7 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             eClass: Ecore.EOperation,
             name: 'parse',
             _: function(data, loader) {
-                if (loader && typeof loader.parser === 'function')
+                if (loader && typeof loader.parse === 'function')
                     loader.parse(this, data);
                 else
                     Ecore.JSON.parse(this, data);
@@ -454,6 +454,8 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                 if (ePackage) {
                     if (ePackage.eResource()) {
                         resource = ePackage.eResource();
+                        resource.set('resourceSet', this);
+                        this.get('resources').add(resource);
                     } else {
                         resource = Ecore.Resource.create(attrs);
                         resource.add(ePackage);
@@ -515,12 +517,12 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                 var filter = function(el) {
                     if (!type) return true;
                     else if (type.eClass) {
-                        return v.eClass === type;
+                        return el.eClass === type;
                     } else {
-                        return v.eClass.get('name') === type;
+                        return el.eClass.get('name') === type;
                     }
                 };
-                var resources = this.get('resources');
+                var resources = this.get('resources').array();
                 var contents = _.flatten(_.map(resources, function(m) {
                     return _.filter(_.values(m._index()), filter);
                 }));
