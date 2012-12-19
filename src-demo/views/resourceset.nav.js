@@ -8,19 +8,29 @@ var ResourceNavigatorView = Backbone.View.extend({
         'icon-plus': function(e) {
             $('#add-modal').modal('show');
         },
-    'icon-remove': function() {},
-    'icon-share': function() {}
+        'icon-remove': function() {},
+        'icon-share': function() {}
+    },
+
+    initialize: function() {
+        _.bindAll(this, 'render');
+
+        this.views = [];
+        this.modal = new CreateResourceModal({ model: this.model });
+        this.modal.render();
+        this.model.on('change', this.render);
     },
 
     render: function() {
-        var html = this.template();
-        this.views = [];
+        if (!this.$content) {
+            var html = this.template();
+            this.$el.append(html);
+            this.$content = $('.nav-content', this.$el);
+            this.$header = $('.nav-header > div', this.$el);
 
-        this.$el.append(html);
-        this.$content = $('.nav-content', this.$el);
-        this.$header = $('.nav-header > div', this.$el);
-
-        _.each(this.buttons, this.addButton, this);
+            _.each(this.buttons, this.addButton, this);
+        }
+        this.$content.children().remove();
         this.model.get('resources').each(this.addResource, this);
 
         return this;
@@ -35,14 +45,12 @@ var ResourceNavigatorView = Backbone.View.extend({
         return this;
     },
 
-    createResource: function() {
-        var res = this.model.create({ uri: 'http://www.example.org/sample' });
-        var view = new ResourceView({ model: res });
-    },
-
     addButton: function(icon) {
         var btn = new ButtonView({ icon: icon });
-        btn.click = this.actions[icon];
+        var modal = this.modal;
+        btn.click = function(e) {
+            modal.show();
+        };
         btn.render();
         this.$header.append(btn.$el);
         return this;

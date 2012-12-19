@@ -35,19 +35,29 @@ var ResourceNavigatorView = Backbone.View.extend({
         'icon-plus': function(e) {
             $('#add-modal').modal('show');
         },
-    'icon-remove': function() {},
-    'icon-share': function() {}
+        'icon-remove': function() {},
+        'icon-share': function() {}
+    },
+
+    initialize: function() {
+        _.bindAll(this, 'render');
+
+        this.views = [];
+        this.modal = new CreateResourceModal({ model: this.model });
+        this.modal.render();
+        this.model.on('change', this.render);
     },
 
     render: function() {
-        var html = this.template();
-        this.views = [];
+        if (!this.$content) {
+            var html = this.template();
+            this.$el.append(html);
+            this.$content = $('.nav-content', this.$el);
+            this.$header = $('.nav-header > div', this.$el);
 
-        this.$el.append(html);
-        this.$content = $('.nav-content', this.$el);
-        this.$header = $('.nav-header > div', this.$el);
-
-        _.each(this.buttons, this.addButton, this);
+            _.each(this.buttons, this.addButton, this);
+        }
+        this.$content.children().remove();
         this.model.get('resources').each(this.addResource, this);
 
         return this;
@@ -62,14 +72,12 @@ var ResourceNavigatorView = Backbone.View.extend({
         return this;
     },
 
-    createResource: function() {
-        var res = this.model.create({ uri: 'http://www.example.org/sample' });
-        var view = new ResourceView({ model: res });
-    },
-
     addButton: function(icon) {
         var btn = new ButtonView({ icon: icon });
-        btn.click = this.actions[icon];
+        var modal = this.modal;
+        btn.click = function(e) {
+            modal.show();
+        };
         btn.render();
         this.$header.append(btn.$el);
         return this;
@@ -99,6 +107,96 @@ var ResourceView = Backbone.View.extend({
 
 
 
+var ModalView = Backbone.View.extend({
+    template: _.template('<div id="<%= id =>" class="modal hide fade"></div>'),
+    templateHeader: _.template('<div class="modal-header"></div>'),
+    templateBody: _.template('<div class="modal-body"></div>'),
+    templateFooter: _.template('<div class="modal-footer"><a href="#" class="btn">Close</a><a href="#" class="btn confirm">Confirm</a></div>'),
+
+    render: function() {
+        var html = this.template({ id: this.cid });
+        var header = this.templateHeader();
+        var body = this.templateBody();
+        var footer = this.templateFooter();
+
+        this.setElement(html);
+        this.$el.append(header);
+        this.$el.append(body);
+        this.$el.append(footer);
+
+        this.$header = $('div[class="modal-header"]', this.$el);
+        this.$body = $('div[class="modal-body"]', this.$el);
+        this.$footer = $('div[class="modal-footer"]', this.$el);
+
+        return this;
+    },
+
+    show: function() {
+        this.$el.modal('show');
+    }
+
+});
+
+var CreateResourceModal = ModalView.extend({
+    templateForm: _.template('<form class="form-horizontal"></form>'),
+    templateControlURI: _.template('<div class="control-group"><label class="control-label" for="inputURI">URI</label><div class="controls"><input type="text" id="inputURI" placeholder="URI"></div></div>'),
+    templateControlElement: _.template('<div class="control-group"><label class="control-label" for="inputElement">Element</label><div class="controls"><select type="text" id="selectElement"></select></div>'),
+    templateHeaderContent: _.template('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h3>Create Resource</h3></div>'),
+    templateOptions: _.template('<% _.each(options, function(option) { %> <option><%= option.get("name") %></option> <% }); %>'),
+
+    events: {
+        'click .modal-footer a[class~="confirm"]': 'onConfirm'
+    },
+
+    initialize: function() {
+        _.bindAll(this, 'onConfirm');
+    },
+
+    render: function() {
+        ModalView.prototype.render.apply(this);
+
+        var html = this.templateForm();
+        var header = this.templateHeaderContent();
+        var cURI = this.templateControlURI();
+        var cElt = this.templateControlElement();
+
+        this.$header.append(header);
+        this.$body.append(html);
+        this.$form = $('form', this.$body);
+        this.$form.append(cURI).append(cElt);
+
+        this.$select = $('#selectElement', this.$form);
+        this.classes = this.model.elements('EClass');
+        this.classes = _.filter(this.classes, function(c) { return !c.get('abstract'); });
+
+        var options = this.templateOptions({ options: this.classes });
+        this.$select.append(options);
+
+        return this;
+    },
+
+    createResource: function(uri, eClass) {
+        var res = this.model.create({ uri: uri });
+        res.get('contents').add(eClass.create());
+        this.model.trigger('change add', res);
+    },
+
+    onConfirm: function() {
+        var uri = $('#inputURI', this.$form).val();
+        var element = $('option:selected', this.$select).val();
+
+        if (uri && uri.length && element) {
+            var eClass = _.find(this.classes, function(c) { return c.get('name') === element; } );
+            if (eClass) this.createResource(uri, eClass);
+        }
+
+        this.$el.modal('hide');
+    }
+
+});
+
+
+
 var PropertyWindow = Ecore.Editor.Window.extend({
     el: '#property-window',
     title: 'Property',
@@ -108,22 +206,104 @@ var PropertyWindow = Ecore.Editor.Window.extend({
 
 
 
+// TreeEditor
 
 var DemoTreeEditorView = Ecore.Editor.EditorView.extend({
+    templateMenuBar: _.template('<div class="row-fluid"></div>'),
+
     initialize: function(attributes) {
         this.tree = new Ecore.Editor.TreeView({ model: this.model });
         this.tree.on('select', function() { this.trigger('select', this.tree.currentSelection.model); }, this);
         Ecore.Editor.EditorView.prototype.initialize.apply(this, [attributes]);
     },
+
     renderContent: function() {
+        if (!this.menuBar) {
+            this.menuBar = this.createMenuBar();
+            this.menuBar.render();
+        }
+        this.$el.append(this.menuBar.$el);
         this.tree.model = this.model;
         this.tree.render();
         this.$el.append(this.tree.$el);
         this.tree.show();
         return this;
+    },
+
+    createMenuBar: function() {
+        var html = this.templateMenuBar();
+        var view = this;
+
+        var AddButton = new Ecore.Editor.MenuBarDropDownButton({
+            label: 'add',
+            click: function() {
+                var selection = view.tree.currentSelection;
+                if (!selection) return;
+
+                var model = selection.model;
+                var child = model.eClass.get('eAllContainments');
+                var eContainingFeature = model.eContainingFeature;
+
+                this.removeItem();
+
+                _.each(child, function(c) {  createChildItems.apply(this, [c, model]); }, this);
+
+                if (eContainingFeature) {
+                    var eType = eContainingFeature.get('eType');
+                    var siblings = eType.get('abstract') ? eType.get('eAllSubTypes') : [eType];
+
+                    if (child.length > 0) {
+                        this.addItem(new Ecore.Editor.Separator());
+                    }
+
+                    _.each(siblings, function(type) {
+                        this.addItem(new Ecore.Editor.DropDownItem({ label: 'Sibling ' + type.get('name') }));
+                    }, this);
+                }
+
+                _.each(this.items, this.renderItem, this);
+            }
+        });
+
+        var RemoveButton = new Ecore.Editor.MenuBarButton({
+            label: 'remove',
+            click: function() {
+                console.log('remove', this);
+            }
+        });
+
+        var menuBar = new Ecore.Editor.MenuBar({
+            el: html,
+            buttons: [AddButton, RemoveButton]
+        });
+
+        return menuBar;
     }
 });
 
+function createChildItems(feature, model) {
+    var eType = feature.get('eType');
+    var types = eType.get('abstract') ? eType.get('eAllSubTypes') : [eType];
+    var item;
+
+    _.each(types, function(type) {
+        item = new Ecore.Editor.DropDownItem({
+            label: 'Child ' + type.get('name'),
+            model: type,
+            click: function() {
+                console.log('click me', this);
+                if (feature.get('upperBound') === 1) {
+                    model.set(feature.get('name'), type.create());
+                } else {
+                    model.get(feature.get('name')).add(type.create());
+                }
+            }
+        });
+        this.addItem(item);
+    }, this);
+}
+
+// EditorTabs
 
 var DemoEditorTabView = Ecore.Editor.EditorTabView.extend({
     el: '#editor',
@@ -212,13 +392,19 @@ Workbench.navigator = new ResourceNavigatorView({ model: resourceSet });
 
 Workbench.navigator.render();
 
-Workbench.navigator.on('select', function(e) {
-    this.editorTab.render().open(e);
-    this.properties.content.model = e;
+Workbench.navigator.on('select', function(m) {
+    this.editorTab.render().open(m);
+    this.properties.content.model = m;
     this.properties.render();
 }, Workbench);
 
 Workbench.editorTab.on('select', function(m) {
+    this.properties.content.model = m;
+    this.properties.render();
+}, Workbench);
+
+resourceSet.on('add', function(m) {
+    this.editorTab.render().open(m);
     this.properties.content.model = m;
     this.properties.render();
 }, Workbench);

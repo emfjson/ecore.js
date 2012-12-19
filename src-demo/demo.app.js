@@ -32,13 +32,19 @@ Workbench.navigator = new ResourceNavigatorView({ model: resourceSet });
 
 Workbench.navigator.render();
 
-Workbench.navigator.on('select', function(e) {
-    this.editorTab.render().open(e);
-    this.properties.content.model = e;
+Workbench.navigator.on('select', function(m) {
+    this.editorTab.render().open(m);
+    this.properties.content.model = m;
     this.properties.render();
 }, Workbench);
 
 Workbench.editorTab.on('select', function(m) {
+    this.properties.content.model = m;
+    this.properties.render();
+}, Workbench);
+
+resourceSet.on('add', function(m) {
+    this.editorTab.render().open(m);
     this.properties.content.model = m;
     this.properties.render();
 }, Workbench);

@@ -26,6 +26,5 @@
 
 .part-content .tab-content .tab-pane {
     max-height:600px;
-    height:auto !important;
     height:600px;
 }
