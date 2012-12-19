@@ -1,5 +1,15 @@
 module.exports = function(grunt) {
     grunt.initConfig({
+        watch: {
+            scripts: {
+                files: '../src-demo/**/*.js',
+                tasks: ['concat'],
+                options: {
+                    interrupt: true
+                }
+            }
+        },
+
         concat: {
             dist: {
                 src: [
@@ -20,4 +30,5 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('build', 'concat');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 };
