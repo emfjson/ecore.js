@@ -1,0 +1,31 @@
+/**
+ * EDITOR
+**/
+
+.part {
+    -webkit-box-shadow: inset 1px 1px 0px 0px rgba(220, 220, 220, 1);
+    box-shadow: inset 1px 1px 0px 0px rgba(220, 220, 220, 1);
+    background: white;
+    height: 100%;
+    width: 800px;
+    left: 320px;
+    position: absolute;
+}
+
+.part-header {
+    position: relative;
+    height: 20px;
+}
+
+.part-content {
+    position: relative;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+}
+
+.part-content .tab-content .tab-pane {
+    max-height:600px;
+    height:auto !important;
+    height:600px;
+}
