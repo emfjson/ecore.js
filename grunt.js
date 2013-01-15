@@ -9,17 +9,30 @@ module.exports = function(grunt) {
             },
             edit: {
                 src: [
+                    'src/edit/ecore.edit.start',
                     'src/edit/ecore.edit.js',
-                    'src/edit/windows.js',
-                    'src/edit/menus.js',
-                    'src/edit/explorer.js',
-                    'src/edit/property.js',
-                    'src/edit/tabs.js',
-                    'src/edit/tabeditor.js',
-                    'src/edit/tree.js',
-                    'src/edit/ecore.edit.end.js'
+                    'src/edit/ui/window/windows.js',
+                    'src/edit/ui/menu/menus.js',
+                    'src/edit/ui/property/value.js',
+                    'src/edit/ui/property/row.js',
+                    'src/edit/ui/property/property.js',
+                    'src/edit/ui/editor/tab.js',
+                    'src/edit/ui/editor/editor.js',
+                    'src/edit/ui/editor/tabeditor.js',
+                    'src/edit/ui/tree/node.js',
+                    'src/edit/ui/tree/tree.js',
+                    'src/edit/ecore.edit.end'
                 ],
                 dest: 'dist/ecore.edit.js'
+            }
+        },
+
+        less: {
+            development: {
+                options: {
+                    compress: true
+                },
+                files: { 'dist/css/ecore.edit.css': 'src/edit/ui/**/*.less' }
             }
         },
 
@@ -62,8 +75,9 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-simple-mocha');
+    grunt.loadNpmTasks('grunt-contrib-less');
 
     grunt.registerTask('test', 'concat simplemocha');
-    grunt.registerTask('build', 'concat simplemocha min');
+    grunt.registerTask('build', 'concat simplemocha less min');
 
 };
