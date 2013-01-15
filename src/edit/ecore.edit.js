@@ -1,63 +1,54 @@
-(function() {
 
-    Ecore.Editor = {};
+//
+// Ecore.Edit
+//
 
-    var label = function() {
-        var label = this.has('name') ? this.get('name') : this.get('uri');
-        return this.eClass.get('name') + label ? ' ' + label : '';
-    };
+var Edit = Ecore.Edit = {
+    version: '0.3.0'
+};
 
-    var eClassLabel = function() {
-        var supers = [];
-        if (this.isSet('eSuperTypes')) {
-            supers = this.get('eSuperTypes').map(function(s) { return s.get('name'); });
-        }
-        return this.get('name') + (supers.length ? ' > ' + supers.join(' , ') : '');
-    };
+//
+// LabelProvider
+//
+// Provides labels for EObjects.
+//
+// It can be extended to provide labels to different kind of EObject by
+// using the extend method provided by underscore:
+//
+//      _.extend(Ecore.Edit.LabelProvider, {
+//          FooClass: function(eObject) { return eObject.get('bar'); }
+//      });
+//
 
-    Ecore.EObject.get('eOperations').add(
-        Ecore.EOperation.create({
-            name: 'label',
-            eType: Ecore.EString,
-            upperBound: 1,
-            lowerBound: 0,
-            _: label
-        }));
+Edit.LabelProvider = {
+    getLabel: function(eObject) {
+        var eClass = eObject.eClass.get('name');
+        if (this[eClass])
+            return this[eClass](eObject);
+        else
+            return eObject.eClass.get('name');
+    },
 
-    Ecore.EClass.get('eOperations').add(
-        Ecore.EOperation.create({
-            name: 'label',
-            eType: Ecore.EString,
-            _: eClassLabel
-        }));
+    // Labels for Ecore classes
 
-    Ecore.EStructuralFeature.get('eOperations').add(
-        Ecore.EOperation.create({
-            name: 'label',
-            eType: Ecore.EString,
-            _: function() {
-                return this.get('name') + ' : ' + this.get('eType').get('name');
-            }
-        }));
-
-    _.each(Ecore.EPackage.Registry.ePackages(), function(p) {
-        p.label = label;
-        p.get('eClassifiers').each(function(c) {
-            c.label = eClassLabel;
-
-            if (c.has('eStructuralFeatures')) {
-                c.get('eStructuralFeatures').each(function(f) {
-                    f.label = function() {
-                        return this.get('name') + ' : ' + this.get('eType').get('name');
-                    };
-                });
-                c.get('eOperations').each(function(f) {
-                    f.label = function() {
-                        return this.get('name') + '()' + (this.isSet('eType') ? ' : ' + this.get('eType').get('name') : '');
-                    };
-                });
-            }
-        });
-    });
-
+    EClass: function(eObject) { return eObject.get('name'); },
+    EDataType: function(eObject) { return eObject.get('name'); },
+    EEnum: function(eObject) { return eObject.get('name'); },
+    EEnumLiteral: function(eObject) { return eObject.get('name') + ' = ' + eObject.get('value'); },
+    EAttribute: function(eObject) {
+        var type = eObject.isSet('eType') ? ' : ' + eObject.get('eType').get('name') : '';
+        return eObject.get('name') + type;
+    },
+    EReference: function(eObject) {
+        var type = eObject.isSet('eType') ? ' : ' + eObject.get('eType').get('name') : '';
+        return eObject.get('name') + type;
+    },
+    EOperation: function(eObject) {
+        var returnType = eObject.isSet('eType') ? ' : ' + eObject.get('eType').get('name') : '';
+        return eObject.get('name') + '()' + returnType;
+    },
+    EPackage: function(eObject) { return eObject.get('name'); },
+    ResourceSet: function(eObject) { return 'resourceSet'; },
+    Resource: function(eObject) { return eObject.get('uri'); }
+};
 
