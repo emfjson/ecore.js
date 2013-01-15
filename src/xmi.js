@@ -1,5 +1,9 @@
 
-var sax = root.sax || require('sax');
+if (typeof require === 'function') {
+    Ecore.sax = require('sax');
+} else {
+    Ecore.sax = root.sax;
+}
 
 Ecore.XMI = {
 
@@ -7,7 +11,9 @@ Ecore.XMI = {
     contentType: 'application/xml',
 
     parse: function(model, data) {
-        var parser = sax.parser(true),
+        if (!Ecore.sax) throw new Error('Sax is missing.');
+
+        var parser = Ecore.sax.parser(true),
             resourceSet = model.get('resourceSet') || Ecore.ResourceSet.create(),
             namespaces = [],
             current;
@@ -34,7 +40,11 @@ Ecore.XMI = {
         }
 
         function isPrefixed(node) {
-            return node.name.indexOf(':') !== -1;
+            return isPrefixedString(node.name);
+        }
+
+        function isPrefixedString(string) {
+            return string.indexOf(':') !== -1;
         }
 
         function getClassURIFromPrefix(value) {
@@ -111,10 +121,19 @@ Ecore.XMI = {
                     parentObject = node.parent.eObject;
                     if (parentObject.has(node.name)) {
                         eFeature = parentObject.eClass.getEStructuralFeature(node.name);
-                        if (eFeature.get('upperBound') === 1) {
-                            parentObject.set(node.name, eObject);
+                        if (eFeature.get('containment')) {
+                            if (eFeature.get('upperBound') === 1) {
+                                parentObject.set(node.name, eObject);
+                            } else {
+                                parentObject.get(node.name).add(eObject);
+                            }
                         } else {
-                            parentObject.get(node.name).add(eObject);
+                            // resolve proxy element from href
+                            var attrs = node.attributes;
+                            var href = attrs ? attrs.href : null;
+                            if (href) {
+                                toResolve.push({ parent: parentObject, feature: eFeature, value: href });
+                            }
                         }
                     }
                 }
@@ -143,6 +162,8 @@ Ecore.XMI = {
                     resolved;
 
                 _.each(refs, function(ref) {
+                    if (ref[0] === '#') ref = ref.substring(1, ref.length);
+
                     if (isLocal(ref)) {
                         resolved = index[ref];
                     } else {
