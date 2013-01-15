@@ -24,7 +24,7 @@ module.exports = function(grunt) {
                     '../src-demo/demo.app.js',
                     'end.js'
                 ],
-                dest: '../public/js/demo.app.js'
+                dest: '../demo/js/demo.app.js'
             }
         }
     });

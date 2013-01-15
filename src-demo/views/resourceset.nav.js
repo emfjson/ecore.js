@@ -17,7 +17,6 @@ var ResourceNavigatorView = Backbone.View.extend({
 
         this.views = [];
         this.modal = new CreateResourceModal({ model: this.model });
-        this.modal.render();
         this.model.on('change', this.render);
     },
 
@@ -49,6 +48,7 @@ var ResourceNavigatorView = Backbone.View.extend({
         var btn = new ButtonView({ icon: icon });
         var modal = this.modal;
         btn.click = function(e) {
+            modal.render();
             modal.show();
         };
         btn.render();

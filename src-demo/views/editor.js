@@ -1,13 +1,15 @@
 
 // TreeEditor
 
-var DemoTreeEditorView = Ecore.Editor.EditorView.extend({
+var DemoTreeEditorView = Ecore.Edit.EditorView.extend({
     templateMenuBar: _.template('<div class="row-fluid"></div>'),
 
     initialize: function(attributes) {
-        this.tree = new Ecore.Editor.TreeView({ model: this.model });
-        this.tree.on('select', function() { this.trigger('select', this.tree.currentSelection.model); }, this);
-        Ecore.Editor.EditorView.prototype.initialize.apply(this, [attributes]);
+        this.tree = new Ecore.Edit.TreeView({ model: this.model });
+        this.tree.on('select', function() {
+            this.trigger('select', this.tree.selected.model);
+        }, this);
+        Ecore.Edit.EditorView.prototype.initialize.apply(this, [attributes]);
     },
 
     renderContent: function() {
@@ -15,11 +17,12 @@ var DemoTreeEditorView = Ecore.Editor.EditorView.extend({
             this.menuBar = this.createMenuBar();
             this.menuBar.render();
         }
+        // clear and redraw the tree
+        $('div[class="tree"]', this.$el).remove();
         this.$el.append(this.menuBar.$el);
         this.tree.model = this.model;
         this.tree.render();
         this.$el.append(this.tree.$el);
-        this.tree.show();
         return this;
     },
 
@@ -27,10 +30,10 @@ var DemoTreeEditorView = Ecore.Editor.EditorView.extend({
         var html = this.templateMenuBar();
         var view = this;
 
-        var AddButton = new Ecore.Editor.MenuBarDropDownButton({
+        var AddButton = new Ecore.Edit.MenuBarDropDownButton({
             label: 'add',
             click: function() {
-                var selection = view.tree.currentSelection;
+                var selection = view.tree.selected;
                 if (!selection) return;
 
                 var model = selection.model;
@@ -46,11 +49,11 @@ var DemoTreeEditorView = Ecore.Editor.EditorView.extend({
                     var siblings = eType.get('abstract') ? eType.get('eAllSubTypes') : [eType];
 
                     if (child.length > 0) {
-                        this.addItem(new Ecore.Editor.Separator());
+                        this.addItem(new Ecore.Edit.Separator());
                     }
 
                     _.each(siblings, function(type) {
-                        this.addItem(new Ecore.Editor.DropDownItem({ label: 'Sibling ' + type.get('name') }));
+                        this.addItem(new Ecore.Edit.DropDownItem({ label: 'Sibling ' + type.get('name') }));
                     }, this);
                 }
 
@@ -58,14 +61,14 @@ var DemoTreeEditorView = Ecore.Editor.EditorView.extend({
             }
         });
 
-        var RemoveButton = new Ecore.Editor.MenuBarButton({
+        var RemoveButton = new Ecore.Edit.MenuBarButton({
             label: 'remove',
             click: function() {
                 console.log('remove', this);
             }
         });
 
-        var menuBar = new Ecore.Editor.MenuBar({
+        var menuBar = new Ecore.Edit.MenuBar({
             el: html,
             buttons: [AddButton, RemoveButton]
         });
@@ -80,11 +83,10 @@ function createChildItems(feature, model) {
     var item;
 
     _.each(types, function(type) {
-        item = new Ecore.Editor.DropDownItem({
+        item = new Ecore.Edit.DropDownItem({
             label: 'Child ' + type.get('name'),
             model: type,
             click: function() {
-                console.log('click me', this);
                 if (feature.get('upperBound') === 1) {
                     model.set(feature.get('name'), type.create());
                 } else {
@@ -98,7 +100,7 @@ function createChildItems(feature, model) {
 
 // EditorTabs
 
-var DemoEditorTabView = Ecore.Editor.EditorTabView.extend({
+var DemoEditorTabView = Ecore.Edit.EditorTabView.extend({
     el: '#editor',
     open: function(model) {
         var editor = this.getEditor(model);

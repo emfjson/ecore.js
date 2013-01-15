@@ -59,6 +59,7 @@ var CreateResourceModal = ModalView.extend({
         this.$form.append(cURI).append(cElt);
 
         this.$select = $('#selectElement', this.$form);
+        console.log(this.model);
         this.classes = this.model.elements('EClass');
         this.classes = _.filter(this.classes, function(c) { return !c.get('abstract'); });
 
