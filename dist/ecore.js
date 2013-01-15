@@ -179,7 +179,7 @@ var EObject = function(attributes) {
     this.eClass = attributes.eClass;
     this.values = {};
 
-    // stores function for eoperations.
+    // stores function for eOperations.
     attributes._ && (this._ = attributes._);
 
     // Initialize values according to the eClass features.
@@ -207,8 +207,7 @@ function initValues(eObject) {
 
             if (value === null || value === undefined) {
                 if (isDerived) {
-                    eObject.values[featureName] = eFeature.values._; // TODO recompute on change event.
-                    //eObject.values[featureName] = _.memoize(eFeature.values._); // TODO recompute on change event.
+                    eObject.values[featureName] = eFeature.values._;
                 } else if (upperBound === 1 || !upperBound) {
                     initValue(eObject, featureName, defaultValue);
                 } else {
@@ -278,7 +277,8 @@ function setValues(eObject, attributes) {
 function eAllOperations(eClass) {
     var eOperations = eClass.get('eOperations').array();
     var superTypes = eClass.get('eAllSuperTypes');
-    var all = _.flatten(_.union(eOperations || [], _.map(superTypes || [], function(s) { return eAllOperations(s); })));
+    var all = _.flatten(_.union(eOperations || [], _.map(superTypes || [],
+                    function(s) { return eAllOperations(s); })));
 
     return all;
 }
@@ -354,7 +354,7 @@ Ecore.EObjectPrototype = {
     //      @return {EObject}
 
     set: function(attrs, options) {
-        var attr, key, val;
+        var attr, key, val, eve;
         if (attrs === null) return this;
 
         // Handle attrs is a hash or attrs is
@@ -369,7 +369,8 @@ Ecore.EObjectPrototype = {
             val = attrs[attr];
             if (typeof val !== 'undefined' && this.has(attr)) {
                 this.values[attr] = val;
-                this.trigger('change', attr);
+                eve = 'change:' + attr;
+                this.trigger('change ' + eve, attr);
             }
         }
 
@@ -379,11 +380,16 @@ Ecore.EObjectPrototype = {
     // Getter for the property identified by the first parameter.
     //
     //      @method get
-    //      @param {String} name
+    //      @param {EStructuralFeature} feature
+    //      or
+    //      @param {String} feature name
     //      @return {Object}
 
-    get: function(name) {
-        var value = this.values[name];
+    get: function(feature) {
+        if (!feature) return null;
+
+        var featureName = feature.eClass ? feature.get('name') : feature;
+        var value = this.values[featureName];
 
         if (typeof value === 'function') {
             return value.apply(this);
@@ -570,7 +576,10 @@ EList.prototype = {
 
         this._size++;
         this._internal.push(eObject);
-        this._owner.trigger('change', eObject);
+
+        var eve = 'add';
+        if (this._feature) eve += ':' + this._feature.get('name');
+        this._owner.trigger(eve, eObject);
 
         return this;
     },
@@ -690,7 +699,7 @@ EList.prototype = {
 
 var EClass = new EObject(),
     EString = new EObject(),
-    EInteger = new EObject(),
+    EInt = new EObject(),
     EBoolean = new EObject(),
     EDouble = new EObject(),
     EDate = new EObject(),
@@ -700,7 +709,6 @@ var EClass = new EObject(),
     EClass_eStructuralFeatures = new EObject(),
     EClass_eOperations = new EObject(),
     EClass_eSuperTypes = new EObject();
-
 
 EClass.eClass = EClass;
 EClass.values = {
@@ -716,15 +724,21 @@ EClass.values = {
     eAllSuperTypes: function() {
         var superTypes, eAllSuperTypes;
 
-        superTypes = this.get('eSuperTypes')._internal;
-        eAllSuperTypes = _.union(superTypes || [],
-            _.flatten(_.map(superTypes || [], function(eSuper) {
-                return eSuper.get('eAllSuperTypes');
-            }))
-        );
+        if (!this._superTypes) {
+            this._superTypes = this.get('eSuperTypes')._internal || [];
+            this._superTypes = _.union(this._superTypes,
+                _.flatten(_.map(this._superTypes, function(eSuper) {
+                    return eSuper.get('eAllSuperTypes');
+                }))
+            );
+        }
 
-        // Returns all or an empty array.
-        return _.isArray(eAllSuperTypes) ? eAllSuperTypes : [];
+         this.on('add:eSuperTypes', function(added) {
+             delete this._superTypes;
+             this._superTypes = this.get('eAllSuperTypes');
+         }, this);
+
+        return this._superTypes;
     },
     eAllSubTypes: function() {
         var eClasses, subTypes;
@@ -767,20 +781,28 @@ EClass.values = {
         return _.isArray(eID) ? null : eID;
     },
     eAllStructuralFeatures: function() {
-        var superTypes, eSuperFeatures, eAllFeatures;
+        var eSuperFeatures, eAllFeatures, eSuperTypes;
 
-        superTypes = this.get('eAllSuperTypes');
+        eSuperTypes = this.get('eAllSuperTypes');
+        if (!this._features) {
+            this._features = this.get('eStructuralFeatures').array();
+        }
+
+        this.on('add:eStructuralFeatures', function(added) {
+            delete this._features;
+            this._features = this.get('eStructuralFeatures').array();
+        }, this);
+
         eSuperFeatures = _.flatten(
-            _.map(superTypes || [], function(sup) {
+            _.map(this._superTypes || [], function(sup) {
                 return sup.get('eAllStructuralFeatures');
             })
         );
 
-        eAllFeatures = _.union(eSuperFeatures || [],
-        this.get('eStructuralFeatures')._internal);
+        eAllFeatures = _.union(eSuperFeatures || [], this._features);
 
         // Returns all or an empty array.
-        return _.isArray(eAllFeatures) ? eAllFeatures : [];
+        return eAllFeatures;
     },
     eAllAttributes: function() {
         var superTypes, eSuperFeatures, eAllFeatures;
@@ -1148,7 +1170,7 @@ ETypedElement_lowerBound.values = {
     upperBound: 1,
     defaultValueLiteral: '0',
     defaultValue: 0,
-    eType: EInteger
+    eType: EInt
 };
 ETypedElement_upperBound.eClass = EAttribute;
 ETypedElement_upperBound.values = {
@@ -1157,7 +1179,7 @@ ETypedElement_upperBound.values = {
     upperBound: 1,
     defaultValueLiteral: '1',
     defaultValue: 1,
-    eType: EInteger
+    eType: EInt
 };
 ETypedElement_many.eClass = EAttribute;
 ETypedElement_many.values = {
@@ -1311,7 +1333,7 @@ EEnum.get('eStructuralFeatures').add(EEnum_eLiterals);
 
 EEnumLiteral_value = EAttribute.create({
     name: 'value',
-    eType: EInteger
+    eType: EInt
 });
 
 EEnumLiteral_literal = EAttribute.create({
@@ -1327,8 +1349,8 @@ EEnumLiteral.get('eStructuralFeatures')
 
 EString.eClass = EDataType;
 EString.set({ name: 'EString' });
-EInteger.eClass = EDataType;
-EInteger.set({ name: 'EInteger' });
+EInt.eClass = EDataType;
+EInt.set({ name: 'EInt' });
 EBoolean.eClass = EDataType;
 EBoolean.set({ name: 'EBoolean' });
 EDate.eClass = EDataType;
@@ -1401,7 +1423,7 @@ Ecore.EcorePackage.get('eClassifiers')
     .add(EEnumLiteral)
     .add(EString)
     .add(EBoolean)
-    .add(EInteger)
+    .add(EInt)
     .add(EDouble)
     .add(EDate)
     .add(Ecore.EShort)
@@ -1427,7 +1449,7 @@ Ecore.EOperation = EOperation;
 Ecore.EParameter = EParameter;
 Ecore.EString = EString;
 Ecore.EBoolean = EBoolean;
-Ecore.EInteger = EInteger;
+Ecore.EInt = EInt;
 Ecore.EDouble = EDouble;
 Ecore.EDate = EDate;
 Ecore.JSObject = JSObject;
@@ -2035,6 +2057,8 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
     ]
 });
 
+EClassResource.getEStructuralFeature('resourceSet').set('eType', EClassResourceSet);
+
 var EPackageResource = Ecore.EPackage.create({
     name: 'resources',
     nsPrefix: 'resources',
@@ -2085,7 +2109,11 @@ function buildIndex(model) {
 
 
 
-var sax = root.sax || require('sax');
+if (typeof require === 'function') {
+    Ecore.sax = require('sax');
+} else {
+    Ecore.sax = root.sax;
+}
 
 Ecore.XMI = {
 
@@ -2093,7 +2121,9 @@ Ecore.XMI = {
     contentType: 'application/xml',
 
     parse: function(model, data) {
-        var parser = sax.parser(true),
+        if (!Ecore.sax) throw new Error('Sax is missing.');
+
+        var parser = Ecore.sax.parser(true),
             resourceSet = model.get('resourceSet') || Ecore.ResourceSet.create(),
             namespaces = [],
             current;
@@ -2120,7 +2150,11 @@ Ecore.XMI = {
         }
 
         function isPrefixed(node) {
-            return node.name.indexOf(':') !== -1;
+            return isPrefixedString(node.name);
+        }
+
+        function isPrefixedString(string) {
+            return string.indexOf(':') !== -1;
         }
 
         function getClassURIFromPrefix(value) {
@@ -2197,10 +2231,19 @@ Ecore.XMI = {
                     parentObject = node.parent.eObject;
                     if (parentObject.has(node.name)) {
                         eFeature = parentObject.eClass.getEStructuralFeature(node.name);
-                        if (eFeature.get('upperBound') === 1) {
-                            parentObject.set(node.name, eObject);
+                        if (eFeature.get('containment')) {
+                            if (eFeature.get('upperBound') === 1) {
+                                parentObject.set(node.name, eObject);
+                            } else {
+                                parentObject.get(node.name).add(eObject);
+                            }
                         } else {
-                            parentObject.get(node.name).add(eObject);
+                            // resolve proxy element from href
+                            var attrs = node.attributes;
+                            var href = attrs ? attrs.href : null;
+                            if (href) {
+                                toResolve.push({ parent: parentObject, feature: eFeature, value: href });
+                            }
                         }
                     }
                 }
@@ -2229,6 +2272,8 @@ Ecore.XMI = {
                     resolved;
 
                 _.each(refs, function(ref) {
+                    if (ref[0] === '#') ref = ref.substring(1, ref.length);
+
                     if (isLocal(ref)) {
                         resolved = index[ref];
                     } else {
