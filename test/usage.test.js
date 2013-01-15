@@ -28,7 +28,7 @@ describe('Usage', function() {
             assert.equal(MyClass.get('abstract'), true);
         });
 
-        it('other', function() {
+        it('should create a EClass by calling EClass.create', function() {
             var MyClass = Ecore.EClass.create();
 
             assert.ok(MyClass);
@@ -49,8 +49,35 @@ describe('Usage', function() {
             assert.equal(MyClass.get('abstract'), true);
         });
 
-    });
+        it('should return correct eStructuralFeatures', function() {
+            var MyClass = Ecore.EClass.create();
+            assert.strictEqual(0, MyClass.get('eAllStructuralFeatures').length);
 
+            var Name = Ecore.EAttribute.create({ name: 'name', eType: Ecore.EString });
+            MyClass.get('eStructuralFeatures').add(Name);
+
+            assert.strictEqual(1, MyClass.get('eAllStructuralFeatures').length);
+            assert.strictEqual(Name, MyClass.get('eAllStructuralFeatures')[0]);
+
+            var SuperClass = Ecore.EClass.create();
+            MyClass.get('eSuperTypes').add(SuperClass);
+
+            assert.strictEqual(1, MyClass.get('eAllStructuralFeatures').length);
+
+            var SuperAttr = Ecore.EAttribute.create({ name: 'value', eType: Ecore.EString });
+            SuperClass.get('eStructuralFeatures').add(SuperAttr);
+
+            assert.strictEqual(1, SuperClass.get('eAllStructuralFeatures').length);
+            assert.strictEqual(2, MyClass.get('eAllStructuralFeatures').length);
+
+            var OtherAttr = Ecore.EAttribute.create({ name: 'other', eType: Ecore.EString });
+            MyClass.get('eStructuralFeatures').add(OtherAttr);
+
+            assert.strictEqual(1, SuperClass.get('eAllStructuralFeatures').length);
+            assert.strictEqual(3, MyClass.get('eAllStructuralFeatures').length);
+        });
+
+    });
 
     describe('creation of an EObject', function() {
         var User;
