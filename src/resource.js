@@ -546,6 +546,8 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
     ]
 });
 
+EClassResource.getEStructuralFeature('resourceSet').set('eType', EClassResourceSet);
+
 var EPackageResource = Ecore.EPackage.create({
     name: 'resources',
     nsPrefix: 'resources',
