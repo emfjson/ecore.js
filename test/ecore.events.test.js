@@ -47,6 +47,35 @@ describe('Events', function() {
     });
 
     describe('#trigger', function() {
+    });
+
+    describe('#set', function() {
+
+        it('should trigger a change event after setting a property', function() {
+            var Test = Ecore.EClass.create({ name: 'Test' });
+            Test.on('change', function(changed) {
+                assert.equal('name', changed);
+                assert.equal('TestTest', Test.get(changed));
+            });
+            Test.on('change:name', function(changed) {
+                assert.equal('name', changed);
+                assert.equal('TestTest', Test.get(changed));
+            });
+            Test.set('name', 'TestTest');
+        });
+
+    });
+
+    describe('#EList.add', function() {
+
+        it('should trigger an add event', function() {
+            var Test = Ecore.EClass.create({ name: 'Test' });
+            var Name = Ecore.EAttribute.create({ name: 'name', eType: Ecore.EString });
+            Test.on('add:eStructuralFeatures', function(added) {
+                assert.strictEqual(Name, added);
+            });
+            Test.get('eStructuralFeatures').add(Name);
+        });
 
     });
 

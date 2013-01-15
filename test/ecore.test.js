@@ -11,12 +11,31 @@ describe('Ecore', function() {
             assert.strictEqual(Ecore.EcorePackage.eClass, Ecore.EPackage);
         });
 
+        it('should contain EPackage attributes', function() {
+            var nsURI = Ecore.EPackage.getEStructuralFeature('nsURI');
+            assert.strictEqual(Ecore.EAttribute, nsURI.eClass);
+//            assert.equal(false, nsURI.get('derived'));
+        });
+
     });
 
     describe('#EModelElement', function() {
+
+        it('should be abstract', function() {
+            var EModelElement = Ecore.EModelElement;
+            assert.ok(EModelElement);
+            assert.equal(true, EModelElement.get('abstract'));
+        });
+
     });
 
     describe('#ENamedElement', function() {
+
+        it('should be abstract', function() {
+            var ENamedElement = Ecore.ENamedElement;
+            assert.ok(ENamedElement);
+            assert.strictEqual(true, ENamedElement.get('abstract'));
+        });
 
         it('should contain ENamedElement attributes', function() {
             // name
@@ -178,11 +197,18 @@ describe('Ecore', function() {
             assert.strictEqual(eOperations.get('eType'), Ecore.EOperation);
 
         });
+    }); // end EClass
+
+    describe('#EDataType', function() {
 
         it('should contain EDataType', function() {
             assert.ok(Ecore.EDataType);
             assert.strictEqual(Ecore.EDataType.eClass, Ecore.EClass);
         });
+
+    }); // end EDataType
+
+    describe('#EStructuralFeature', function() {
 
         it('should contain EStructuralFeature', function() {
             assert.ok(Ecore.EStructuralFeature);
@@ -225,6 +251,9 @@ describe('Ecore', function() {
             assert.ok(derived);
             assert.strictEqual(derived.eClass, Ecore.EAttribute);
         });
+    }); // end EStructuralFeature
+
+    describe('#EAttribute', function() {
 
         it('should contain EAttribute', function() {
             assert.ok(Ecore.EAttribute);
@@ -237,6 +266,10 @@ describe('Ecore', function() {
             assert.ok(iD);
             assert.strictEqual(iD.eClass, Ecore.EAttribute);
         });
+
+    }); // end EAttribute
+
+    describe('#EReference', function() {
 
         it('should contain EReference', function() {
             assert.ok(Ecore.EReference);
@@ -271,6 +304,10 @@ describe('Ecore', function() {
             assert.equal(eOpposite.get('eType'), eReference);
         });
 
+    }); // end EReference
+
+    describe('#EOperation', function() {
+
         it('should contain EOperation', function() {
             assert.ok(Ecore.EOperation);
             assert.strictEqual(Ecore.EOperation.eClass, Ecore.EClass);
@@ -286,88 +323,97 @@ describe('Ecore', function() {
             assert.equal(eParameters.get('eType'), Ecore.EParameter);
         });
 
+    }); // end EOperation
+
+    describe('#EParameter', function() {
+
         it('should contain EParameter', function() {
             assert.ok(Ecore.EParameter);
             assert.strictEqual(Ecore.EParameter.eClass, Ecore.EClass);
         });
 
-        describe('#EModelElement', function() {
-            var EModelElement = Ecore.EModelElement;
+    }); // end EParameter
 
-            it('should have correct attributes', function() {
-                assert.equal(EModelElement.get('abstract'), true);
-                assert.equal(EModelElement.get('eSuperTypes').size(), 1);
+    describe('#EModelElement', function() {
+        var EModelElement = Ecore.EModelElement;
+
+        it('should have correct attributes', function() {
+            assert.equal(EModelElement.get('abstract'), true);
+            assert.equal(EModelElement.get('eSuperTypes').size(), 1);
+        });
+
+    }); // end describe EModelElement
+
+    describe('#ENamedElement', function() {
+        var ENamedElement = Ecore.ENamedElement;
+
+        it('should have correct attributes', function() {
+            assert.equal(ENamedElement.get('abstract'), true);
+            assert.equal(ENamedElement.get('eSuperTypes').size(), 1);
+
+            var superType = ENamedElement.get('eSuperTypes').first();
+
+            assert.strictEqual(superType, Ecore.EModelElement);
+        });
+    }); // end describe ENamedElement
+
+    describe('#ETypedElement', function() {
+        var ETypedElement = Ecore.ETypedElement;
+
+        it('should have correct attributes', function() {
+            assert.equal(ETypedElement.get('abstract'), true);
+            assert.equal(ETypedElement.get('eSuperTypes').size(), 1);
+
+            var superType = ETypedElement.get('eSuperTypes').first();
+
+            assert.strictEqual(superType, Ecore.ENamedElement);
+
+            var allSuperTypes = ETypedElement.get('eAllSuperTypes');
+
+            assert.equal(allSuperTypes.length, 3);
+            assert.ok(_.contains(allSuperTypes, Ecore.ENamedElement));
+            assert.ok(_.contains(allSuperTypes, Ecore.EModelElement));
+        });
+
+    }); // end describe ETypedElement
+
+    describe('#EClassifier', function() {
+        var EClassifier = Ecore.EClassifier;
+
+        it('should have correct attributes', function() {
+            assert.equal(EClassifier.get('abstract'), true);
+            assert.equal(EClassifier.get('eSuperTypes').size(), 1);
+        });
+
+    }); // end describe EClassifier
+
+    describe('#EClass', function() {
+        var EClass = Ecore.EClass;
+
+        it('should have correct attributes', function() {
+            assert.strictEqual(EClass, EClass.eClass);
+
+            var eFeatures = EClass.get('eAllStructuralFeatures');
+
+            var found = _.find(eFeatures, function(feature) {
+                return feature.get('name') === 'name';
             });
-        }); // end describe EModelElement
 
-        describe('#ENamedElement', function() {
-            var ENamedElement = Ecore.ENamedElement;
+            assert.ok(found);
+            assert.strictEqual(found.eClass, Ecore.EAttribute);
+        });
 
-            it('should have correct attributes', function() {
-                assert.equal(ENamedElement.get('abstract'), true);
-                assert.equal(ENamedElement.get('eSuperTypes').size(), 1);
-
-                var superType = ENamedElement.get('eSuperTypes').first();
-
-                assert.strictEqual(superType, Ecore.EModelElement);
-            });
-        }); // end describe ENamedElement
-
-        describe('#ETypedElement', function() {
-            var ETypedElement = Ecore.ETypedElement;
-
-            it('should have correct attributes', function() {
-                assert.equal(ETypedElement.get('abstract'), true);
-                assert.equal(ETypedElement.get('eSuperTypes').size(), 1);
-
-                var superType = ETypedElement.get('eSuperTypes').first();
-
-                assert.strictEqual(superType, Ecore.ENamedElement);
-
-                var allSuperTypes = ETypedElement.get('eAllSuperTypes');
-
-                assert.equal(allSuperTypes.length, 3);
-                assert.ok(_.contains(allSuperTypes, Ecore.ENamedElement));
-                assert.ok(_.contains(allSuperTypes, Ecore.EModelElement));
-            });
-        }); // end describe ETypedElement
-
-        describe('#EClassifier', function() {
+        it('should have EClassifier has eSuperTypes', function() {
             var EClassifier = Ecore.EClassifier;
-
-            it('should have correct attributes', function() {
-                assert.equal(EClassifier.get('abstract'), true);
-                assert.equal(EClassifier.get('eSuperTypes').size(), 1);
-            });
-        }); // end describe EClassifier
-
-        describe('#EClass', function() {
-            var EClass = Ecore.EClass;
-
-            it('should have correct attributes', function() {
-                assert.strictEqual(EClass, EClass.eClass);
-
-                var eFeatures = EClass.get('eAllStructuralFeatures');
-
-                var found = _.find(eFeatures, function(feature) {
-                    return feature.get('name') === 'name';
-                });
-
-                assert.ok(found);
-                assert.strictEqual(found.eClass, Ecore.EAttribute);
+            var found = EClass.get('eSuperTypes').find(function(type) {
+                return type === EClassifier;
             });
 
-            it('should have EClassifier has eSuperTypes', function() {
-                var EClassifier = Ecore.EClassifier;
-                var found = EClass.get('eSuperTypes').find(function(type) {
-                    return type === EClassifier;
-                });
+            assert.ok(found);
+            assert.strictEqual(found, EClassifier);
+        });
 
-                assert.ok(found);
-                assert.strictEqual(found, EClassifier);
-            });
-        });  // end describe EClass.
+    });  // end describe EClass.
 
-    }); // end describe Ecore.
+}); // end describe Ecore.
 
-});
