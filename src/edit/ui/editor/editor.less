@@ -1,0 +1,35 @@
+
+@part-background: white;
+
+.box-shadow-inset (@x: 0px, @y: 0px, @blur: 1px, @alpha: 1) {
+    -webkit-box-shadow: inset @x @y @blur rgba(220, 220, 220, @alpha);
+    -moz-box-shadow: inset @x @y @blur rgba(220, 220, 220, @alpha);
+    box-shadow: inset @x @y @blur rgba(220, 220, 220, @alpha);
+}
+
+.part {
+    .box-shadow-inset(1px, 1px, 0px, 1);
+    background: @part-background;
+    height: 100%;
+    width: 800px;
+    left: 320px;
+    position: absolute;
+}
+
+.part-header {
+    position: relative;
+    height: 20px;
+}
+
+.part-content {
+    position: relative;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+}
+
+.part-content .tab-content .tab-pane {
+    max-height:600px;
+    height:600px;
+}
+
