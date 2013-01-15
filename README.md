@@ -40,7 +40,7 @@ var User = Ecore.EClass.create({
         Ecore.EAttribute.create({
             name: 'name',
             upperBound: 1,
-            eType: Ecore.EcorePackage.EString
+            eType: Ecore.EString
         }),
         // EReferences are used to define links between domain
         // elements.
@@ -79,7 +79,7 @@ Model Elements can also be created separately.
 var User = Ecore.EClass.create({ name: 'User' });
 var User_name = Ecore.EAttribute.create({
    name: 'name',
-   eType: Ecore.EcorePackage.EString
+   eType: Ecore.EString
 });
 var User_friends = Ecore.EReference.create({
    name: 'friends',
@@ -114,6 +114,20 @@ described [here](https://github.com/ghillairet/emfjson) and looks like this:
         { "$ref" : '/u3.json#/', eClass: '/model.json#//User' }
     ]
 }
+```
+
+## XMI
+
+Support for XMI has been added in version 0.3.0. This support requires [sax.js](https://github.com/isaacs/sax-js).
+
+```javascript
+var resourceSet = Ecore.ResourceSet.create();
+var resource = resourceSet.create({ uri: 'test2.xmi' });
+
+resource.parse(data, Ecore.XMI); // data being a string containing the XMI.
+
+resource.to(Ecore.XMI, true); // returns the XMI string
+
 ```
 
 ## API
