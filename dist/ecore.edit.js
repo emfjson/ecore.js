@@ -162,6 +162,7 @@ Ecore.Editor.Window = Backbone.View.extend({
         var html = this._template({ title: this.title });
 
         this.$el.addClass('window');
+        this.$el.css('z-index', '1000');
         this.$el.append(html);
         this.$header = $('div > div[class*="window-header"]', this.$el);
 
@@ -186,9 +187,6 @@ Ecore.Editor.Window = Backbone.View.extend({
             draggable( this.$el.get()[0] );
         }
 
-//        this.$el.css('top', '200px');
-//        this.$el.css('left', '200px');
-
         resizable(this, this.$el[0]);
 
         return this;
@@ -199,9 +197,8 @@ Ecore.Editor.Window = Backbone.View.extend({
             this.$content.remove();
         }
         if (this.$el) {
-//            this.$el[0].style.left = 0;
-//            this.$el[0].style.top = 0;
             this.$el.children().remove();
+            this.$el.css('z-index', '-1');
         }
         return this;
     },
