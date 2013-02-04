@@ -3,6 +3,9 @@ var Ecore = require('../dist/ecore.js');
 var express = require('express');
 var app = express();
 
+
+app.use('/', express.static(__dirname + '/'));
+
 var resourceSet = Ecore.ResourceSet.create();
 resourceSet.uriConverter().map('/models/', 'http://www.example.org/models/');
 resourceSet.uriConverter().map('/models/ecore', Ecore.EcorePackage.get('nsURI'));

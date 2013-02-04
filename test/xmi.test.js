@@ -43,7 +43,7 @@ describe('#XMI', function() {
                 var error = function() {
                     done();
                 };
-                model.load(success, error, data, Ecore.XMI);
+                model.load(success, error, { data: data, format: Ecore.XMI });
             });
 
         });
@@ -88,7 +88,7 @@ describe('#XMI', function() {
                 var error = function() {
                     done();
                 };
-                model.load(success, error, data, Ecore.XMI);
+                model.load(success, error, { data: data, format: Ecore.XMI });
             });
         });
 

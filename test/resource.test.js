@@ -126,7 +126,7 @@ describe('Resource', function() {
                     assert.strictEqual(eClassB.get('eSuperTypes').at(0), eClassA);
 
                     done();
-                }, function(){}, JSON.parse(data));
+                }, function(){}, { data: JSON.parse(data) });
             });
 
         });
@@ -175,7 +175,7 @@ describe('Resource', function() {
                     assert.equal(second.eStructuralFeatures, undefined);
 
                     done();
-                }, function(){}, JSON.parse(data));
+                }, function(){}, { data: JSON.parse(data) });
             });
         });
     }); // end toJSON
