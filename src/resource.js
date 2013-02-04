@@ -343,28 +343,45 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
         {
             eClass: Ecore.EOperation,
             name: 'save',
-            _: function(success, error, formatter) {
+            _: function(success, error, options) {
+                options || (options = {});
+                var formatter = options.format ? options.format : Ecore.JSON;
                 var data = this.to(formatter);
-                var dataType = formatter ? formatter.dataType : 'json';
-                if (data) {
-                    Ajax.post(this.uri, data, format, success, error);
-                }
+                var dataType = formatter.dataType;
+                var set = this.get('resourceSet');
+                var converter = set ? set.uriConverter() : null;
+                var uri = this.get('uri');
+                uri = converter ? converter.normalize(uri) : uri;
+
+                Ajax.post(uri, data, dataType, success, error);
             }
         },
         {
             eClass: Ecore.EOperation,
             name: 'load',
-            _: function(success, error, data, loader) {
+            _: function(success, error, options) {
+                options || (options = {});
                 var model = this;
+                var loader = options.format || Ecore.JSON;
+                var set = this.get('resourceSet');
+                var converter = set ? set.uriConverter() : null;
+                var uri = this.get('uri');
                 var loadSuccess = function(data) {
                     model.parse(data, loader);
-                    return success(model);
+                    model.trigger('change');
+
+                    if (typeof success === 'function')
+                        return success(model);
                 };
 
-                if (data) {
-                    return loadSuccess(data);
+                if (options.data) {
+                    return loadSuccess(options.data);
                 } else {
-                    return Ajax.get(this.uri, 'json', loadSuccess, error);
+                    if (set && set.isSet('uri')) {
+                        uri = set.get('uri') + '/' + uri;
+                    }
+                    uri = converter ? converter.normalize(uri) : uri;
+                    return Ajax.get(uri, loader.dataType, loadSuccess, error);
                 }
             }
         },
@@ -423,6 +440,13 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
         Ecore.EObject
     ],
     eStructuralFeatures: [
+        {
+            eClass: Ecore.EAttribute,
+            name: 'uri',
+            upperBound: 1,
+            lowerBound: 0,
+            eType: Ecore.EString
+        },
         {
             eClass: Ecore.EReference,
             name: 'resources',
@@ -541,6 +565,58 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                 }
 
                 return this._converter;
+            }
+        },
+        {
+            eClass: Ecore.EOperation,
+            eType: Ecore.JSObject,
+            upperBound: 1,
+            name: 'toJSON',
+            _: function() {
+                var result = { total: this.get('resources').size(), resources: [] };
+
+                this.get('resources').each(function(resource) {
+                    result.resources.push({
+                        uri: resource.get('uri'),
+                        length: resource.get('contents').size(),
+                        contents: resource.get('contents').map(function(c) {
+                            return { eURI: c.eURI(), eClass: c.eClass.eURI() };
+                        })
+                    });
+                });
+
+                return result;
+            }
+        },
+        {
+            eClass: Ecore.EOperation,
+            name: 'parse',
+            _: function(data) {
+                if (!data || !data.resources) return;
+
+                _.each(data.resources, function(resource) {
+                    if (resource.uri) {
+                        resourceSet.create({ uri: resource.uri });
+                    }
+                }, this);
+            }
+        },
+        {
+            eClass: Ecore.EOperation,
+            name: 'fetch',
+            _: function(success, error) {
+                var uri = this.get('uri');
+                console.log(uri, this);
+                if (!uri) return;
+                var set = this;
+                var loadSuccess = function(data) {
+                    set.parse(data);
+                    set.trigger('change');
+
+                    if (typeof success === 'function')
+                        return success(set);
+                };
+                Ajax.get(uri, Ecore.JSON.dataType, loadSuccess, error);
             }
         }
     ]
