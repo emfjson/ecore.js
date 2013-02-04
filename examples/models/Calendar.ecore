@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Calendar" nsURI="http://Calendar/0.1/" nsPrefix="Calendar">
+  <eClassifiers xsi:type="ecore:EClass" name="Calendar">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ID" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="events" ordered="false" upperBound="-1" eType="//Event" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="profiles" ordered="false" upperBound="-1" eType="//Profile" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Profile">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="URI" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="user" ordered="false" eType="//Contact"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contacts" ordered="false" upperBound="-1" eType="//Contact"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Event">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="URI" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="startTime" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="endTime" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="summary" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attendees" ordered="false" upperBound="-1" eType="//Contact" eOpposite="//Contact/events"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Contact" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="URI" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="email" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="description" ordered="false" unique="false" upperBound="-1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="image" ordered="false" eType="//Image"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="events" ordered="false" upperBound="-1" eType="//Event" eOpposite="//Event/attendees"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contacts" ordered="false" upperBound="-1" eType="//Contact"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Person" eSuperTypes="//Contact">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="firstName" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lastName" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Group" eSuperTypes="//Contact">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Image">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="location" ordered="false" unique="false" lowerBound="1" eType="//String"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EDataType" name="String"/>
+</ecore:EPackage>

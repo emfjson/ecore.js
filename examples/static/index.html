@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script src="js/underscore.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/jquery-1.8.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/sax.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/ecore.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
+            <div style="position: relative;">
+                <select></select>
+                <button id="btn-json">JSON</button>
+                <button id="btn-xmi">XMI</button>
+            </div>
+            <textarea style="position: relative; width: 100%; height: 100%;" id="output"></textarea>
+        </div>
+
+        <script>
+            var select = document.getElementsByTagName('select')[0];
+            var jsonBtn = document.getElementById('btn-json');
+            var xmiBtn = document.getElementById('btn-xmi');
+            var textarea = document.getElementById('output');
+
+            var resourceSet = Ecore.ResourceSet.create({ uri: '/api/models' });
+            resourceSet.on('change', function() {
+                select.innerHTML = '';
+                resourceSet.get('resources').each(function(resource) {
+                    var option = document.createElement('option');
+                    option.innerHTML = resource.get('uri');
+                    select.appendChild(option);
+                });
+            });
+
+            jsonBtn.addEventListener('click', function(e) {
+                var resourceURI = select.options[select.selectedIndex].value;
+                var resource = resourceSet.create({ uri: resourceURI });
+                var display = function() {
+                    textarea.innerHTML = JSON.stringify(resource.to(Ecore.JSON), 0, 4);
+                };
+                resource.on('change', display);
+                resource.load();
+            });
+
+            xmiBtn.addEventListener('click', function(e) {
+                var resourceURI = select.options[select.selectedIndex].value;
+                var resource = resourceSet.create({ uri: resourceURI });
+                var display = function() {
+                    textarea.innerHTML = resource.to(Ecore.XMI, true);
+                };
+                resource.on('change', display);
+                resource.load();
+            });
+
+            resourceSet.fetch();
+        </script>
+
+    </body>
+</html>
