@@ -1,5 +1,5 @@
 
-var TextView = Backbone.View.extend({
+var TextValue = Backbone.View.extend({
     template: _.template('<div contenteditable><%= value %></div>'),
 
     render: function() {
@@ -15,9 +15,9 @@ var TextView = Backbone.View.extend({
     }
 });
 
-var DateView = Backbone.View.extend({});
+var DateValue = Backbone.View.extend({});
 
-var SelectView = Backbone.View.extend({
+var SelectValue = Backbone.View.extend({
     templateOptions: _.template('<% _.each(options, function(option) { %> <option> <%= option.eClass ? Ecore.Edit.LabelProvider.getLabel(option) : option %></option> <% }); %>'),
 
     initialize: function(attributes) {
@@ -46,36 +46,36 @@ var SelectView = Backbone.View.extend({
     }
 });
 
-var SingleValueSelectView = SelectView.extend({
+var SingleValueSelect = SelectValue.extend({
     template: _.template('<select></select>'),
 
     initialize: function(attributes) {
-        SelectView.prototype.initialize.apply(this, [attributes]);
+        SelectValue.prototype.initialize.apply(this, [attributes]);
     },
 
     render: function() {
         var html = this.template();
         this.setElement(html);
-        SelectView.prototype.render.apply(this);
+        SelectValue.prototype.render.apply(this);
         return this;
     }
 });
 
-var MultiValueSelectView = SelectView.extend({
+var MultiValueSelect = SelectValue.extend({
     template: _.template('<select multiple="multiple"></select>'),
     templateActions: _.template('<div class="btn-group"></div>'),
     templateAddAction: _.template('<a class="btn-mini"><i class="icon-plus"></i></a>'),
     templateDelAction: _.template('<a class="btn-mini"><i class="icon-remove"></i></a>'),
 
     initialize: function(attributes) {
-        SelectView.prototype.initialize.apply(this, [attributes]);
+        SelectValue.prototype.initialize.apply(this, [attributes]);
     },
 
     render: function() {
         var html = this.template();
         this.setElement(html);
 
-        SelectView.prototype.render.apply(this);
+        SelectValue.prototype.render.apply(this);
 
         var div = $(document.createElement('div'));
         div.append(this.$el);
