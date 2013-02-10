@@ -249,7 +249,7 @@ Edit.MenuBar = Backbone.View.extend({
 // var bar = new MenuBar({buttons: [add]});
 
 Edit.MenuBarButton = Backbone.View.extend({
-    template: _.template('<a class="btn btn-mini"> <%= label %> </a>'),
+    template: _.template('<a class="btn btn-<%= size %>"> <%= label %> </a>'),
 
     events: {
         'click': 'click'
@@ -257,32 +257,31 @@ Edit.MenuBarButton = Backbone.View.extend({
 
     initialize: function(attributes) {
         _.bindAll(this, 'render', 'click');
+        this.size = attributes.size || 'mini';
         this.label = attributes.label;
-        this.clickHandle = attributes.click;
     },
     render: function() {
-        var html = this.template({ label: this.label });
+        var html = this.template({ label: this.label, size: this.size });
         this.setElement(html);
 
         return this;
     },
-    click: function() {
-        return this.clickHandle();
+    click: function(e) {
+        this.trigger('click', e);
     }
 });
 
 Edit.MenuBarDropDownButton = Edit.MenuBarButton.extend({
-    template: _.template('<a class="btn btn-mini" data-toggle="dropdown"> <%= label %> <span class="caret"> </span></a><ul class="dropdown-menu"></ul>'),
+    template: _.template('<a class="btn btn-<%= size %>" data-toggle="dropdown"> <%= label %> <span class="caret"> </span></a><ul class="dropdown-menu"></ul>'),
 
     initialize: function(attributes) {
-        _.bindAll(this, 'render', 'click');
+        Edit.MenuBarButton.prototype.initialize.apply(this, [attributes]);
+
         this.label = attributes.label;
         this.items = attributes.items || [];
-        this.clickHandle = attributes.click;
     },
     render: function() {
-        var html = this.template({ label: this.label });
-        this.setElement(html);
+        Edit.MenuBarButton.prototype.render.apply(this);
 
         this.removeItem();
         _.each(this.items, this.renderItem, this);
@@ -329,23 +328,24 @@ Edit.DropDownItem = Backbone.View.extend({
     initialize: function(attributes) {
         _.bindAll(this, 'render', 'click');
         this.label = attributes.label;
-        this.handleClick = attributes.click;
     },
     render: function() {
-        var html = this.template({label: this.label});
+        var html = this.template({ label: this.label });
         this.setElement(html);
 
         return this;
     },
-    click: function() {
-        return this.handleClick();
+    click: function(e) {
+        this.trigger('click', e);
     },
     remove: function() {
+        Backbone.View.prototype.remove.apply(this);
     }
 });
 
 
-var TextView = Backbone.View.extend({
+
+var TextValue = Backbone.View.extend({
     template: _.template('<div contenteditable><%= value %></div>'),
 
     render: function() {
@@ -361,9 +361,9 @@ var TextView = Backbone.View.extend({
     }
 });
 
-var DateView = Backbone.View.extend({});
+var DateValue = Backbone.View.extend({});
 
-var SelectView = Backbone.View.extend({
+var SelectValue = Backbone.View.extend({
     templateOptions: _.template('<% _.each(options, function(option) { %> <option> <%= option.eClass ? Ecore.Edit.LabelProvider.getLabel(option) : option %></option> <% }); %>'),
 
     initialize: function(attributes) {
@@ -392,36 +392,36 @@ var SelectView = Backbone.View.extend({
     }
 });
 
-var SingleValueSelectView = SelectView.extend({
+var SingleValueSelect = SelectValue.extend({
     template: _.template('<select></select>'),
 
     initialize: function(attributes) {
-        SelectView.prototype.initialize.apply(this, [attributes]);
+        SelectValue.prototype.initialize.apply(this, [attributes]);
     },
 
     render: function() {
         var html = this.template();
         this.setElement(html);
-        SelectView.prototype.render.apply(this);
+        SelectValue.prototype.render.apply(this);
         return this;
     }
 });
 
-var MultiValueSelectView = SelectView.extend({
+var MultiValueSelect = SelectValue.extend({
     template: _.template('<select multiple="multiple"></select>'),
     templateActions: _.template('<div class="btn-group"></div>'),
     templateAddAction: _.template('<a class="btn-mini"><i class="icon-plus"></i></a>'),
     templateDelAction: _.template('<a class="btn-mini"><i class="icon-remove"></i></a>'),
 
     initialize: function(attributes) {
-        SelectView.prototype.initialize.apply(this, [attributes]);
+        SelectValue.prototype.initialize.apply(this, [attributes]);
     },
 
     render: function() {
         var html = this.template();
         this.setElement(html);
 
-        SelectView.prototype.render.apply(this);
+        SelectValue.prototype.render.apply(this);
 
         var div = $(document.createElement('div'));
         div.append(this.$el);
@@ -433,7 +433,7 @@ var MultiValueSelectView = SelectView.extend({
 
 
 
-Edit.PropertyRowView = Backbone.View.extend({
+Edit.PropertyRow = Backbone.View.extend({
     propertyTemplate: _.template('<tr><td><%= name %></td></tr>'),
     valueTemplate: _.template('<td></td>'),
 
@@ -470,7 +470,7 @@ Edit.PropertyRowView = Backbone.View.extend({
             if (eFeature.get('eType') === Ecore.EBoolean)
                 view = this.renderEAttributeBoolean(model, eFeature, value || false);
             else {
-                view = new TextView({ model: value });
+                view = new TextValue({ model: value });
                 view.on('change', function(changed) {
                     model.set(eFeature.get('name'), changed);
                     model.trigger('change');
@@ -483,7 +483,7 @@ Edit.PropertyRowView = Backbone.View.extend({
     },
 
     renderEAttributeBoolean: function(model, eFeature, value) {
-        var view = new SingleValueSelectView({
+        var view = new SingleValueSelect({
             options: ['true', 'false'],
             value: value
         });
@@ -500,12 +500,12 @@ Edit.PropertyRowView = Backbone.View.extend({
     renderEReference: function(model, eFeature, value) {
         var view;
         if (eFeature.get('upperBound') !== 1) {
-            view = new MultiValueSelectView({
+            view = new MultiValueSelect({
                 value: value,
                 options: this.options
             });
         } else {
-            view = new SingleValueSelectView({
+            view = new SingleValueSelect({
                 value: value,
                 options: this.options
             });
@@ -529,7 +529,7 @@ Edit.PropertyRowView = Backbone.View.extend({
                 view = this.renderEReference(model, this.eFeature, value);
             }
         } else {
-            view = new SingleValueSelectView({
+            view = new SingleValueSelect({
                 model: [value],
                 value: value,
                 options: this.options
@@ -592,7 +592,7 @@ $('[contenteditable]').live('focus', function() {
 // PropertySheetView
 //
 
-Edit.PropertySheetView = Backbone.View.extend({
+Edit.PropertySheet = Backbone.View.extend({
     template: _.template('<table class="table table-striped"></table>'),
     templateTableHead: _.template('<thead><tr><th style="width: 30%"></th><th style="width: 70%"></th></tr></thead>'),
     templateTableBody: _.template('<tbody></tbody>'),
@@ -631,7 +631,7 @@ Edit.PropertySheetView = Backbone.View.extend({
 
     createRow: function(feature, model, value, options) {
         var view =
-            new Edit.PropertyRowView({
+            new Edit.PropertyRow({
                 model: {
                     eFeature: feature,
                     eObject: model,
@@ -671,7 +671,7 @@ Edit.PropertySheetView = Backbone.View.extend({
 
 
 
-Edit.TabView = Backbone.View.extend({
+Edit.Tab = Backbone.View.extend({
     template: _.template('<li><a href="#tab-<%= id %>" data-toggle="tab"> <%= title %> <i class="icon-remove-circle"></i> </a></li>'),
 
     events: {
@@ -693,7 +693,7 @@ Edit.TabView = Backbone.View.extend({
     },
     remove: function() {
         this.trigger('remove');
-        Backbone.View.prototype.remove.apply(this);
+        return Backbone.View.prototype.remove.apply(this);
     },
     title: function() {
         var uri = this.model.get('uri');
@@ -702,100 +702,12 @@ Edit.TabView = Backbone.View.extend({
 });
 
 
-
-Edit.EditorView = Backbone.View.extend({
-    template: _.template('<div class="tab-pane" id="tab-<%= id %>"></div>'),
-
-    initialize: function(attributes) {
-        _.bindAll(this, 'render', 'remove');
-        if (attributes && attributes.$container && attributes.$tabs) {
-            this.$container = attributes.container;
-            this.$tabs = attributes.tabs;
-        }
-        this.tab = new Edit.TabView({ eid: this.cid, model: this.model });
-        this.tab.on('remove', this.remove);
-        this._rendered = false;
-    },
-
-    render: function() {
-        if (!this._rendered) {
-            var html = this.template({ id: this.cid });
-            this.setElement(html);
-
-            this.$container.append(this.$el);
-            this.$tabs.append(this.tab.render().$el);
-            this._rendered = true;
-        }
-
-        this.renderContent();
-
-        return this;
-    },
-
-    renderContent: function() {},
-
-    show: function() {
-        $('a[href="#tab-' +  this.cid + '"]', this.$tabs).tab('show');
-    },
-
-    remove: function() {
-        this.trigger('remove');
-        Backbone.View.prototype.remove.apply(this);
-    }
-
-});
-
-
-
-Edit.EditorTabView = Backbone.View.extend({
-    template: _.template('<ul class="nav nav-tabs"></ul> <div class="tab-content"></div>'),
-
-    initialize: function(attributes) {
-        this.editors = [];
-    },
-
-    render: function() {
-        if (!this.$content && !this.$tabs) {
-            var html = this.template();
-            this.$el.addClass('tabbable');
-
-            this.$el.append(html);
-
-            this.$content = $('.tab-content', this.$el);
-            this.$tabs = $('.nav-tabs', this.$el);
-        }
-
-        _.each(this.editors, function(e) { e.render(); });
-
-        return this;
-    },
-    addEditor: function(editor) {
-        if (this.$content && this.$tabs) {
-            editor.$container = this.$content;
-            editor.$tabs = this.$tabs;
-            this.editors.push(editor);
-
-            editor.on('remove', function() { this.suppress(editor); }, this);
-        }
-    },
-    getEditor: function(model) {
-        return _.find(this.editors, function(e) { return e.model === model; });
-    },
-    suppress: function(editor) {
-        this.editors = _.without(this.editors, editor);
-    },
-    show: function(editor) {
-        this.getEditor(editor).show();
-    }
-});
-
-
 /**
- * @name TreeNodeView
+ * @name TreeNode
  * @class
  *
  */
-Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
+Edit.TreeNode = Backbone.View.extend(/** @lends TreeNode.prototype */ {
     template: _.template('<tr class="tree-item-tr"></tr>'),
     table: '<table style="border-collapse; collapse; margin-left: 0px;"><tbody><tr></tr></tbody></table>',
     td: '<td class="tree-td"></td>',
@@ -808,20 +720,20 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
     initialize: function(attributes) {
         this.tree = attributes.tree;
         this.parent = attributes.parent;
-        this.previous = attributes.previous;
-        this.display = attributes.display;
         this.margin = attributes.margin;
         this.children = [];
         _.bindAll(this, 'render', 'onClick', 'expand', 'collapse', 'highlight', 'unhighlight');
     },
     render: function() {
         var html = this.template();
+        this.remove();
         this.setElement(html);
 
-        this.$el.append(this._createOrderElement())
-            .append(this._createLabelElemnt())
-            .append(this._createEditElement())
-            .append(this._createDeleteElement());
+        if (this.model) {
+            this.$el.append(this._createLabelElemnt());
+        } else {
+            this.$el.append(this._createAddElement());
+        }
 
         return this;
     },
@@ -831,49 +743,83 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
     },
     unhighlight: function() {
         this.$el[0].style.background = 'rgba(255, 255, 255, 1)';
-        this.$el[0].style.cursor = 'none';
+        this.$el[0].style.cursor = 'auto';
     },
     onClick: function() {
+        this.tree.setSelection(this);
         if (this.expanded) {
             this.collapse();
         } else {
             this.expand();
         }
     },
+    select: function(e) {
+        if (e) e.stopImmediatePropagation();
+        if (this.$el) {
+            this.$el.addClass('tree-selected');
+        }
+        this.tree.setSelection(this);
+    },
+    deselect: function() {
+        if (this.$el) {
+            this.$el.removeClass('tree-selected');
+        }
+    },
     expand: function() {
-        var previous, current;
         this.expanded = true;
+        var contents = this.model.eContents();
+        _.each(contents, this.addNode, this);
+    },
+    addNode: function(model) {
+        var previous = _.last(this.children);
+        var view = new Edit.TreeNode({
+            model: model,
+            tree: this.tree,
+            parent: this,
+            margin: this.margin + 24
+        });
 
-        _.each(this.model.eContents(), function(model) {
-            current = new Edit.TreeNodeView({ model: model, parent: this, display: this.display, margin: this.margin + 24 });
-            if (!previous) previous = current;
-            previous.next = current;
-            current.previous = current;
-            previous = current;
-            this.children.push(current);
-            current.render();
-            if (this.next && this.next !== this) {
-                this.display.$tbody[0].insertBefore(current.$el[0], this.next.$el[0]);
-            } else {
-                this.display.$tbody.append(current.$el);
-            }
-        }, this);
+        if (previous) previous.next = view;
+
+        this.children.push(view);
+        view.render();
+
+        if (this.next && this.next !== this) {
+            this.tree.$tbody[0].insertBefore(view.$el[0], this.next.$el[0]);
+        } else {
+            this.tree.$tbody.append(view.$el);
+        }
     },
     collapse: function() {
         this.expanded = false;
         _.each(this.children, function(c) { c.remove(); });
+        this.children.length = 0;
     },
     remove: function() {
         _.each(this.children, function(c) { c.remove(); });
         Backbone.View.prototype.remove.apply(this);
+        this.children.length = 0;
         return this;
+    },
+
+
+    // private methods
+
+
+    _createAddElement: function() {
+        var td = document.createElement('td');
+        td.className = 'tree-td';
+        var add = document.createElement('a');
+        add.className = 'icon-plus icon-large';
+        td.appendChild(add);
+        return td;
     },
     _createOrderElement: function() {
         var td = document.createElement('td');
         td.className = 'tree-td';
         if (this.parent) {
             var reorder = document.createElement('a');
-            reorder.className += ' icon-reorder';
+            reorder.className += ' icon-reorder icon-large';
             reorder.style.color = 'grey';
             td.appendChild(reorder);
         }
@@ -885,7 +831,8 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
         var table = this._createInnerTable();
         td.appendChild(table.table);
 
-        table.label.innerHTML = this.model.get('name');
+        var label = Edit.LabelProvider.getLabel(this.model);
+        table.label.innerHTML = label;
         td.addEventListener('click', this.onClick);
 
         return td;
@@ -896,7 +843,7 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
         td.style.color = '#CCCCCC';
         td.style.padding = 0;
         var copy = document.createElement('div');
-        copy.className = 'icon-edit';
+        copy.className = 'icon-edit icon-large';
         td.appendChild(copy);
         return td;
     },
@@ -906,7 +853,7 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
         td.style.color = '#CCCCCC';
         td.style.padding = 0;
         var del = document.createElement('div');
-        del.className = 'icon-remove';
+        del.className = 'icon-remove icon-large';
         td.appendChild(del);
 
         return td;
@@ -927,9 +874,15 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
         td_label.className = 'tree-td';
         var div_label = document.createElement('div');
         div_label.className = 'tree-label';
+        var td_icon = document.createElement('td');
+        td_icon.className = 'tree-td';
+        var span_icon = document.createElement('span');
+        span_icon.className = 'icon-edit-' + this.model.eClass.get('name');
 
         td_btn.appendChild(btn);
         tr.appendChild(td_btn);
+        tr.appendChild(td_icon);
+        td_icon.appendChild(span_icon);
         td_label.appendChild(div_label);
         tr.appendChild(td_label);
         tbody.appendChild(tr);
@@ -1077,118 +1030,50 @@ Edit.TreeNodeView = Backbone.View.extend({
 
 */
 
-Edit.TreeView = Backbone.View.extend({
-    template: _.template('<div class="tree-frame"></div>'),
+
+/**
+ * @name Tree
+ * @class Display Ecore elements in a Tree.
+ *
+ */
+Edit.Tree = Backbone.View.extend(/** @lends Tree.prototype */ {
+    template: _.template('<table class="tree-table"></table>'),
+    tableTmpl: _.template('<colgroup><col></colgroup><tbody></tbody>'),
+
     initialize: function(attributes) {
-        _.bindAll(this, 'render');
-        this.menu = new Edit.TreeViewMenu({ tree: this, model: this.model });
-        this.content = new Edit.TreeViewContent({ tree: this, model: this.model });
+        this.selected = null;
+        this.nodes = [];
     },
+
     render: function() {
-        var html = this.template();
-        this.menu.render();
-        this.content.render();
-        this.$el.append(html);
-        this.$frame = $('.tree-frame', this.$el);
-        this.$frame.append(this.menu.$el).append(this.content.$el);
+        if (!this.$body) {
+            this.setElement(this.template());
+            this.$el.append(this.tableTmpl());
+            this.$tbody = $('tbody', this.$el);
+
+            var previous, current;
+            this.model.get('contents').each(this.addNode, this);
+        }
 
         return this;
     },
+
+    addNode: function(model) {
+        var previous = _.last(this.nodes);
+        var view = new Edit.TreeNode({ model: model, tree: this, margin: 0 });
+        if (previous) previous.next = view;
+
+        this.nodes.push(view);
+        view.render();
+        this.$tbody.append(view.$el);
+    },
+
     expand: function() {
         if (this.$frame) {
             this.$frame.expand();
         }
-    }
-});
-
-Edit.TreeViewMenu = Backbone.View.extend({
-    template: _.template('<div class="tree-menu"></div>'),
-    render: function() {
-        var html = this.template();
-        this.setElement(html);
-        return this;
-    }
-});
-
-Edit.TreeViewContent = Backbone.View.extend({
-    template: _.template('<div class="tree-content-outer"><div class="tree-content"><table class="tree-table"></table></div></div>'),
-    tableTmpl: _.template('<colgroup><col width="24px"><col><col width="24px"></colgroup><tbody></tbody>'),
-
-    initialize: function(attributes) {
-        this.tree = attributes.tree;
-        this.items = [];
     },
-    render: function() {
-        if (!this.$table) {
-            var html = this.template();
-            this.setElement(html);
-            this.$table = $('.tree-table', this.$el);
-            this.$table.append(this.tableTmpl());
-            this.$tbody = $('tbody', this.$table);
 
-            var previous, current;
-            this.model.get('contents').each(function(item) {
-                current = new Edit.TreeNodeView({ model: item, tree: this.tree, display: this, margin: 0 });
-                if (!previous) previous = current;
-                previous.next = current;
-                current.previous = previous;
-                previous = current;
-                this.items.push(current);
-                current.render();
-                this.$tbody.append(current.$el);
-                    //                    this.$tbody[0].insertBefore(current.$el[0], current.children[0].$el[0]);
-            }, this);
-        }
-
-        return this;
-    }
-});
-
-/*
-
- TreeView
-
- <div class="tree">
-     <ul>
-     </ul>
- </div>
-
-*
-
-Edit.TreeView = Backbone.View.extend({
-    template: _.template('<div class="tree"><ul></ul></div>'),
-
-    selected: null,
-
-    initialize: function(attributes) {
-        this.children = [];
-    },
-    render: function() {
-        if (!this.model) return this;
-
-        if (!this.$content) {
-            var html = this.template();
-            this.setElement(html);
-            this.$children = $('ul', this.$el);
-        }
-
-        this.$children.children().remove();
-        var contents = this.model.eContents();
-        _.each(contents, this.addChildren, this);
-
-        if (this.children.length > 0) {
-            this.children[0].select();
-        }
-
-        return this;
-    },
-    addChildren: function(child) {
-        var view = new Edit.TreeNodeView({ model: child, tree: this });
-        view.render();
-        this.children.push(view);
-        this.$children.append(view.$el);
-        return view;
-    },
     setSelection: function(view) {
         if (this.selected) {
             this.selected.deselect();
@@ -1196,9 +1081,248 @@ Edit.TreeView = Backbone.View.extend({
         }
         this.selected = view;
         this.trigger('select', this.selected);
+    },
+
+    remove: function() {
+        if (this.$body) this.$body.remove();
+        _.each(this.nodes, function(node) { node.remove(); });
+        Backbone.View.prototype.remove.apply(this);
     }
 });
-*/
+
+
+/**
+ * @name Editor
+ * @class
+ *
+ */
+Edit.Editor = Backbone.View.extend(/** @lends Edior.prototype */ {
+    _frame: '<div class="editor-frame"></div>',
+    _menu: '<div class="editor-menu"></div>',
+    _content: '<div class="editor-content-outer"><div class="editor-content"></div></div>',
+
+    initialize: function(attributes) {},
+
+    render: function() {
+        var $frame;
+
+        if (!this.$content) {
+            this.setElement(this.template({ id: this.cid }));
+            this.$el.addClass('editor');
+            this.$el.append(this._frame);
+            $frame = $('.editor-frame', this.$el);
+            $frame.append(this._menu);
+            $frame.append(this._content);
+
+            this.$menu = $('.editor-menu', $frame);
+            this.$content = $('.editor-content', $frame);
+
+            if (this.$container) {
+                this.$container.append(this.$el);
+            }
+
+            this.renderContent();
+        }
+
+        return this;
+    },
+
+    renderContent: function() {},
+
+    remove: function() {
+        this.trigger('remove');
+        return Backbone.View.prototype.remove.apply(this);
+    }
+
+});
+
+/**
+ * @name TabEditor
+ * @class
+ *
+ */
+Edit.TabEditor = Edit.Editor.extend(/** @lends TabEdior.prototype */ {
+    template: _.template('<div class="tab-pane" id="tab-<%= id %>"></div>'),
+
+    initialize: function(attributes) {
+        Edit.Editor.prototype.initialize.apply(this, [attributes]);
+        this.tab = new Edit.Tab({ eid: this.cid, model: this.model });
+        this.tab.on('remove', this.remove);
+    },
+
+    render: function() {
+        Edit.Editor.prototype.render.apply(this);
+
+        if (this.$tabs) {
+            this.$tabs.append(this.tab.render().$el);
+        }
+
+        return this;
+    },
+
+    show: function() {
+         $('a[href="#tab-' +  this.cid + '"]', this.$tabs).tab('show');
+    }
+
+});
+
+
+/**
+ * @name TreeTabEdior
+ * @class
+ *
+ */
+Edit.TreeTabEdior = Edit.TabEditor.extend(/** @lends TreeTabEdior.prototype */ {
+    _menuGroup: '<div class="btn-group"></div>',
+
+    initialize: function(attributes) {
+        _.bindAll(this);
+        Edit.TabEditor.prototype.initialize.apply(this, [attributes]);
+        this.tree = new Ecore.Edit.Tree({ model: this.model });
+    },
+
+    renderContent: function() {
+        this.$content.append(this.tree.render().$el);
+        this.$menu.append(this._createMenu());
+    },
+
+    addElement: function(e) {
+        var selection = this.tree.selected;
+        if (!selection) return;
+
+        var menu = this.add;
+        var model = selection.model;
+        var child = model.eClass.get('eAllContainments');
+        var eContainingFeature = model.eContainingFeature;
+
+        menu.removeItem();
+        _.each(child, function(c) {
+            createChildItems.apply(menu, [c, model]);
+        });
+
+        if (eContainingFeature) {
+            var eType = eContainingFeature.get('eType');
+            var siblings = eType.get('abstract') ? eType.get('eAllSubTypes') : [eType];
+            var label, item;
+
+            if (child.length > 0) menu.addItem(new Edit.Separator());
+
+            _.each(siblings, function(type) {
+                label = 'Sibling ' + type.get('name');
+                item = new Edit.DropDownItem({ label: label });
+                menu.addItem(item);
+            });
+        }
+
+        _.each(menu.items, menu.renderItem, menu);
+    },
+
+    removeElement: function() {
+        console.log('remove');
+    },
+
+    _createMenu: function() {
+        var $group = $(this._menuGroup);
+
+        this.add = new Edit.MenuBarDropDownButton({ label: 'add', size: 'small' });
+        this.remove = new Edit.MenuBarButton({ label: 'remove', size: 'small' });
+        this.edit = new Edit.MenuBarButton({ label: 'edit', size: 'small' });
+
+        this.add.on('click', this.addElement);
+        this.remove.on('click', this.removeElement);
+
+        $group.append(this.add.render().$el)
+            .append(this.remove.render().$el)
+            .append(this.edit.render().$el);
+
+        return $group;
+    }
+});
+
+
+/*
+ * Helper functions
+ */
+
+function createChildItems(feature, model) {
+    var eType = feature.get('eType');
+    var types = eType.get('abstract') ? eType.get('eAllSubTypes') : [eType];
+    var item, label;
+
+    _.each(types, function(type) {
+        label = 'Child ' + type.get('name');
+        item = new Edit.DropDownItem({ label: label, model: type });
+
+        item.on('click', function() {
+            if (feature.get('upperBound') === 1) {
+                model.set(feature.get('name'), type.create());
+            } else {
+                model.get(feature.get('name')).add(type.create());
+            }
+        });
+
+        this.addItem(item);
+    }, this);
+}
+
+
+/**
+ * @name TabPanel
+ * @class
+ */
+Edit.TabPanel = Backbone.View.extend(/** @lends TabPanel.prototype */ {
+    template: _.template('<ul class="nav nav-tabs"></ul> <div class="tab-content"></div>'),
+
+    initialize: function(attributes) {
+        this.editors = [];
+    },
+    render: function() {
+        if (!this.$content && !this.$tabs) {
+            var html = this.template();
+            this.$el.addClass('tabbable');
+
+            this.$el.append(html);
+
+            this.$content = $('.tab-content', this.$el);
+            this.$tabs = $('.nav-tabs', this.$el);
+        }
+
+        _.each(this.editors, function(e) { e.render(); });
+
+        return this;
+    },
+    add: function(editor) {
+        if (this.$content && this.$tabs) {
+            editor.$container = this.$content;
+            editor.$tabs = this.$tabs;
+            this.editors.push(editor);
+
+            editor.on('remove', function() { this.suppress(editor); }, this);
+        }
+    },
+    get: function(editor) {
+        return _.find(this.editors, function(e) { return e === editor; });
+    },
+    getByModel: function(model) {
+        return _.find(this.editors, function(e) { return e.model === model; });
+    },
+    suppress: function(editor) {
+        this.editors = _.without(this.editors, editor);
+    },
+    show: function(model) {
+        this.getByModel(model).show();
+    },
+    open: function(model) {
+        var editor = this.getByModel(model);
+        if (!editor) {
+            editor = new Edit.TabEditor({ model: model });
+            this.add(editor);
+            editor.render();
+        }
+        editor.show();
+    }
+});
+
 
 
 })();
