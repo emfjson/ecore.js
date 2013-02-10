@@ -1,4 +1,4 @@
-//     Ecore.js 0.3.0
+//     Ecore.js 0.3.1
 //     Ecore Implementation in JavaScript.
 //
 //     © 2012 Guillaume Hillairet.
@@ -78,7 +78,7 @@ var Ecore = {
 };
 
 // Current version
-Ecore.version = '0.3.0';
+Ecore.version = '0.3.1';
 
 // Export Ecore
 if (typeof exports !== 'undefined') {
