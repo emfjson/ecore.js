@@ -15,7 +15,7 @@ $('[contenteditable]').live('focus', function() {
 // PropertySheetView
 //
 
-Edit.PropertySheetView = Backbone.View.extend({
+Edit.PropertySheet = Backbone.View.extend({
     template: _.template('<table class="table table-striped"></table>'),
     templateTableHead: _.template('<thead><tr><th style="width: 30%"></th><th style="width: 70%"></th></tr></thead>'),
     templateTableBody: _.template('<tbody></tbody>'),
@@ -54,7 +54,7 @@ Edit.PropertySheetView = Backbone.View.extend({
 
     createRow: function(feature, model, value, options) {
         var view =
-            new Edit.PropertyRowView({
+            new Edit.PropertyRow({
                 model: {
                     eFeature: feature,
                     eObject: model,

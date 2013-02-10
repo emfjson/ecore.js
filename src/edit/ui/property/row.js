@@ -1,5 +1,5 @@
 
-Edit.PropertyRowView = Backbone.View.extend({
+Edit.PropertyRow = Backbone.View.extend({
     propertyTemplate: _.template('<tr><td><%= name %></td></tr>'),
     valueTemplate: _.template('<td></td>'),
 
@@ -36,7 +36,7 @@ Edit.PropertyRowView = Backbone.View.extend({
             if (eFeature.get('eType') === Ecore.EBoolean)
                 view = this.renderEAttributeBoolean(model, eFeature, value || false);
             else {
-                view = new TextView({ model: value });
+                view = new TextValue({ model: value });
                 view.on('change', function(changed) {
                     model.set(eFeature.get('name'), changed);
                     model.trigger('change');
@@ -49,7 +49,7 @@ Edit.PropertyRowView = Backbone.View.extend({
     },
 
     renderEAttributeBoolean: function(model, eFeature, value) {
-        var view = new SingleValueSelectView({
+        var view = new SingleValueSelect({
             options: ['true', 'false'],
             value: value
         });
@@ -66,12 +66,12 @@ Edit.PropertyRowView = Backbone.View.extend({
     renderEReference: function(model, eFeature, value) {
         var view;
         if (eFeature.get('upperBound') !== 1) {
-            view = new MultiValueSelectView({
+            view = new MultiValueSelect({
                 value: value,
                 options: this.options
             });
         } else {
-            view = new SingleValueSelectView({
+            view = new SingleValueSelect({
                 value: value,
                 options: this.options
             });
@@ -95,7 +95,7 @@ Edit.PropertyRowView = Backbone.View.extend({
                 view = this.renderEReference(model, this.eFeature, value);
             }
         } else {
-            view = new SingleValueSelectView({
+            view = new SingleValueSelect({
                 model: [value],
                 value: value,
                 options: this.options

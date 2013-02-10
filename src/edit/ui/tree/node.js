@@ -1,9 +1,9 @@
 /**
- * @name TreeNodeView
+ * @name TreeNode
  * @class
  *
  */
-Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
+Edit.TreeNode = Backbone.View.extend(/** @lends TreeNode.prototype */ {
     template: _.template('<tr class="tree-item-tr"></tr>'),
     table: '<table style="border-collapse; collapse; margin-left: 0px;"><tbody><tr></tr></tbody></table>',
     td: '<td class="tree-td"></td>',
@@ -16,20 +16,20 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
     initialize: function(attributes) {
         this.tree = attributes.tree;
         this.parent = attributes.parent;
-        this.previous = attributes.previous;
-        this.display = attributes.display;
         this.margin = attributes.margin;
         this.children = [];
         _.bindAll(this, 'render', 'onClick', 'expand', 'collapse', 'highlight', 'unhighlight');
     },
     render: function() {
         var html = this.template();
+        this.remove();
         this.setElement(html);
 
-        this.$el.append(this._createOrderElement())
-            .append(this._createLabelElemnt())
-            .append(this._createEditElement())
-            .append(this._createDeleteElement());
+        if (this.model) {
+            this.$el.append(this._createLabelElemnt());
+        } else {
+            this.$el.append(this._createAddElement());
+        }
 
         return this;
     },
@@ -39,49 +39,83 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
     },
     unhighlight: function() {
         this.$el[0].style.background = 'rgba(255, 255, 255, 1)';
-        this.$el[0].style.cursor = 'none';
+        this.$el[0].style.cursor = 'auto';
     },
     onClick: function() {
+        this.tree.setSelection(this);
         if (this.expanded) {
             this.collapse();
         } else {
             this.expand();
         }
     },
+    select: function(e) {
+        if (e) e.stopImmediatePropagation();
+        if (this.$el) {
+            this.$el.addClass('tree-selected');
+        }
+        this.tree.setSelection(this);
+    },
+    deselect: function() {
+        if (this.$el) {
+            this.$el.removeClass('tree-selected');
+        }
+    },
     expand: function() {
-        var previous, current;
         this.expanded = true;
+        var contents = this.model.eContents();
+        _.each(contents, this.addNode, this);
+    },
+    addNode: function(model) {
+        var previous = _.last(this.children);
+        var view = new Edit.TreeNode({
+            model: model,
+            tree: this.tree,
+            parent: this,
+            margin: this.margin + 24
+        });
 
-        _.each(this.model.eContents(), function(model) {
-            current = new Edit.TreeNodeView({ model: model, parent: this, display: this.display, margin: this.margin + 24 });
-            if (!previous) previous = current;
-            previous.next = current;
-            current.previous = current;
-            previous = current;
-            this.children.push(current);
-            current.render();
-            if (this.next && this.next !== this) {
-                this.display.$tbody[0].insertBefore(current.$el[0], this.next.$el[0]);
-            } else {
-                this.display.$tbody.append(current.$el);
-            }
-        }, this);
+        if (previous) previous.next = view;
+
+        this.children.push(view);
+        view.render();
+
+        if (this.next && this.next !== this) {
+            this.tree.$tbody[0].insertBefore(view.$el[0], this.next.$el[0]);
+        } else {
+            this.tree.$tbody.append(view.$el);
+        }
     },
     collapse: function() {
         this.expanded = false;
         _.each(this.children, function(c) { c.remove(); });
+        this.children.length = 0;
     },
     remove: function() {
         _.each(this.children, function(c) { c.remove(); });
         Backbone.View.prototype.remove.apply(this);
+        this.children.length = 0;
         return this;
+    },
+
+
+    // private methods
+
+
+    _createAddElement: function() {
+        var td = document.createElement('td');
+        td.className = 'tree-td';
+        var add = document.createElement('a');
+        add.className = 'icon-plus icon-large';
+        td.appendChild(add);
+        return td;
     },
     _createOrderElement: function() {
         var td = document.createElement('td');
         td.className = 'tree-td';
         if (this.parent) {
             var reorder = document.createElement('a');
-            reorder.className += ' icon-reorder';
+            reorder.className += ' icon-reorder icon-large';
             reorder.style.color = 'grey';
             td.appendChild(reorder);
         }
@@ -93,7 +127,8 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
         var table = this._createInnerTable();
         td.appendChild(table.table);
 
-        table.label.innerHTML = this.model.get('name');
+        var label = Edit.LabelProvider.getLabel(this.model);
+        table.label.innerHTML = label;
         td.addEventListener('click', this.onClick);
 
         return td;
@@ -104,7 +139,7 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
         td.style.color = '#CCCCCC';
         td.style.padding = 0;
         var copy = document.createElement('div');
-        copy.className = 'icon-edit';
+        copy.className = 'icon-edit icon-large';
         td.appendChild(copy);
         return td;
     },
@@ -114,7 +149,7 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
         td.style.color = '#CCCCCC';
         td.style.padding = 0;
         var del = document.createElement('div');
-        del.className = 'icon-remove';
+        del.className = 'icon-remove icon-large';
         td.appendChild(del);
 
         return td;
@@ -135,9 +170,15 @@ Edit.TreeNodeView = Backbone.View.extend(/** @lends TreeNodeView.prototype */ {
         td_label.className = 'tree-td';
         var div_label = document.createElement('div');
         div_label.className = 'tree-label';
+        var td_icon = document.createElement('td');
+        td_icon.className = 'tree-td';
+        var span_icon = document.createElement('span');
+        span_icon.className = 'icon-edit-' + this.model.eClass.get('name');
 
         td_btn.appendChild(btn);
         tr.appendChild(td_btn);
+        tr.appendChild(td_icon);
+        td_icon.appendChild(span_icon);
         td_label.appendChild(div_label);
         tr.appendChild(td_label);
         tbody.appendChild(tr);

@@ -1,11 +1,13 @@
-
-Edit.EditorTabView = Backbone.View.extend({
+/**
+ * @name TabPanel
+ * @class
+ */
+Edit.TabPanel = Backbone.View.extend(/** @lends TabPanel.prototype */ {
     template: _.template('<ul class="nav nav-tabs"></ul> <div class="tab-content"></div>'),
 
     initialize: function(attributes) {
         this.editors = [];
     },
-
     render: function() {
         if (!this.$content && !this.$tabs) {
             var html = this.template();
@@ -21,7 +23,7 @@ Edit.EditorTabView = Backbone.View.extend({
 
         return this;
     },
-    addEditor: function(editor) {
+    add: function(editor) {
         if (this.$content && this.$tabs) {
             editor.$container = this.$content;
             editor.$tabs = this.$tabs;
@@ -30,14 +32,26 @@ Edit.EditorTabView = Backbone.View.extend({
             editor.on('remove', function() { this.suppress(editor); }, this);
         }
     },
-    getEditor: function(model) {
+    get: function(editor) {
+        return _.find(this.editors, function(e) { return e === editor; });
+    },
+    getByModel: function(model) {
         return _.find(this.editors, function(e) { return e.model === model; });
     },
     suppress: function(editor) {
         this.editors = _.without(this.editors, editor);
     },
-    show: function(editor) {
-        this.getEditor(editor).show();
+    show: function(model) {
+        this.getByModel(model).show();
+    },
+    open: function(model) {
+        var editor = this.getByModel(model);
+        if (!editor) {
+            editor = new Edit.TabEditor({ model: model });
+            this.add(editor);
+            editor.render();
+        }
+        editor.show();
     }
 });
 

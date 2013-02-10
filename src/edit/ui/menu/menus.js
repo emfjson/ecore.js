@@ -25,7 +25,7 @@ Edit.MenuBar = Backbone.View.extend({
 // var bar = new MenuBar({buttons: [add]});
 
 Edit.MenuBarButton = Backbone.View.extend({
-    template: _.template('<a class="btn btn-mini"> <%= label %> </a>'),
+    template: _.template('<a class="btn btn-<%= size %>"> <%= label %> </a>'),
 
     events: {
         'click': 'click'
@@ -33,32 +33,31 @@ Edit.MenuBarButton = Backbone.View.extend({
 
     initialize: function(attributes) {
         _.bindAll(this, 'render', 'click');
+        this.size = attributes.size || 'mini';
         this.label = attributes.label;
-        this.clickHandle = attributes.click;
     },
     render: function() {
-        var html = this.template({ label: this.label });
+        var html = this.template({ label: this.label, size: this.size });
         this.setElement(html);
 
         return this;
     },
-    click: function() {
-        return this.clickHandle();
+    click: function(e) {
+        this.trigger('click', e);
     }
 });
 
 Edit.MenuBarDropDownButton = Edit.MenuBarButton.extend({
-    template: _.template('<a class="btn btn-mini" data-toggle="dropdown"> <%= label %> <span class="caret"> </span></a><ul class="dropdown-menu"></ul>'),
+    template: _.template('<a class="btn btn-<%= size %>" data-toggle="dropdown"> <%= label %> <span class="caret"> </span></a><ul class="dropdown-menu"></ul>'),
 
     initialize: function(attributes) {
-        _.bindAll(this, 'render', 'click');
+        Edit.MenuBarButton.prototype.initialize.apply(this, [attributes]);
+
         this.label = attributes.label;
         this.items = attributes.items || [];
-        this.clickHandle = attributes.click;
     },
     render: function() {
-        var html = this.template({ label: this.label });
-        this.setElement(html);
+        Edit.MenuBarButton.prototype.render.apply(this);
 
         this.removeItem();
         _.each(this.items, this.renderItem, this);
@@ -105,18 +104,18 @@ Edit.DropDownItem = Backbone.View.extend({
     initialize: function(attributes) {
         _.bindAll(this, 'render', 'click');
         this.label = attributes.label;
-        this.handleClick = attributes.click;
     },
     render: function() {
-        var html = this.template({label: this.label});
+        var html = this.template({ label: this.label });
         this.setElement(html);
 
         return this;
     },
-    click: function() {
-        return this.handleClick();
+    click: function(e) {
+        this.trigger('click', e);
     },
     remove: function() {
+        Backbone.View.prototype.remove.apply(this);
     }
 });
 

@@ -1,5 +1,5 @@
 
-Edit.TabView = Backbone.View.extend({
+Edit.Tab = Backbone.View.extend({
     template: _.template('<li><a href="#tab-<%= id %>" data-toggle="tab"> <%= title %> <i class="icon-remove-circle"></i> </a></li>'),
 
     events: {
@@ -21,7 +21,7 @@ Edit.TabView = Backbone.View.extend({
     },
     remove: function() {
         this.trigger('remove');
-        Backbone.View.prototype.remove.apply(this);
+        return Backbone.View.prototype.remove.apply(this);
     },
     title: function() {
         var uri = this.model.get('uri');
