@@ -11,7 +11,8 @@ var root = this;
 
 // Load underscore from the `window` object in the browser or via the require function
 // on the server.
-var _ = root._ || require('underscore');
+var _ = root._;
+if (!_ && (typeof require !== 'undefined')) _ = require('underscore');
 
 // Ecore
 // -------
@@ -365,12 +366,14 @@ Ecore.EObjectPrototype = {
             options = arguments[2];
         }
 
+        var eResource = this.eResource();
         for (attr in attrs) {
             val = attrs[attr];
             if (typeof val !== 'undefined' && this.has(attr)) {
                 this.values[attr] = val;
                 eve = 'change:' + attr;
                 this.trigger('change ' + eve, attr);
+                if (eResource) eResource.trigger('change', this);
             }
         }
 
@@ -577,9 +580,12 @@ EList.prototype = {
         this._size++;
         this._internal.push(eObject);
 
-        var eve = 'add';
+        var eResource = this._owner.eResource(),
+            eve = 'add';
+
         if (this._feature) eve += ':' + this._feature.get('name');
         this._owner.trigger(eve, eObject);
+        if (eResource) eResource.trigger('add', this);
 
         return this;
     },
@@ -603,8 +609,14 @@ EList.prototype = {
     // @param {EObject}
 
     remove: function(eObject) {
+        var eve = 'remove',
+            eResource = this._owner.eResource();
+
         this._internal = _.without(this._internal, eObject);
         this._size = this._size - 1;
+        if (this._feature) eve += ':' + this._feature.get('name');
+        this._owner.trigger(eve, eObject);
+        if (eResource) eResource.trigger('remove', this);
 
         return this;
     },
