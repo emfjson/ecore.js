@@ -1,6 +1,6 @@
 _ = require('underscore');
 var Ecore = require('../dist/ecore.js');
-var assert = require("assert");
+var assert = require('assert');
 
 describe('Ecore', function() {
 

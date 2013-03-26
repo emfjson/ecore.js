@@ -11,7 +11,8 @@ var root = this;
 
 // Load underscore from the `window` object in the browser or via the require function
 // on the server.
-var _ = root._ || require('underscore');
+var _ = root._;
+if (!_ && (typeof require !== 'undefined')) _ = require('underscore');
 
 // Ecore
 // -------
