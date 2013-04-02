@@ -11,6 +11,7 @@ body {
   font-family: "Lato", "Helvetica", serif;
   color: #DD3344;
   background-color: #FFFFFF;
+  font-size: 1.2em;
 }
 
 a {
@@ -44,7 +45,7 @@ nav a {
 }
 
 section {
-  margin: 4em 14em 1em 14em;
+  margin: 2em 10em 2em 10em;
   color: black;
 }
 
@@ -70,8 +71,11 @@ h3 {
 }
 
 p {
-  padding: 0.2em;
+    display: inline-block;
+    margin-bottom: 12px;
+    line-height: 30px;
 }
+
 
 
 pre {

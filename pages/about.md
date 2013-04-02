@@ -2,8 +2,9 @@
 
 # What is it
 
-**Ecorejs** brings ecore meta-modeling to Javascript. It implements the ecore model in Javascript and provides
-JSON and XMI writers and parsers for the browser and nodejs.
+**Ecorejs** brings Ecore [metamodeling](http://en.wikipedia.org/wiki/Metamodeling) to Javascript. It implements the Ecore model
+in Javascript and includes JSON and [XMI](http://en.wikipedia.org/wiki/XML_Metadata_Interchange) (XML Metadata Interchange format)
+writers and parsers for the Browser and [Node.js](http://nodejs.org/).
 
 </section>
 
@@ -14,11 +15,11 @@ JSON and XMI writers and parsers for the browser and nodejs.
 <table>
 <tbody><tr>
 <td><a href="https://raw.github.com/ghillairet/ecore.js/master/dist/ecore.js">Development Version (0.3.1)</a></td>
-<td><i>132 kb, Uncompressed with comments</i></td>
+<td><i>78 kb, Uncompressed with comments</i></td>
 </tr>
 <tr>
 <td><a href="https://raw.github.com/ghillairet/ecore.js/master/dist/ecore.min.js">Production Version (0.3.1)</a></td>
-<td><i>15 kb Minified & gzipped (59 kb minified)</i></td>
+<td><i>29 kb Minified</i></td>
 </tr>
 </tbody>
 </table>
