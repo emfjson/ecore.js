@@ -161,9 +161,9 @@ describe('Ecore', function() {
              var eClass = Ecore.EClass;
 
             // abstract
-            var abstract = Ecore.EClass.getEStructuralFeature('abstract');
-            assert.ok(abstract);
-            assert.strictEqual(abstract.eClass, Ecore.EAttribute);
+            var _abstract = Ecore.EClass.getEStructuralFeature('abstract');
+            assert.ok(_abstract);
+            assert.strictEqual(_abstract.eClass, Ecore.EAttribute);
 
             // interface
             var _interface = Ecore.EClass.getEStructuralFeature('interface');
@@ -222,14 +222,14 @@ describe('Ecore', function() {
             assert.strictEqual(changeable.eClass, Ecore.EAttribute);
 
             // volatile
-            var volatile = Ecore.EStructuralFeature.getEStructuralFeature('volatile');
-            assert.ok(volatile);
-            assert.strictEqual(volatile.eClass, Ecore.EAttribute);
+            var _volatile = Ecore.EStructuralFeature.getEStructuralFeature('volatile');
+            assert.ok(_volatile);
+            assert.strictEqual(_volatile.eClass, Ecore.EAttribute);
 
             // transient
-            var transient = Ecore.EStructuralFeature.getEStructuralFeature('transient');
-            assert.ok(transient);
-            assert.strictEqual(transient.eClass, Ecore.EAttribute);
+            var _transient = Ecore.EStructuralFeature.getEStructuralFeature('transient');
+            assert.ok(_transient);
+            assert.strictEqual(_transient.eClass, Ecore.EAttribute);
 
             // defaultValueLiteral
             var defaultValueLiteral = Ecore.EStructuralFeature.getEStructuralFeature('defaultValueLiteral');

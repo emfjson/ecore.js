@@ -2,6 +2,36 @@ _ = require('../lib/underscore.js');
 var Ecore = require('../dist/ecore.js');
 var assert = require("assert");
 
+var createModel = function() {
+    var resourceSet = Ecore.ResourceSet.create();
+    var m1 = resourceSet.create({ uri: 'model1' });
+    var p1 = Ecore.EPackage.create({ name: 'p1', nsPrefix: 'model1', nsURI: 'model1' });
+    var Foo = Ecore.EClass.create({ name: 'Foo' });
+    var Bar = Ecore.EClass.create({ name: 'Bar' });
+    var BarBar = Ecore.EClass.create({ name: 'BarBar' });
+
+    Foo.get('eStructuralFeatures').add(Ecore.EReference.create({
+        name: 'child',
+        upperBound: -1,
+        eType: Foo,
+        containment: true
+    }));
+    Foo.get('eStructuralFeatures').add(Ecore.EAttribute.create({
+        name: 'label',
+        upperBound: 1,
+        eType: Ecore.EString
+    }));
+    Bar.get('eSuperTypes').add(Foo);
+    BarBar.get('eSuperTypes').add(Foo);
+
+    p1.get('eClassifiers').add(Foo);
+    p1.get('eClassifiers').add(Bar);
+    p1.get('eClassifiers').add(BarBar);
+    m1.get('contents').add(p1);
+
+    return m1;
+};
+
 describe('Usage', function() {
 
     describe('creation of an EClass', function() {
@@ -75,6 +105,12 @@ describe('Usage', function() {
 
             assert.strictEqual(1, SuperClass.get('eAllStructuralFeatures').length);
             assert.strictEqual(3, MyClass.get('eAllStructuralFeatures').length);
+        });
+
+        it('should return correct subtypes', function() {
+            var model = createModel();
+            var p = model.get('contents').at(0);
+            // TODO
         });
 
     });
