@@ -23,6 +23,29 @@ describe('Resource', function() {
             assert.strictEqual(m.getEObject('//C1/label'), c1_label);
         });
 
+        it('should build correct index for EModelElements with multiple roots', function() {
+            var resourceSet = Ecore.ResourceSet.create();
+            var r = resourceSet.create({ uri: 'test' });
+            var p1 = Ecore.EPackage.create({ name: 'p1', nsPrefix: 'p1', nsURI: 'test/p1' });
+            var c1 = Ecore.EClass.create({ name: 'C1' });
+            var c1_label = Ecore.EClass.create({
+                name: 'label',
+                eType: Ecore.EString
+            });
+            c1.get('eStructuralFeatures').add(c1_label);
+            p1.get('eClassifiers').add(c1);
+            var p2 = Ecore.EPackage.create({ name: 'p2', nsPrefix: 'p2', nsURI: 'test/p2' });
+            var c2 = Ecore.EClass.create({ name: 'C2' });
+            p2.get('eClassifiers').add(c2);
+            r.get('contents').add(p1).add(p2);
+
+            assert.strictEqual(r.getEObject('/0'), p1);
+            assert.strictEqual(r.getEObject('/1'), p2);
+            assert.strictEqual(r.getEObject('/0/C1'), c1);
+            assert.strictEqual(r.getEObject('/0/C1/label'), c1_label);
+            assert.strictEqual(r.getEObject('/1/C2'), c2);
+        });
+
         describe('index for instance models', function() {
             var testModel = Ecore.Resource.create({ uri: 'test.json' });
             var testPackage = Ecore.EPackage.create({
@@ -63,6 +86,17 @@ describe('Resource', function() {
                 assert.strictEqual(contain, m.getEObject('/'));
                 assert.strictEqual(c1, m.getEObject('//@child.0'));
                 assert.strictEqual(c2, m.getEObject('//@child.1'));
+            });
+
+            it('should be correct if multiple roots', function() {
+                var m = Ecore.Resource.create({ uri: 'instance.json' });
+                var c1 = Ecore.create(Child);
+                var c2 = Ecore.create(Child);
+                m.add(c1).add(c2);
+
+                assert.equal(2, m.get('contents').size());
+                assert.strictEqual(c1, m.getEObject('/0'));
+                assert.strictEqual(c2, m.getEObject('/1'));
             });
 
         });
