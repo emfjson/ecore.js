@@ -53,6 +53,58 @@ describe('ResourceSet', function() {
 
     });
 
+    describe('#elements', function() {
+
+        it('should return all elements in the resourceSet if no parameter', function() {
+            var resourceSet = Ecore.ResourceSet.create();
+            var r = resourceSet.create({ uri: 'test' });
+            var P = Ecore.EPackage.create({ name: 'P', nsURI: 'test', nsPrefix: 'P' });
+            var A = Ecore.EClass.create({ name: 'A' });
+            var B = Ecore.EClass.create({ name: 'B' });
+            B.get('eSuperTypes').add(A);
+            P.get('eClassifiers').add(A).add(B);
+            r.get('contents').add(P);
+            var r2 = resourceSet.create({ uri: 'test-instance' });
+            var a1 = A.create();
+            var a2 = A.create();
+            var b1 = B.create();
+            r2.get('contents').add(a1).add(a2).add(b1);
+
+            var elements = resourceSet.elements();
+            assert.ok(elements);
+            assert.strictEqual(6, elements.length);
+        });
+
+        it('should return all elements that are of type provided as parameter', function() {
+            var resourceSet = Ecore.ResourceSet.create();
+            var r = resourceSet.create({ uri: 'test' });
+            var P = Ecore.EPackage.create({ name: 'P', nsURI: 'test', nsPrefix: 'P' });
+            var A = Ecore.EClass.create({ name: 'A' });
+            var B = Ecore.EClass.create({ name: 'B' });
+            B.get('eSuperTypes').add(A);
+            P.get('eClassifiers').add(A).add(B);
+            r.get('contents').add(P);
+            var r2 = resourceSet.create({ uri: 'test-instance' });
+            var a1 = A.create();
+            var a2 = A.create();
+            var b1 = B.create();
+            r2.get('contents').add(a1).add(a2).add(b1);
+
+            var elementsEClass = resourceSet.elements('EClass');
+            assert.ok(elementsEClass);
+            assert.strictEqual(2, elementsEClass.length);
+
+            var elementsA = resourceSet.elements('A');
+            assert.ok(elementsA);
+            assert.strictEqual(3, elementsA.length);
+
+            var elementsB = resourceSet.elements('B');
+            assert.ok(elementsB);
+            assert.strictEqual(1, elementsB.length);
+        });
+
+    });
+
     describe('#uriConverter', function() {
 
         it('should return unique URIConverter per resourceSet', function() {
