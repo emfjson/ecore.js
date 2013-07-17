@@ -79,7 +79,7 @@ var Ecore = {
 };
 
 // Current version
-Ecore.version = '0.3.1';
+Ecore.version = '0.3.2';
 
 // Export Ecore
 if (typeof exports !== 'undefined') {
@@ -491,7 +491,10 @@ Ecore.EObjectPrototype = {
     fragment: function() {
         var eContainer = this.eContainer,
             eClass = this.eClass,
-            iD = eClass.get('eIDAttribute');
+            iD = eClass.get('eIDAttribute'),
+            eFeature,
+            contents,
+            fragment;
 
         // Must be at least contain in a Resource or EObject.
         if (!eContainer) return null;
@@ -499,26 +502,28 @@ Ecore.EObjectPrototype = {
         // Use ID has fragment
         if (iD) return this.get(iD.get('name'));
 
-        // ModelElement use names
+        // ModelElement uses names except for roots
         if (this.isKindOf('EModelElement')) {
-            if (!eContainer || eContainer.isKindOf('Resource')) {
+            if (!eContainer) {
                 return '/';
+            } else if (eContainer.isKindOf('Resource')) {
+                contents = eContainer.get('contents');
+                return contents.size() > 1 ? '/' + contents.indexOf(this) : '/';
             } else {
                 return eContainer.fragment() + '/' + this.get('name');
             }
         }
 
         // Default fragments
-        var fragment;
-        if (this.eContainer.isKindOf('Resource')) {
-            fragment = '/';
+        if (eContainer.isKindOf('Resource')) {
+            contents = eContainer.get('contents');
+            fragment = contents.size() > 1 ? '/' + contents.indexOf(this) : '/';
         } else {
-            var eFeature = this.eContainingFeature;
+            eFeature = this.eContainingFeature;
             if (eFeature) {
-                fragment = this.eContainer.fragment() + '/@' + eFeature.get('name');
+                fragment = eContainer.fragment() + '/@' + eFeature.get('name');
                 if (eFeature.get('upperBound') !== 1) {
-                    var position = this.eContainer.get(eFeature.get('name')).indexOf(this);
-                    fragment += '.' + position;
+                    fragment += '.' + eContainer.get(eFeature.get('name')).indexOf(this);
                 }
             }
         }
@@ -2062,19 +2067,13 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
             name: 'elements',
             _: function(type) {
                 var filter = function(el) {
-                    if (!type) return true;
-                    else if (type.eClass) {
-                        return el.eClass === type;
-                    } else {
-                        return el.eClass.get('name') === type;
-                    }
+                    return !type ? true : el.isKindOf(type);
                 };
-                var resources = this.get('resources').array();
-                var contents = _.flatten(_.map(resources, function(m) {
+                var contents = this.get('resources').map(function(m) {
                     return _.filter(_.values(m._index()), filter);
-                }));
-
-                return contents;
+                });
+                console.log(contents);
+                return _.flatten(contents);
             }
         },
         {
@@ -2129,7 +2128,6 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
             name: 'fetch',
             _: function(success, error) {
                 var uri = this.get('uri');
-                console.log(uri, this);
                 if (!uri) return;
                 var set = this;
                 var loadSuccess = function(data) {
@@ -2174,9 +2172,7 @@ function buildIndex(model) {
     var index = {},
         contents = model.get('contents').array();
 
-    if (contents.length === 1) {
-        var root = contents[0];
-
+    if (contents.length) {
         var build = function(object, idx) {
             var eContents = object.eContents();
             index[idx] = object;
@@ -2184,11 +2180,25 @@ function buildIndex(model) {
             _.each(eContents, function(e) { build(e, e.fragment()); });
         };
 
-        var iD = root.eClass.get('eIDAttribute') || null;
-        if (iD) {
-            build(root, root.get(iD.name));
+        var root, iD;
+        if (contents.length === 1) {
+            root = contents[0];
+            iD = root.eClass.get('eIDAttribute') || null;
+            if (iD) {
+                build(root, root.get(iD.name));
+            } else {
+                build(root, '/');
+            }
         } else {
-            build(root, '/');
+            for (var i = 0; i < contents.length; i++) {
+                root = contents[i];
+                iD = root.eClass.get('eIDAttribute') || null;
+                if (iD) {
+                    build(root, root.get(iD.name));
+                } else {
+                    build(root, '/' + i);
+                }
+            }
         }
     }
 
