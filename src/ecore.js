@@ -79,7 +79,7 @@ var Ecore = {
 };
 
 // Current version
-Ecore.version = '0.3.1';
+Ecore.version = '0.3.2';
 
 // Export Ecore
 if (typeof exports !== 'undefined') {
@@ -491,7 +491,10 @@ Ecore.EObjectPrototype = {
     fragment: function() {
         var eContainer = this.eContainer,
             eClass = this.eClass,
-            iD = eClass.get('eIDAttribute');
+            iD = eClass.get('eIDAttribute'),
+            eFeature,
+            contents,
+            fragment;
 
         // Must be at least contain in a Resource or EObject.
         if (!eContainer) return null;
@@ -499,26 +502,28 @@ Ecore.EObjectPrototype = {
         // Use ID has fragment
         if (iD) return this.get(iD.get('name'));
 
-        // ModelElement use names
+        // ModelElement uses names except for roots
         if (this.isKindOf('EModelElement')) {
-            if (!eContainer || eContainer.isKindOf('Resource')) {
+            if (!eContainer) {
                 return '/';
+            } else if (eContainer.isKindOf('Resource')) {
+                contents = eContainer.get('contents');
+                return contents.size() > 1 ? '/' + contents.indexOf(this) : '/';
             } else {
                 return eContainer.fragment() + '/' + this.get('name');
             }
         }
 
         // Default fragments
-        var fragment;
-        if (this.eContainer.isKindOf('Resource')) {
-            fragment = '/';
+        if (eContainer.isKindOf('Resource')) {
+            contents = eContainer.get('contents');
+            fragment = contents.size() > 1 ? '/' + contents.indexOf(this) : '/';
         } else {
-            var eFeature = this.eContainingFeature;
+            eFeature = this.eContainingFeature;
             if (eFeature) {
-                fragment = this.eContainer.fragment() + '/@' + eFeature.get('name');
+                fragment = eContainer.fragment() + '/@' + eFeature.get('name');
                 if (eFeature.get('upperBound') !== 1) {
-                    var position = this.eContainer.get(eFeature.get('name')).indexOf(this);
-                    fragment += '.' + position;
+                    fragment += '.' + eContainer.get(eFeature.get('name')).indexOf(this);
                 }
             }
         }

@@ -539,19 +539,12 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
             name: 'elements',
             _: function(type) {
                 var filter = function(el) {
-                    if (!type) return true;
-                    else if (type.eClass) {
-                        return el.eClass === type;
-                    } else {
-                        return el.eClass.get('name') === type;
-                    }
+                    return !type ? true : el.isKindOf(type);
                 };
-                var resources = this.get('resources').array();
-                var contents = _.flatten(_.map(resources, function(m) {
+                var contents = this.get('resources').map(function(m) {
                     return _.filter(_.values(m._index()), filter);
-                }));
-
-                return contents;
+                });
+                return _.flatten(contents);
             }
         },
         {
@@ -606,7 +599,6 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
             name: 'fetch',
             _: function(success, error) {
                 var uri = this.get('uri');
-                console.log(uri, this);
                 if (!uri) return;
                 var set = this;
                 var loadSuccess = function(data) {
@@ -651,9 +643,7 @@ function buildIndex(model) {
     var index = {},
         contents = model.get('contents').array();
 
-    if (contents.length === 1) {
-        var root = contents[0];
-
+    if (contents.length) {
         var build = function(object, idx) {
             var eContents = object.eContents();
             index[idx] = object;
@@ -661,11 +651,25 @@ function buildIndex(model) {
             _.each(eContents, function(e) { build(e, e.fragment()); });
         };
 
-        var iD = root.eClass.get('eIDAttribute') || null;
-        if (iD) {
-            build(root, root.get(iD.name));
+        var root, iD;
+        if (contents.length === 1) {
+            root = contents[0];
+            iD = root.eClass.get('eIDAttribute') || null;
+            if (iD) {
+                build(root, root.get(iD.name));
+            } else {
+                build(root, '/');
+            }
         } else {
-            build(root, '/');
+            for (var i = 0; i < contents.length; i++) {
+                root = contents[i];
+                iD = root.eClass.get('eIDAttribute') || null;
+                if (iD) {
+                    build(root, root.get(iD.name));
+                } else {
+                    build(root, '/' + i);
+                }
+            }
         }
     }
 
