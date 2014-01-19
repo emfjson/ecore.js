@@ -1,11 +1,11 @@
 {
-  "name": "hello",
+  "name": "events",
   "version": "0.4.0",
   "homepage": "https://github.com/ghillairet/ecore.js",
   "authors": [
     "ghillairet <g.hillairet@gmail.com>"
   ],
-  "description": "ecorejs hello world",
+  "description": "ecorejs events examples",
   "main": "main.js",
   "license": "EPL",
   "private": true,
@@ -17,7 +17,7 @@
     "tests"
   ],
   "dependencies": {
-    "ecore.js": "git://github.com/ghillairet/ecore.js#~0.4.0",
+    "ecore.js": "git://github.com/ghillairet/ecore.js#~0.3.2",
     "underscore": "~1.5.2"
   }
 }

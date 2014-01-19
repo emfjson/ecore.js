@@ -1,0 +1,12 @@
+{
+  "name": "node",
+  "version": "0.4.0",
+  "description": "node example",
+  "main": "main.js",
+  "author": "ghillairet",
+  "license": "EPL",
+  "dependencies": {
+    "underscore": "~1.5.2",
+    "ecore": "~0.3.2"
+  }
+}

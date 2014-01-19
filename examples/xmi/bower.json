@@ -1,12 +1,12 @@
 {
-  "name": "hello",
+  "name": "xmi",
   "version": "0.4.0",
   "homepage": "https://github.com/ghillairet/ecore.js",
   "authors": [
     "ghillairet <g.hillairet@gmail.com>"
   ],
-  "description": "ecorejs hello world",
-  "main": "main.js",
+  "description": "ecorejs xmi example",
+  "main": "xmi.js",
   "license": "EPL",
   "private": true,
   "ignore": [
@@ -17,7 +17,8 @@
     "tests"
   ],
   "dependencies": {
-    "ecore.js": "git://github.com/ghillairet/ecore.js#~0.4.0",
-    "underscore": "~1.5.2"
+    "underscore": "~1.5.2",
+    "ecore.js": "git://github.com/ghillairet/ecore.js#~0.3.2",
+    "sax": "git://github.com/isaacs/sax-js.git#~0.6.0"
   }
 }
