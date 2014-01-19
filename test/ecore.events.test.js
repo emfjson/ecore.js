@@ -27,6 +27,8 @@ describe('Events', function() {
                 Test.set({ 'upperBound': Test.get('upperBound') + 1 });
             });
 
+            assert.equal(0, Test.get('upperBound'));
+
             Test.trigger('a');
             assert.equal(1, Test.get('upperBound'));
 
@@ -75,6 +77,22 @@ describe('Events', function() {
                 assert.strictEqual(Name, added);
             });
             Test.get('eStructuralFeatures').add(Name);
+        });
+
+    });
+
+    describe('#ResourceSet.create', function() {
+
+        it('should trigger an add event', function() {
+            var resourceSet = Ecore.ResourceSet.create();
+
+            resourceSet.on('add', function(resource) {
+                assert.ok(resource);
+                assert.equal(1, resourceSet.get('resources').size());
+                assert.equal("sample.ecore", resourceSet.get('resources').at(0).get('uri'));
+            });
+
+            resourceSet.create({ uri: 'sample.ecore' });
         });
 
     });

@@ -14,17 +14,58 @@ describe('Ecore', function() {
         it('should contain EPackage attributes', function() {
             var nsURI = Ecore.EPackage.getEStructuralFeature('nsURI');
             assert.strictEqual(Ecore.EAttribute, nsURI.eClass);
-//            assert.equal(false, nsURI.get('derived'));
         });
 
     });
 
     describe('#EModelElement', function() {
+        var EModelElement = Ecore.EModelElement;
 
         it('should be abstract', function() {
-            var EModelElement = Ecore.EModelElement;
             assert.ok(EModelElement);
             assert.equal(true, EModelElement.get('abstract'));
+        });
+
+        it('should have eAnnotations feature', function() {
+            assert.equal(1, EModelElement.get('eStructuralFeatures').size());
+
+            var eAnnotations = EModelElement.get('eStructuralFeatures').at(0);
+            assert.equal('eAnnotations', eAnnotations.get('name'));
+            assert.equal(Ecore.EReference, eAnnotations.eClass);
+            assert.equal(0, eAnnotations.get('lowerBound'));
+            assert.equal(-1, eAnnotations.get('upperBound'));
+            assert.equal(true, eAnnotations.get('containment'));
+        });
+
+    });
+
+    describe('#EAnnotation', function() {
+        var EAnnotation = Ecore.EAnnotation;
+
+        it('should exist', function() {
+            assert.ok(EAnnotation);
+            assert.equal(false, EAnnotation.get('abstract'));
+        });
+
+        it('should have source and details attributes', function() {
+            var features = EAnnotation.get('eStructuralFeatures');
+            assert.equal(2, features.size());
+
+            var source = features.at(0);
+            assert.equal('source', source.get('name'));
+            assert.equal(0, source.get('lowerBound'));
+            assert.equal(1, source.get('upperBound'));
+            assert.strictEqual(Ecore.EAttribute, source.eClass);
+            assert.equal(Ecore.EString, source.get('eType'));
+
+            var details = features.at(1);
+            assert.equal('details', details.get('name'));
+            assert.equal(0, details.get('lowerBound'));
+            assert.equal(-1, details.get('upperBound'));
+            assert.strictEqual(Ecore.EReference, details.eClass);
+            assert.strictEqual(Ecore.EStringToStringMapEntry, details.get('eType'));
+
+            assert.ok(details.eClass.getEStructuralFeature);
         });
 
     });
@@ -185,6 +226,7 @@ describe('Ecore', function() {
             assert.ok(eSuperTypes);
             assert.equal(eSuperTypes.get('lowerBound'), 0);
             assert.equal(eSuperTypes.get('upperBound'), -1);
+            assert.strictEqual(eSuperTypes.get('many'), true);
             assert.equal(eSuperTypes.get('containment'), false);
             assert.strictEqual(eSuperTypes.get('eType'), Ecore.EClass);
 
