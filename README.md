@@ -1,4 +1,4 @@
-ecore.js: [Ecore](http://www.eclipse.org/modeling/emf/?project=emf) ([EMOF](http://en.wikipedia.org/wiki/Meta-Object_Facility)) implementation in JavaScript.
+[Ecore](http://www.eclipse.org/modeling/emf/?project=emf) ([EMOF](http://en.wikipedia.org/wiki/Meta-Object_Facility)) implementation in JavaScript.
 
 ## Install
 
@@ -48,8 +48,6 @@ var User = Ecore.EClass.create({
             name: 'friends',
             upperBound: -1,
             containment: false,
-            // If reference non previously defined variables,
-            // use a function that will return it a posteriori.
             eType: function() { return User; }
         })
     ]
