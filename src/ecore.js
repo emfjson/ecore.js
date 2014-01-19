@@ -1,7 +1,7 @@
-//     Ecore.js 0.3.1
+//     Ecore.js 0.4.0
 //     Ecore Implementation in JavaScript.
 //
-//     © 2012 Guillaume Hillairet.
+//     ©2014 Guillaume Hillairet.
 //     EPL License (http://www.eclipse.org/legal/epl-v10.html)
 
 (function() {
@@ -37,7 +37,7 @@ var Ecore = {
     //              {
     //                  eClass: Ecore.EAttribute,
     //                  name: 'userName',
-    //                  eType: Ecore.EcorePackage.EString
+    //                  eType: Ecore.EString
     //              }
     //          ]
     //      });
@@ -64,7 +64,7 @@ var Ecore = {
             }
         } else {
             attrs = attributes;
-            attrs.eClass = eClass;
+            attrs.eClass = attributes.eClass || eClass;
         }
 
         if (!attrs.eClass || attrs.eClass.get('abstract')) {
@@ -79,7 +79,7 @@ var Ecore = {
 };
 
 // Current version
-Ecore.version = '0.3.2';
+Ecore.version = '0.4.0';
 
 // Export Ecore
 if (typeof exports !== 'undefined') {
@@ -197,48 +197,48 @@ function initValues(eObject) {
 
     var eStructuralFeatures = eClass.get('eAllStructuralFeatures');
 
-    _.each(eStructuralFeatures, function( eFeature ) {
-        var featureName = eFeature.get('name');
-        if (featureName) {
-            var defaultValue = eFeature.values.defaultValue,
-                upperBound = eFeature.get('upperBound'),
-                isDerived = eFeature.values.derived === true,
-                isContainment = eFeature.values.containment === true,
-                value = eObject.values[featureName];
-
-            if (value === null || value === undefined) {
-                if (isDerived) {
-                    eObject.values[featureName] = eFeature.values._;
-                } else if (upperBound === 1 || !upperBound) {
-                    initValue(eObject, featureName, defaultValue);
-                } else {
-                    if (value instanceof Ecore.EList) {
-                        value._setFeature(eFeature);
-                    } else {
-                        eObject.values[featureName] =
-                            eFeature.isTypeOf('EAttribute') ? [] :
-                                new Ecore.EList(eObject, eFeature);
-                    }
-                }
-            }
-        }
+    _.each(eStructuralFeatures, function(eFeature) {
+        initValue(eObject, eFeature);
     });
 }
 
-function initValue(eObject, featureName, defaultValue) {
-    var _default;
-    if (defaultValue === null || defaultValue === undefined) {
-        _default = null;
-    } else {
-        if (defaultValue === 0) {
+function initValue(eObject, eFeature) {
+    if (!eObject || !eFeature) return;
+
+    var featureName = eFeature.get('name'),
+        defaultValue = eFeature.values.defaultValue,
+        upperBound = eFeature.get('upperBound'),
+        isDerived = eFeature.values.derived === true,
+        isContainment = eFeature.values.containment === true,
+        value = eObject.values[featureName];
+
+    var setDefaultUniqueValue = function() {
+        var _default;
+        if (defaultValue === null || defaultValue === undefined) {
+            _default = null;
+        } else if (defaultValue === 0) {
             _default = 0;
         } else if (defaultValue === false) {
             _default = false;
         } else {
             _default = defaultValue;
         }
+        return _default;
+    };
+
+    if (value === null || value === undefined) {
+        if (isDerived) {
+            eObject.values[featureName] = eFeature.values._;
+        } else if (upperBound === 1 || !upperBound) {
+            eObject.values[featureName] = setDefaultUniqueValue();
+        } else if (value instanceof Ecore.EList) {
+            value._setFeature(eFeature);
+        } else if (eFeature.isTypeOf('EAttribute')) {
+            eObject.values[featureName] = [];
+        } else {
+            eObject.values[featureName] = new Ecore.EList(eObject, eFeature);
+        }
     }
-    eObject.values[featureName] = _default;
 }
 
 function getEStructuralFeature(eClass, featureName) {
@@ -250,26 +250,40 @@ function getEStructuralFeature(eClass, featureName) {
 function setValues(eObject, attributes) {
     if (!eObject.eClass) return;
 
+    var getOrCreate = function(eType, value) {
+        if (typeof value === 'function') return value;
+        if (value instanceof EObject) return value;
+        return Ecore.create(eType, value);
+    };
+
+    var createSingle = function(key, value, isReference, eType) {
+        if (isReference) {
+            eObject.set(key, getOrCreate(eType, value));
+        } else {
+            eObject.set(key, value);
+        }
+    };
+
+    var createMany = function(key, value, isReference, eType) {
+        var values = _.isArray(value) ? value : [value];
+        _.each(values, function(current) {
+            if (isReference) {
+                eObject.get(key).add(getOrCreate(eType, current));
+            } else {
+                eObject.get(key).push(current);
+            }
+        });
+    };
+
     _.each(attributes, function(value, key) {
         var eFeature = getEStructuralFeature(this.eClass, key),
             values = [];
 
-        if (eFeature) {
-
-            if (eFeature.isTypeOf('EReference')) {
-                if (_.isArray(value)) {
-                    _.each(value, function(v) {
-                        values.push(v instanceof EObject ? v : Ecore.create(v));
-                    });
-                } else if (!value instanceof EObject) {
-                    value = Ecore.create(value);
-                }
-            }
-
-            if (eFeature.get('upperBound') === 1 || !eFeature.get('upperBound')) {
-                this.set(key, value);
+        if (eFeature && value !== undefined) {
+            if (eFeature.get('upperBound') === 1) {
+                createSingle(key, value, eFeature.eClass === Ecore.EReference, eFeature.get('eType'));
             } else {
-                this.get(key).addAll(values);
+                createMany(key, value, eFeature.eClass === EReference, eFeature.get('eType'));
             }
         }
     }, eObject);
@@ -392,6 +406,11 @@ Ecore.EObjectPrototype = {
         if (!feature) return null;
 
         var featureName = feature.eClass ? feature.get('name') : feature;
+
+        if (!_.has(this.values, featureName) && this.has(featureName)) {
+            initValue(this, getEStructuralFeature(this.eClass, featureName));
+        }
+
         var value = this.values[featureName];
 
         if (typeof value === 'function') {
@@ -626,6 +645,14 @@ EList.prototype = {
         return this;
     },
 
+    clear: function() {
+        var array = this.array();
+        for (var i = 0; i < array.length; i++) {
+            this.remove(array[i]);
+        }
+        return this;
+    },
+
     // Returns the size of the EList
     //
     //      @public
@@ -702,18 +729,6 @@ EList.prototype = {
 
 //  Bootstrap Ecore Model.
 
-// EClass
-//  - attributes:
-//      - abstract: Boolean
-//      - interface: Boolean
-//  - references:
-//      - eStructuralFeatures: EStructuralFeature
-//      - eSuperTypes: EClass
-//      - eOperations: EOperation
-//  - operations:
-//      - isSuperTypeOf(eClass): Boolean
-//      - getEStructuralFeature(feature): EStructuralFeature
-
 var EClass = new EObject(),
     EString = new EObject(),
     EInt = new EObject(),
@@ -726,6 +741,20 @@ var EClass = new EObject(),
     EClass_eStructuralFeatures = new EObject(),
     EClass_eOperations = new EObject(),
     EClass_eSuperTypes = new EObject();
+
+
+// EClass
+//  - attributes:
+//      - abstract: Boolean
+//      - interface: Boolean
+//  - references:
+//      - eStructuralFeatures: EStructuralFeature
+//      - eSuperTypes: EClass
+//      - eOperations: EOperation
+//  - operations:
+//      - isSuperTypeOf(eClass): Boolean
+//      - getEStructuralFeature(feature): EStructuralFeature
+
 
 EClass.eClass = EClass;
 EClass.values = {
@@ -1236,7 +1265,21 @@ ETypedElement.get('eStructuralFeatures')
 //  - operations:
 //      - getEAnnotation(source): EAnnotation
 
+var EModelElement_eAnnotations = new EObject();
+EModelElement_eAnnotations.eClass = EReference;
+EModelElement_eAnnotations.values = {
+    name: 'eAnnotations',
+    eType: EAnnotation,
+    lowerBound: 0,
+    upperBound: -1,
+    containment: true
+};
+
+EModelElement.get('eStructuralFeatures').add(EModelElement_eAnnotations);
+
 // ENamedElement
+// - attributes
+//   - name: EString
 
 var ENamedElement_name = new EObject();
 ENamedElement_name.eClass = EAttribute;
@@ -1246,11 +1289,12 @@ ENamedElement_name.values = {
     upperBound: 1,
     eType: EString
 };
+
 ENamedElement.get('eStructuralFeatures').add(ENamedElement_name);
 
 // EClassifier
 //  - references:
-//      - ePackages: EPackage
+//      - ePackages[*]: EPackage
 
 // EStructuralFeature
 //  - attributes:
@@ -1348,21 +1392,63 @@ var EEnum_eLiterals = EReference.create({
 
 EEnum.get('eStructuralFeatures').add(EEnum_eLiterals);
 
-EEnumLiteral_value = EAttribute.create({
-    name: 'value',
-    eType: EInt
+EEnumLiteral.get('eStructuralFeatures')
+    .add(EAttribute.create({ name: 'literal', eType: EString }))
+    .add(EAttribute.create({ name: 'value', eType: EInt }));
+
+// EStringToStringMapEntry
+//  - attributes
+//    - key: EString
+//    - value: EString
+
+var EStringToStringMapEntry = EClass.create({
+    name: 'EStringToStringMapEntry'
 });
 
-EEnumLiteral_literal = EAttribute.create({
-    name: 'literal',
+var EStringToStringMapEntry_key = EAttribute.create({
+    name: 'key',
+    lowerBound: 0,
+    upperBound: 1,
     eType: EString
 });
 
-EEnumLiteral.get('eStructuralFeatures')
-    .add(EEnumLiteral_literal)
-    .add(EEnumLiteral_value);
+var EStringToStringMapEntry_value = EAttribute.create({
+    name: 'value',
+    lowerBound: 0,
+    upperBound: 1,
+    eType: EString
+});
 
-// DataTypes
+EStringToStringMapEntry.get('eStructuralFeatures')
+    .add(EStringToStringMapEntry_key)
+    .add(EStringToStringMapEntry_value);
+
+// EAnnotation
+// - attributes:
+//  - source: EString
+// - references:
+//  - details[*]: EStringToStringMapEntry
+
+var EAnnotation_source = EAttribute.create({
+    name: 'source',
+    upperBound: 1,
+    lowerBound: 0,
+    eType: EString
+});
+var EAnnotation_details = EReference.create({
+    name: 'details',
+    upperBound: -1,
+    lowerBound: 0,
+    containment: true,
+    eType: EStringToStringMapEntry
+});
+
+EAnnotation.get('eStructuralFeatures')
+    .add(EAnnotation_source)
+    .add(EAnnotation_details);
+
+
+// Setting core datatypes values
 
 EString.eClass = EDataType;
 EString.set({ name: 'EString' });
@@ -1376,6 +1462,8 @@ EDouble.eClass = EDataType;
 EDouble.set({ name: 'EDouble' });
 JSObject.eClass = EDataType;
 JSObject.set({ name: 'JSObject' });
+
+// Additional datatypes
 
 Ecore.ELong = EDataType.create({
     name: 'ELong'
@@ -1438,6 +1526,7 @@ Ecore.EcorePackage.get('eClassifiers')
     .add(EParameter)
     .add(EEnum)
     .add(EEnumLiteral)
+    .add(EStringToStringMapEntry)
     .add(EString)
     .add(EBoolean)
     .add(EInt)
@@ -1453,6 +1542,7 @@ Ecore.EModelElement = EModelElement;
 Ecore.EClass = EClass;
 Ecore.EClassifier = EClassifier;
 Ecore.EAnnotation = EAnnotation;
+Ecore.EStringToStringMapEntry = EStringToStringMapEntry;
 Ecore.EPackage = EPackage;
 Ecore.ETypedElement = ETypedElement;
 Ecore.ENamedElement = ENamedElement;
@@ -1487,6 +1577,10 @@ Ecore.EPackage.Registry = {
         if (!ePackage.isSet('nsURI')) {
             throw new Error('Cannot register EPackage without nsURI');
         }
+
+        ePackage.get('eSubPackages').each(function(ePackage) {
+            register(ePackage)
+        });
 
         this._ePackages[ePackage.get('nsURI')] = ePackage;
     },

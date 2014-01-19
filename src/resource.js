@@ -254,16 +254,10 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
     eOperations: [
         {
             eClass: Ecore.EOperation,
-            name: 'clear',
-            _: function() {
-                this.get('contents').clear();
-            }
-        },
-        {
-            eClass: Ecore.EOperation,
             name: 'add',
             _: function(eObject) {
-                if (!_.isObject(eObject)) return this;
+                if (!eObject && !eObject.eClass) return this;
+
                 eObject.eContainer = this;
                 this.get('contents').add(eObject);
 
@@ -275,17 +269,6 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             name: 'clear',
             _: function() {
                 this.get('contents').clear();
-                return this;
-            }
-        },
-        {
-            eClass: Ecore.EOperation,
-            name: 'add',
-            _: function(eObject) {
-                if (eObject) {
-                    eObject.eContainer = this;
-                    this.get('contents').add(eObject);
-                }
                 return this;
             }
         },
@@ -345,6 +328,7 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             name: 'save',
             _: function(success, error, options) {
                 options || (options = {});
+
                 var formatter = options.format ? options.format : Ecore.JSON;
                 var data = this.to(formatter);
                 var dataType = formatter.dataType;
@@ -361,6 +345,7 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             name: 'load',
             _: function(success, error, options) {
                 options || (options = {});
+
                 var model = this;
                 var loader = options.format || Ecore.JSON;
                 var set = this.get('resourceSet');
@@ -383,6 +368,17 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
                     uri = converter ? converter.normalize(uri) : uri;
                     return Ajax.get(uri, loader.dataType, loadSuccess, error);
                 }
+            }
+        },
+        {
+            eClass: Ecore.EOperation,
+            name: 'remove',
+            _: function() {
+                var resourceSet = this.get('resourceSet');
+                if (resourceSet) {
+                    resourceSet.get('resources').remove(this);
+                }
+                this.clear();
             }
         },
         {
@@ -493,6 +489,8 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                 resource = Ecore.Resource.create(attrs);
                 resource.set('resourceSet', this);
                 this.get('resources').add(resource);
+
+                this.trigger('add', resource);
 
                 return resource;
             }
