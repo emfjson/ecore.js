@@ -1,6 +1,6 @@
 _ = require('underscore');
 var fs = require('fs');
-var Ecore = require('../dist/ecore.js');
+var Ecore = require('ecore');
 var express = require('express');
 var app = express();
 
@@ -12,6 +12,7 @@ var resourceSet = Ecore.ResourceSet.create();
 var dirName = './models';
 var files = fs.readdirSync(dirName);
 var resource;
+
 _.each(files, function(file) {
     fs.readFile(dirName + '/' + file, 'utf-8', function (err, data) {
         if (err) throw err;

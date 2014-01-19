@@ -1,0 +1,24 @@
+{
+  "name": "node-express-jquery",
+  "version": "0.4.0",
+  "homepage": "https://github.com/ghillairet/ecore.js",
+  "authors": [
+    "ghillairet <g.hillairet@gmail.com>"
+  ],
+  "description": "node-express-jquery example",
+  "main": "main.js",
+  "license": "EPL",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "underscore": "~1.5.2",
+    "ecore.js": "git://github.com/ghillairet/ecore.js#~0.3.2",
+    "jquery": "~2.0.3"
+  }
+}
