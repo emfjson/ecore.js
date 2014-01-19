@@ -1,0 +1,24 @@
+{
+  "name": "ecore.js",
+  "main": "dist/ecore.js",
+  "version": "0.4.0",
+  "homepage": "https://github.com/ghillairet/ecore.js",
+  "authors": [
+    "ghillairet <g.hillairet@gmail.com>"
+  ],
+  "description": "Ecore for Javascript",
+  "keywords": [
+    "Ecore"
+  ],
+  "license": "EPL",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "underscore": "~1.5.2"
+  }
+}
