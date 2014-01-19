@@ -15,7 +15,6 @@ var _ = root._;
 if (!_ && (typeof require !== 'undefined')) _ = require('underscore');
 
 // Ecore
-// -------
 
 // Base object providing common methods for the creation of model elements such as
 // `EPackage`, `EClass`, `EDataType`, `EAttribute` and `EReference`. As well as the

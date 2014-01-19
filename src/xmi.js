@@ -200,7 +200,7 @@ Ecore.XMI = {
             nsURI = root.eClass.eContainer.get('nsURI'),
             contentsFeature = Ecore.Resource.getEStructuralFeature('contents');
 
-        function processElement(root){
+        function processElement(root) {
             docRoot += '<';
 
             var element;
@@ -236,7 +236,7 @@ Ecore.XMI = {
                 var featureName = feature.get('name'),
                     value = root.get(featureName);
 
-                if (value !== false && value !== 'false') {
+                if (value !== undefined && value !== 'false') {
                     docRoot += ' '  + featureName + '="' + value + '"';
                 }
             });
@@ -265,12 +265,14 @@ Ecore.XMI = {
                 _.each(externals, function(ext) {
                     var feature = ext.feature,
                         refs = ext.refs,
-                        isAbstract = feature.get('eType').get('abstract');
+                        isAbstract = feature.get('eType').get('abstract'),
+                        prefix;
 
                     _.each(refs, function(ref) {
                         docRoot += '<' + feature.get('name');
                         if (isAbstract) {
-                            docRoot += ' xsi:type="' + ref.eClass.get('name') + '"';
+                            prefix = ref.eClass.eContainer.get('nsPrefix');
+                            docRoot += ' xsi:type="' + (prefix ? prefix + ':' : '') + ref.eClass.get('name') + '"';
                         }
                         docRoot += ' href="' + ref.eURI() + '"' + ' />';
                     });
