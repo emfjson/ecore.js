@@ -12,7 +12,7 @@ describe('#XMI', function() {
             var resourceSet = Ecore.ResourceSet.create();
             var model = resourceSet.create({ uri: 'test1.xmi' });
 
-            fs.readFile('./test/test1.xmi', 'utf8', function (err, data) {
+            fs.readFile('./test/models/test1.xmi', 'utf8', function (err, data) {
                 if (err) return console.log(err);
 
                 var validate = function(model) {
@@ -52,7 +52,7 @@ describe('#XMI', function() {
             var resourceSet = Ecore.ResourceSet.create();
             var model = resourceSet.create({ uri: 'test2.xmi' });
 
-            fs.readFile('./test/test2.xmi', 'utf8', function (err, data) {
+            fs.readFile('./test/models/test2.xmi', 'utf8', function (err, data) {
                 if (err) return console.log(err);
 
                 var validate = function(model) {

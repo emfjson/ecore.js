@@ -120,7 +120,7 @@ describe('Resource', function() {
 
             var model = Ecore.Resource.create({ uri: 'simple.json' });
 
-            fs.readFile('./test/simple.json', 'utf8', function (err,data) {
+            fs.readFile('./test/models/simple.json', 'utf8', function (err,data) {
                 if (err) {
                     return console.log(err);
                 }
@@ -172,7 +172,7 @@ describe('Resource', function() {
         it('should produce a valid JSON', function(done) {
             var model = Ecore.Resource.create({ uri: 'simple.json' });
 
-            fs.readFile('./test/simple.json', 'utf8', function (err,data) {
+            fs.readFile('./test/models/simple.json', 'utf8', function (err,data) {
                 if (err) {
                     return console.log(err);
                 }

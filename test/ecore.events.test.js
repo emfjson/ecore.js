@@ -1,5 +1,11 @@
-var Ecore = require('../dist/ecore.js');
-var assert = require("assert");
+var Ecore = this.Ecore;
+var assert = this.assert;
+
+if (typeof require === 'function') {
+    _ = require('underscore');
+    Ecore = require('../dist/ecore.js');
+    assert = require("assert");
+}
 
 describe('Events', function() {
 

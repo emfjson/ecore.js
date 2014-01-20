@@ -1,6 +1,11 @@
-_ = require('underscore');
-var Ecore = require('../dist/ecore.js');
-var assert = require("assert");
+var Ecore = this.Ecore;
+var assert = this.assert;
+
+if (typeof require === 'function') {
+    _ = require('underscore');
+    Ecore = require('../dist/ecore.js');
+    assert = require("assert");
+}
 
 describe('Model creation', function() {
 
@@ -379,6 +384,7 @@ var createModel = function() {
                     upperBound: -1,
                     eType: Ecore.EInt
                 }));
+
     Foo.get('eAnnotations').add(FooAnnotation);
     Bar.get('eSuperTypes').add(Foo);
     BarBar.get('eSuperTypes').add(Bar);
