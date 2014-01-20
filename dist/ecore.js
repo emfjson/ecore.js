@@ -1,4 +1,4 @@
-//     Ecore.js 0.4.0
+//     Ecore.js
 //     Ecore Implementation in JavaScript.
 //
 //     ©2014 Guillaume Hillairet.
@@ -78,7 +78,7 @@ var Ecore = {
 };
 
 // Current version
-Ecore.version = '0.4.0';
+Ecore.version = '0.4.1';
 
 // Export Ecore
 if (typeof exports !== 'undefined') {
@@ -195,7 +195,6 @@ function initValues(eObject) {
     if (!eClass) return;
 
     var eStructuralFeatures = eClass.get('eAllStructuralFeatures');
-
     _.each(eStructuralFeatures, function(eFeature) {
         initValue(eObject, eFeature);
     });
@@ -767,23 +766,24 @@ EClass.values = {
     // Derived Features
 
     eAllSuperTypes: function() {
-        var superTypes, eAllSuperTypes;
+        if (!this._eAllSuperTypes) {
+            var compute = function(eClass) {
+                var superTypes = eClass.get('eSuperTypes').array(),
+                    eAllSuperTypes = _.flatten(_.map(superTypes, function(s) {
+                        return s.get('eAllSuperTypes');
+                    }));
 
-        if (!this._superTypes) {
-            this._superTypes = this.get('eSuperTypes')._internal || [];
-            this._superTypes = _.union(this._superTypes,
-                _.flatten(_.map(this._superTypes, function(eSuper) {
-                    return eSuper.get('eAllSuperTypes');
-                }))
-            );
+                return _.union(eAllSuperTypes, superTypes);
+            };
+
+            this.on('add:eSuperTypes remove:eSuperTypes', function() {
+                this._eAllSuperTypes = compute(this);
+            }, this);
+
+            this._eAllSuperTypes = compute(this);
         }
 
-         this.on('add:eSuperTypes', function(added) {
-             delete this._superTypes;
-             this._superTypes = this.get('eAllSuperTypes');
-         }, this);
-
-        return this._superTypes;
+        return this._eAllSuperTypes;
     },
     eAllSubTypes: function() {
         var eClasses, subTypes;
@@ -826,86 +826,43 @@ EClass.values = {
         return _.isArray(eID) ? null : eID;
     },
     eAllStructuralFeatures: function() {
-        var eSuperFeatures, eAllFeatures, eSuperTypes;
+        var compute = function(eClass) {
+            var eSuperFeatures, eAllFeatures, eSuperTypes;
+            eSuperTypes = eClass.get('eAllSuperTypes');
+            eAllFeatures = eClass.values.eStructuralFeatures.array();
+            eSuperFeatures = _.flatten(_.map(eSuperTypes || [], function(s) {
+                return s.values.eStructuralFeatures.array();
+            }));
 
-        eSuperTypes = this.get('eAllSuperTypes');
-        if (!this._features) {
-            this._features = this.get('eStructuralFeatures').array();
-        }
+            return _.union(eSuperFeatures || [], eAllFeatures || []);
+        };
 
-        this.on('add:eStructuralFeatures', function(added) {
-            delete this._features;
-            this._features = this.get('eStructuralFeatures').array();
-        }, this);
-
-        eSuperFeatures = _.flatten(
-            _.map(this._superTypes || [], function(sup) {
-                return sup.get('eAllStructuralFeatures');
-            })
-        );
-
-        eAllFeatures = _.union(eSuperFeatures || [], this._features);
-
-        // Returns all or an empty array.
-        return eAllFeatures;
+        return compute(this);
     },
     eAllAttributes: function() {
-        var superTypes, eSuperFeatures, eAllFeatures;
+        var eAllFeatures = this.get('eAllStructuralFeatures'),
+            eAllAttributes = _.filter(eAllFeatures || [], function(f) {
+                return f.eClass === Ecore.EAttribute;
+            });
 
-        superTypes = this.get('eAllSuperTypes');
-        eSuperFeatures = _.flatten(
-            _.map(superTypes || [], function(sup) {
-                return sup.get('eAllAttributes');
-            })
-        );
-        eAllFeatures = _.union(eSuperFeatures || [],
-            _.filter(this.get('eStructuralFeatures')._internal, function(f) {
-                return f.isTypeOf('EAttribute');
-            })
-        );
-
-        // Returns all or an empty array.
-        return _.isArray(eAllFeatures) ? eAllFeatures : [];
+        return eAllAttributes;
     },
     eAllContainments: function() {
-        var superTypes, eSuperFeatures, eAllFeatures;
+        var eAllFeatures = this.get('eAllStructuralFeatures'),
+            eAllContainments = _.filter(eAllFeatures, function(f) {
+                return f.eClass === Ecore.EReference && f.get('containment');
+            });
 
-        superTypes = this.get('eAllSuperTypes');
-        eSuperFeatures = _.flatten(
-            _.map(superTypes || [], function(sup) {
-                return sup.get('eAllContainments');
-            })
-        );
-
-        eAllFeatures = _.union(eSuperFeatures || [],
-            _.filter(this.get('eStructuralFeatures')._internal, function(f) {
-                return f.isTypeOf('EReference') && f.get('containment');
-            })
-        );
-
-        // Returns all or an empty array.
-        return _.isArray(eAllFeatures) ? eAllFeatures : [];
+        return eAllContainments;
     },
     eAllReferences: function() {
-        var superTypes, eSuperFeatures, eAllFeatures;
+        var eAllFeatures = this.get('eAllStructuralFeatures'),
+            eAllReferences = _.filter(eAllFeatures, function(f) {
+                return f.eClass === Ecore.EReference && !f.get('containment');
+            });
 
-        superTypes = this.get('eAllSuperTypes');
-        eSuperFeatures = _.flatten(
-            _.map(superTypes || [], function(sup) {
-                return sup.get('eAllReferences');
-            })
-        );
-
-        eAllFeatures = _.union(eSuperFeatures || [],
-            _.filter(this.get('eStructuralFeatures')._internal, function(f) {
-                return f.isTypeOf('EReference') && !f.get('containment');
-            })
-        );
-
-        // Returns all or an empty array.
-        return _.isArray(eAllFeatures) ? eAllFeatures : [];
+        return eAllReferences;
     }
-
 };
 
 EClass_abstract.values = {
