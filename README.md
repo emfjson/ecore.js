@@ -9,6 +9,7 @@
 * [XMI](#xmi)
 * [Contributing](#contributing)
 * [History](#history)
+* [License](#license)
 
 
 ## Install
