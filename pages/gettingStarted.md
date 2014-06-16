@@ -8,7 +8,7 @@ to listen to changes made on models and instances.
 
 ## Install
 
-The first step is to install ecore.js.
+The first step is to install Ecore.js.
 
 If you intend to use it in the Browser, download ecore.js from the download links given
 above, and include it in your html file. You will also need to include [underscore.js](http://underscorejs.org/) as ecore.js depends
@@ -18,6 +18,12 @@ on it. If you want to have XMI support, you'll also need to include [sax-js](htt
 <script src="underscore.js"></script>
 <script src="sax.js"></script> <!-- sax is needed for XMI support -->
 <script src="ecore.js"></script>
+```
+
+Alternatively you can use the dependency manager [Bower](http://bower.io/) to install Ecore.js in your project.
+
+```
+bower install ecore
 ```
 
 If you want to use ecore.js on the server side, e.g. with [Node.js](http://www.nodejs.org), simply use [npm](https://npmjs.org/) and

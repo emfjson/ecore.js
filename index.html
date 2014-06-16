@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="description" content="The Om programming language.">
+        <meta name="description" content="EMF on Javascript">
         <title>ecore js</title>
         <link href="css/style.css" rel="stylesheet" type="text/css">
         <link type="text/css" rel="stylesheet" href="css/tomorrow-night.css">
@@ -35,15 +35,18 @@
         <div id="content">
 
 <section>
+
 <h1 id="what-is-it">What is it</h1>
 <p><strong>Ecorejs</strong> brings Ecore <a href="http://en.wikipedia.org/wiki/Metamodeling">metamodeling</a> to Javascript. It implements the Ecore model in Javascript and includes JSON and <a href="http://en.wikipedia.org/wiki/XML_Metadata_Interchange">XMI</a> (XML Metadata Interchange format) writers and parsers for the Browser and <a href="http://nodejs.org/">Node.js</a>.</p>
 </section>
+
 <section>
+
 <h1 id="downloads">Downloads</h1>
 <table>
 <tbody><tr>
 <td>
-<a href="https://raw.github.com/ghillairet/ecore.js/master/dist/ecore.js">Development Version (0.3.1)</a>
+<a href="https://raw.github.com/ghillairet/ecore.js/master/dist/ecore.js">Development Version (0.4.1)</a>
 </td>
 <td>
 <i>78 kb, Uncompressed with comments</i>
@@ -51,7 +54,7 @@
 </tr>
 <tr>
 <td>
-<a href="https://raw.github.com/ghillairet/ecore.js/master/dist/ecore.min.js">Production Version (0.3.1)</a>
+<a href="https://raw.github.com/ghillairet/ecore.js/master/dist/ecore.min.js">Production Version (0.4.1)</a>
 </td>
 <td>
 <i>29 kb Minified</i>
@@ -61,150 +64,155 @@
 </table>
 
 </section>
+
+
 <section>
+
 <h1 id="getting-started">Getting Started</h1>
 <p>In this short guide, you will learn how to create an Ecore model with <strong>ecore.js</strong>, how to create instances of it, what is the concept of resources and how to use them. You will also learn how to serialize resources into JSON and XMI and how to use events to listen to changes made on models and instances.</p>
 <h2 id="install">Install</h2>
-<p>The first step is to install ecore.js.</p>
+<p>The first step is to install Ecore.js.</p>
 <p>If you intend to use it in the Browser, download ecore.js from the download links given above, and include it in your html file. You will also need to include <a href="http://underscorejs.org/">underscore.js</a> as ecore.js depends on it. If you want to have XMI support, you'll also need to include <a href="https://github.com/isaacs/sax-js">sax-js</a>.</p>
 <pre><code>&lt;script src=&quot;underscore.js&quot;&gt;&lt;/script&gt;
 &lt;script src=&quot;sax.js&quot;&gt;&lt;/script&gt; &lt;!-- sax is needed for XMI support --&gt;
 &lt;script src=&quot;ecore.js&quot;&gt;&lt;/script&gt;</code></pre>
+<p>Alternatively you can use the dependency manager <a href="http://bower.io/">Bower</a> to install Ecore.js in your project.</p>
+<pre><code>bower install ecore</code></pre>
 <p>If you want to use ecore.js on the server side, e.g. with <a href="http://www.nodejs.org">Node.js</a>, simply use <a href="https://npmjs.org/">npm</a> and install the ecore package.</p>
 <pre><code>&gt; npm install ecore
 
 var Ecore = require(&#39;ecore&#39;);</code></pre>
 <h2 id="models">Models</h2>
 <p>In Ecore, models are made of packages (EPackage), classifiers (EClass, EDataType, EEnum) and structural features (EAttribute, EReference). A package contains the classifiers while these latter are made of strcutural features.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> LibraryPackage = <span class="kw">Ecore.EPackage</span>.<span class="fu">create</span>({
-    <span class="dt">name</span>: <span class="ch">&#39;library&#39;</span>,
-    <span class="dt">nsPrefix</span>: <span class="ch">&#39;library&#39;</span>,
-    <span class="dt">nsURI</span>: <span class="ch">&#39;http://www.example.org/library&#39;</span>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> LibraryPackage = <span class="ot">Ecore</span>.<span class="ot">EPackage</span>.<span class="fu">create</span>({
+    <span class="dt">name</span>: <span class="st">&#39;library&#39;</span>,
+    <span class="dt">nsPrefix</span>: <span class="st">&#39;library&#39;</span>,
+    <span class="dt">nsURI</span>: <span class="st">&#39;http://www.example.org/library&#39;</span>
 });</code></pre>
 <p>The example chosen is a model of library, adapted from a classic EMF example. This model represents the concept of Book, Writer and Library and their relations.</p>
 <p>The following code shows how to create the EClass Library.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> Library = <span class="kw">Ecore.EClass</span>.<span class="fu">create</span>({
-    <span class="dt">name</span>: <span class="ch">&#39;Library&#39;</span>,
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> Library = <span class="ot">Ecore</span>.<span class="ot">EClass</span>.<span class="fu">create</span>({
+    <span class="dt">name</span>: <span class="st">&#39;Library&#39;</span>,
     <span class="dt">eStructuralFeatures</span>: [
-        <span class="kw">Ecore.EAttribute</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="ch">&#39;name&#39;</span>, <span class="dt">eType</span>: <span class="kw">Ecore</span>.<span class="fu">EString</span> });
+        <span class="ot">Ecore</span>.<span class="ot">EAttribute</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="st">&#39;name&#39;</span>, <span class="dt">eType</span>: <span class="ot">Ecore</span>.<span class="fu">EString</span> });
     ]
 });</code></pre>
 <p>The Library object is an <code>EObject</code> having for eClass <code>Ecore.EClass</code>. This latter can be accessed via the property <code>eClass</code>.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">Library</span>.<span class="fu">eClass</span> <span class="co">// -&gt; Ecore.EClass</span></code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">Library</span>.<span class="fu">eClass</span> <span class="co">// -&gt; Ecore.EClass</span></code></pre>
 <p>EObjects have getter and setter methods that allow access and modifications to their values. We can for example change the value of the property name of Library like this:</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">Library</span>.<span class="fu">get</span>(<span class="ch">&#39;name&#39;</span>); <span class="co">// -&gt; Library</span>
-<span class="kw">Library</span>.<span class="fu">set</span>(<span class="ch">&#39;name&#39;</span>, <span class="ch">&#39;Foo&#39;</span>);
-<span class="kw">Library</span>.<span class="fu">get</span>(<span class="ch">&#39;name&#39;</span>); <span class="co">// -&gt; Foo</span></code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">Library</span>.<span class="fu">get</span>(<span class="st">&#39;name&#39;</span>); <span class="co">// -&gt; Library</span>
+<span class="ot">Library</span>.<span class="fu">set</span>(<span class="st">&#39;name&#39;</span>, <span class="st">&#39;Foo&#39;</span>);
+<span class="ot">Library</span>.<span class="fu">get</span>(<span class="st">&#39;name&#39;</span>); <span class="co">// -&gt; Foo</span></code></pre>
 <p>Note that features with an upper bound &gt; 1 return an EList and cannot be set.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">Library</span>.<span class="fu">get</span>(<span class="ch">&#39;eStructuralFeatures&#39;</span>); <span class="co">// -&gt; EList([ EAttribute(name) ])</span>
-<span class="kw">Library</span>.<span class="fu">get</span>(<span class="ch">&#39;eStructuralFeatures&#39;</span>).<span class="fu">add</span>(aFeature);
-<span class="kw">Library</span>.<span class="fu">get</span>(<span class="ch">&#39;eStructuralFeatures&#39;</span>).<span class="fu">at</span>(<span class="dv">0</span>); <span class="co">// -&gt; EAttribute(name)</span>
-<span class="kw">Library</span>.<span class="fu">get</span>(<span class="ch">&#39;eStructuralFeatures&#39;</span>).<span class="fu">remove</span>(aFeature);
-<span class="kw">Library</span>.<span class="fu">get</span>(<span class="ch">&#39;eStructuralFeatures&#39;</span>).<span class="fu">array</span>() <span class="co">// -&gt; [EAttribute(name)]</span>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">Library</span>.<span class="fu">get</span>(<span class="st">&#39;eStructuralFeatures&#39;</span>); <span class="co">// -&gt; EList([ EAttribute(name) ])</span>
+<span class="ot">Library</span>.<span class="fu">get</span>(<span class="st">&#39;eStructuralFeatures&#39;</span>).<span class="fu">add</span>(aFeature);
+<span class="ot">Library</span>.<span class="fu">get</span>(<span class="st">&#39;eStructuralFeatures&#39;</span>).<span class="fu">at</span>(<span class="dv">0</span>); <span class="co">// -&gt; EAttribute(name)</span>
+<span class="ot">Library</span>.<span class="fu">get</span>(<span class="st">&#39;eStructuralFeatures&#39;</span>).<span class="fu">remove</span>(aFeature);
+<span class="ot">Library</span>.<span class="fu">get</span>(<span class="st">&#39;eStructuralFeatures&#39;</span>).<span class="fu">array</span>() <span class="co">// -&gt; [EAttribute(name)]</span>
 
 <span class="co">// Note that derived features return an array, not an EList.</span>
-<span class="kw">Library</span>.<span class="fu">get</span>(<span class="ch">&#39;eAllAttributes&#39;</span>); <span class="co">// -&gt; [EAttribute(name)]</span></code></pre>
+<span class="ot">Library</span>.<span class="fu">get</span>(<span class="st">&#39;eAllAttributes&#39;</span>); <span class="co">// -&gt; [EAttribute(name)]</span></code></pre>
 <p>We can now create the remaining classes of our model.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> Item = <span class="kw">Ecore.EClass</span>.<span class="fu">create</span>({
-    <span class="dt">name</span>: <span class="ch">&#39;Item&#39;</span>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> Item = <span class="ot">Ecore</span>.<span class="ot">EClass</span>.<span class="fu">create</span>({
+    <span class="dt">name</span>: <span class="st">&#39;Item&#39;</span>
     <span class="dt">abstract</span>: <span class="kw">true</span>,
     <span class="dt">eStructuralFeatures</span>: [
-        { <span class="dt">eClass</span>: <span class="kw">Ecore</span>.<span class="fu">EAttribute</span>, <span class="dt">name</span>: <span class="ch">&#39;publicationDate&#39;</span>, <span class="dt">eType</span>: <span class="kw">Ecore</span>.<span class="fu">EDate</span> }
+        { <span class="dt">eClass</span>: <span class="ot">Ecore</span>.<span class="fu">EAttribute</span>, <span class="dt">name</span>: <span class="st">&#39;publicationDate&#39;</span>, <span class="dt">eType</span>: <span class="ot">Ecore</span>.<span class="fu">EDate</span> }
     ]
 });
 
-<span class="kw">var</span> BookCategory = <span class="kw">Ecore.EEnum</span>.<span class="fu">create</span>({
-    <span class="dt">name</span>: <span class="ch">&#39;BookCategory&#39;</span>,
+<span class="kw">var</span> BookCategory = <span class="ot">Ecore</span>.<span class="ot">EEnum</span>.<span class="fu">create</span>({
+    <span class="dt">name</span>: <span class="st">&#39;BookCategory&#39;</span>,
     <span class="dt">eLiterals</span>: [
-        <span class="kw">Ecore.EEnumLiteral</span>.<span class="fu">create</span>({ <span class="dt">literal</span>: <span class="ch">&#39;Mystery&#39;</span>, <span class="dt">value</span>: <span class="dv">0</span> }),
-        <span class="kw">Ecore.EEnumLiteral</span>.<span class="fu">create</span>({ <span class="dt">literal</span>: <span class="ch">&#39;Science Fiction&#39;</span>, <span class="dt">value</span>: <span class="dv">1</span> }),
-        <span class="kw">Ecore.EEnumLiteral</span>.<span class="fu">create</span>({ <span class="dt">literal</span>: <span class="ch">&#39;Biography&#39;</span>, <span class="dt">value</span>: <span class="dv">2</span> })
+        <span class="ot">Ecore</span>.<span class="ot">EEnumLiteral</span>.<span class="fu">create</span>({ <span class="dt">literal</span>: <span class="st">&#39;Mystery&#39;</span>, <span class="dt">value</span>: <span class="dv">0</span> }),
+        <span class="ot">Ecore</span>.<span class="ot">EEnumLiteral</span>.<span class="fu">create</span>({ <span class="dt">literal</span>: <span class="st">&#39;Science Fiction&#39;</span>, <span class="dt">value</span>: <span class="dv">1</span> }),
+        <span class="ot">Ecore</span>.<span class="ot">EEnumLiteral</span>.<span class="fu">create</span>({ <span class="dt">literal</span>: <span class="st">&#39;Biography&#39;</span>, <span class="dt">value</span>: <span class="dv">2</span> })
     ]
 });
 
-<span class="kw">var</span> Book = <span class="kw">Ecore.EClass</span>.<span class="fu">create</span>({
-    <span class="dt">name</span>: <span class="ch">&#39;Book&#39;</span>,
+<span class="kw">var</span> Book = <span class="ot">Ecore</span>.<span class="ot">EClass</span>.<span class="fu">create</span>({
+    <span class="dt">name</span>: <span class="st">&#39;Book&#39;</span>,
     <span class="dt">eSuperTypes</span>: [ Item ],
     <span class="dt">eStructuralFeatures</span>: [
-        <span class="kw">Ecore.EAttribute</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="ch">&#39;title&#39;</span>, <span class="dt">eType</span>: <span class="kw">Ecore</span>.<span class="fu">EString</span> }),
-        <span class="kw">Ecore.EAttribute</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="ch">&#39;pages&#39;</span>, <span class="dt">eType</span>: <span class="kw">Ecore</span>.<span class="fu">EInt</span> }),
-        <span class="kw">Ecore.EAttribute</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="ch">&#39;category&#39;</span>, <span class="dt">eType</span>: BookCategory })
+        <span class="ot">Ecore</span>.<span class="ot">EAttribute</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="st">&#39;title&#39;</span>, <span class="dt">eType</span>: <span class="ot">Ecore</span>.<span class="fu">EString</span> }),
+        <span class="ot">Ecore</span>.<span class="ot">EAttribute</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="st">&#39;pages&#39;</span>, <span class="dt">eType</span>: <span class="ot">Ecore</span>.<span class="fu">EInt</span> }),
+        <span class="ot">Ecore</span>.<span class="ot">EAttribute</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="st">&#39;category&#39;</span>, <span class="dt">eType</span>: BookCategory })
     ]
 });
 
-<span class="kw">var</span> Writer = <span class="kw">Ecore.EClass</span>.<span class="fu">create</span>({
-    <span class="dt">name</span>: <span class="ch">&#39;Writer&#39;</span>,
+<span class="kw">var</span> Writer = <span class="ot">Ecore</span>.<span class="ot">EClass</span>.<span class="fu">create</span>({
+    <span class="dt">name</span>: <span class="st">&#39;Writer&#39;</span>,
     <span class="dt">eStructuralFeatures</span>: [
-        <span class="kw">Ecore.EAttribute</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="ch">&#39;name&#39;</span>, <span class="dt">eType</span>: <span class="kw">Ecore</span>.<span class="fu">EString</span> })
+        <span class="ot">Ecore</span>.<span class="ot">EAttribute</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="st">&#39;name&#39;</span>, <span class="dt">eType</span>: <span class="ot">Ecore</span>.<span class="fu">EString</span> })
     ]
 });</code></pre>
 <p>The remaining part of our model is about relationships between classes. In Ecore, a relationship is modeled with a EReference.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> LibraryItems = <span class="kw">Ecore.EReference</span>.<span class="fu">create</span>({
-    <span class="dt">name</span>: <span class="ch">&#39;items&#39;</span>,
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> LibraryItems = <span class="ot">Ecore</span>.<span class="ot">EReference</span>.<span class="fu">create</span>({
+    <span class="dt">name</span>: <span class="st">&#39;items&#39;</span>,
     <span class="dt">upperBound</span>: -<span class="dv">1</span>,
     <span class="dt">containment</span>: <span class="kw">true</span>,
     <span class="dt">eType</span>: Item
 });
 
-<span class="kw">var</span> LibraryWriters = <span class="kw">Ecore.EReference</span>.<span class="fu">create</span>({
-    <span class="dt">name</span>: <span class="ch">&#39;writers&#39;</span>,
+<span class="kw">var</span> LibraryWriters = <span class="ot">Ecore</span>.<span class="ot">EReference</span>.<span class="fu">create</span>({
+    <span class="dt">name</span>: <span class="st">&#39;writers&#39;</span>,
     <span class="dt">upperBound</span>: -<span class="dv">1</span>,
     <span class="dt">containment</span>: <span class="kw">true</span>,
     <span class="dt">eType</span>: Writer
 });
 
-<span class="kw">var</span> BookAuthor = <span class="kw">Ecore.EReference</span>.<span class="fu">create</span>({
-    <span class="dt">name</span>: <span class="ch">&#39;authors&#39;</span>,
+<span class="kw">var</span> BookAuthor = <span class="ot">Ecore</span>.<span class="ot">EReference</span>.<span class="fu">create</span>({
+    <span class="dt">name</span>: <span class="st">&#39;authors&#39;</span>,
     <span class="dt">upperBound</span>: -<span class="dv">1</span>,
     <span class="dt">eType</span>: Writer
 });</code></pre>
 <p>And we add those references to their respective classes.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">Library</span>.<span class="fu">get</span>(<span class="ch">&#39;eStructuralFeatures&#39;</span>)
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">Library</span>.<span class="fu">get</span>(<span class="st">&#39;eStructuralFeatures&#39;</span>)
     .<span class="fu">add</span>(LibraryItems)
     .<span class="fu">add</span>(LibraryWriters);
 
-<span class="kw">Book</span>.<span class="fu">get</span>(<span class="ch">&#39;eStructuralFeatures&#39;</span>).<span class="fu">add</span>(BookAuthor);</code></pre>
+<span class="ot">Book</span>.<span class="fu">get</span>(<span class="st">&#39;eStructuralFeatures&#39;</span>).<span class="fu">add</span>(BookAuthor);</code></pre>
 <h2 id="resources">Resources</h2>
 <p>Resources are containers for models and their instances. They are created from a ResourceSet and are identified by a URI.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> resourceSet = <span class="kw">Ecore.ResourceSet</span>.<span class="fu">create</span>();
-<span class="kw">var</span> resource = <span class="kw">resourceSet</span>.<span class="fu">create</span>({ <span class="dt">uri</span>: <span class="ch">&#39;/library&#39;</span> });</code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> resourceSet = <span class="ot">Ecore</span>.<span class="ot">ResourceSet</span>.<span class="fu">create</span>();
+<span class="kw">var</span> resource = <span class="ot">resourceSet</span>.<span class="fu">create</span>({ <span class="dt">uri</span>: <span class="st">&#39;/library&#39;</span> });</code></pre>
 <p>Every EObjects must be contained in a Resource, whether directly or via their parent EObject. For example, when adding LibraryPackage in a Resource, all it's contained EObject (the classifiers) will be also contained by the resource.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">resource</span>.<span class="fu">get</span>(<span class="ch">&#39;contents&#39;</span>).<span class="fu">add</span>(LibraryPackage);
-<span class="kw">LibraryPackage</span>.<span class="fu">eResource</span>(); <span class="co">// -&gt; resource</span></code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">resource</span>.<span class="fu">get</span>(<span class="st">&#39;contents&#39;</span>).<span class="fu">add</span>(LibraryPackage);
+<span class="ot">LibraryPackage</span>.<span class="fu">eResource</span>(); <span class="co">// -&gt; resource</span></code></pre>
 <p>Loading resources from the server by doing an ajax call is done via <code>load</code>. The method takes for parameter a success callback and an error callback.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">resource</span>.<span class="fu">load</span>(<span class="kw">function</span>(resource) {
-    <span class="kw">console</span>.<span class="fu">log</span>(<span class="ch">&#39;success loading&#39;</span>, resource);
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">resource</span>.<span class="fu">load</span>(<span class="kw">function</span>(resource) {
+    <span class="ot">console</span>.<span class="fu">log</span>(<span class="st">&#39;success loading&#39;</span>, resource);
 }, <span class="kw">function</span>(e) {
-    <span class="kw">console</span>.<span class="fu">log</span>(<span class="ch">&#39;error&#39;</span>, e);
+    <span class="ot">console</span>.<span class="fu">log</span>(<span class="st">&#39;error&#39;</span>, e);
 });</code></pre>
 <p>Fetching the content of a ResourceSet from the server is done via <code>fetch</code>. This will trigger a <code>change</code> event when done.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">resourceSet</span>.<span class="fu">fetch</span>();</code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">resourceSet</span>.<span class="fu">fetch</span>();</code></pre>
 <h2 id="instances">Instances</h2>
 <p>You can now create instances of Library and Book by calling the method create.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> myLibrary = <span class="kw">Library</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="ch">&#39;My Library&#39;</span> });
-<span class="kw">var</span> emfBook = <span class="kw">Book</span>.<span class="fu">create</span>();
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> myLibrary = <span class="ot">Library</span>.<span class="fu">create</span>({ <span class="dt">name</span>: <span class="st">&#39;My Library&#39;</span> });
+<span class="kw">var</span> emfBook = <span class="ot">Book</span>.<span class="fu">create</span>();
 
-<span class="kw">myLibrary</span>.<span class="fu">get</span>(<span class="ch">&#39;items&#39;</span>).<span class="fu">add</span>(emfBook);</code></pre>
+<span class="ot">myLibrary</span>.<span class="fu">get</span>(<span class="st">&#39;items&#39;</span>).<span class="fu">add</span>(emfBook);</code></pre>
 <p>You can access the istance properties via the methods get and set like this.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">emfBook</span>.<span class="fu">set</span>(<span class="ch">&#39;title&#39;</span>, <span class="ch">&#39;EMF Modeling Framework&#39;</span>);
-<span class="kw">emfBook</span>.<span class="fu">get</span>(<span class="ch">&#39;title&#39;</span>); <span class="co">// -&gt; EMF Modeling Framework</span></code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">emfBook</span>.<span class="fu">set</span>(<span class="st">&#39;title&#39;</span>, <span class="st">&#39;EMF Modeling Framework&#39;</span>);
+<span class="ot">emfBook</span>.<span class="fu">get</span>(<span class="st">&#39;title&#39;</span>); <span class="co">// -&gt; EMF Modeling Framework</span></code></pre>
 <p>Note also that underscore collections functions are available on EList, so you can use each, map, reduce, etc., functions on EList.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">myLibrary</span>.<span class="fu">get</span>(<span class="ch">&#39;books&#39;</span>).<span class="fu">map</span>(<span class="kw">function</span>(book) { <span class="kw">return</span> <span class="kw">book</span>.<span class="fu">get</span>(<span class="ch">&#39;title&#39;</span>); });</code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">myLibrary</span>.<span class="fu">get</span>(<span class="st">&#39;books&#39;</span>).<span class="fu">map</span>(<span class="kw">function</span>(book) { <span class="kw">return</span> <span class="ot">book</span>.<span class="fu">get</span>(<span class="st">&#39;title&#39;</span>); });</code></pre>
 <h2 id="events">Events</h2>
 <p>Every EObject and EList are given the ability to bind and trigger custom named events. Defaults events are triggered when an EObject value is set or modified (change event) or when an element is added or removed from an EList (add and remove events). Events are also available on Resource and ResourceSet.</p>
 <p>To bind a callback to an EObject, call the method <code>on</code>. The callback will be invoked whenver the event is fired. Note that events can be namespaces, for example the event <code>change:title</code> will only be fire when the attribute title is modified.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">myLibrary</span>.<span class="fu">on</span>(<span class="ch">&#39;change:title&#39;</span>, <span class="kw">function</span>(changed) {
-    <span class="kw">console</span>.<span class="fu">log</span>(<span class="ch">&#39;title changed&#39;</span>);
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">myLibrary</span>.<span class="fu">on</span>(<span class="st">&#39;change:title&#39;</span>, <span class="kw">function</span>(changed) {
+    <span class="ot">console</span>.<span class="fu">log</span>(<span class="st">&#39;title changed&#39;</span>);
 });
 
 <span class="kw">var</span> onAddBook = <span class="kw">function</span>(changed) {
-    <span class="kw">console</span>.<span class="fu">log</span>(<span class="ch">&#39;book added&#39;</span>);
+    <span class="ot">console</span>.<span class="fu">log</span>(<span class="st">&#39;book added&#39;</span>);
 };
-<span class="kw">myLibrary</span>.<span class="fu">on</span>(<span class="ch">&#39;add:items&#39;</span>, onAddBook);</code></pre>
+<span class="ot">myLibrary</span>.<span class="fu">on</span>(<span class="st">&#39;add:items&#39;</span>, onAddBook);</code></pre>
 <p>Triggering events is done by calling <code>trigger</code>.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">myLibrary</span>.<span class="fu">trigger</span>(<span class="ch">&#39;add remove&#39;</span>);</code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">myLibrary</span>.<span class="fu">trigger</span>(<span class="st">&#39;add remove&#39;</span>);</code></pre>
 <p>Events can be removed by calling <code>off</code>.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">myLibrary</span>.<span class="fu">off</span>(<span class="ch">&#39;add:items&#39;</span>, onAddBook);</code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">myLibrary</span>.<span class="fu">off</span>(<span class="st">&#39;add:items&#39;</span>, onAddBook);</code></pre>
 <h2 id="working-with-json">Working with JSON</h2>
 <p>JSON is the default serialization format supported by ecore.js. The JSON format is described <a href="https://github.com/ghillairet/emfjson">here</a> and looks like this:</p>
 <pre class="sourceCode javascript"><code class="sourceCode javascript">{
@@ -218,20 +226,22 @@ var Ecore = require(&#39;ecore&#39;);</code></pre>
     ]
 }</code></pre>
 <p>Getting the JSON representation of a Resource can be done by invoking <code>Resource.to</code>.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">resource</span>.<span class="fu">to</span>() <span class="co">// -&gt; JSON object</span></code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">resource</span>.<span class="fu">to</span>() <span class="co">// -&gt; JSON object</span></code></pre>
 <p>Parsing a JSON object into a Resource can be done via <code>parse</code>.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">resource</span>.<span class="fu">parse</span>(data);</code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">resource</span>.<span class="fu">parse</span>(data);</code></pre>
 <h2 id="working-with-xmi">Working with XMI</h2>
 <p>XMI support is provided in ecore.js, but it is limited and does not support all the XMI specification. This support requires <a href="https://github.com/isaacs/sax-js">sax.js</a>.</p>
 <p>Getting the XMI representation of a Resource is also done via the method <code>to</code>. This time you'll need to indicate that you want to obtain XMI by adding Ecore.XMI as parameter.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">resource</span>.<span class="fu">to</span>(<span class="kw">Ecore</span>.<span class="fu">XMI</span>, <span class="kw">true</span>); <span class="co">// returns the XMI string</span></code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">resource</span>.<span class="fu">to</span>(<span class="ot">Ecore</span>.<span class="fu">XMI</span>, <span class="kw">true</span>); <span class="co">// returns the XMI string</span></code></pre>
 <p>Parsing XMI is done via the <code>parse</code> method.</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">resource</span>.<span class="fu">parse</span>(data, <span class="kw">Ecore</span>.<span class="fu">XMI</span>); <span class="co">// data being a string containing the XMI.</span></code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">resource</span>.<span class="fu">parse</span>(data, <span class="ot">Ecore</span>.<span class="fu">XMI</span>); <span class="co">// data being a string containing the XMI.</span></code></pre>
 </section>
+
+
 
 </div>
 <footer>
-    <p>&copy; 2013 <a href="https://www.github.com/ghillairet">ghillairet</a></p>
+    <p>&copy; 2014 <a href="https://www.github.com/ghillairet">ghillairet</a></p>
 </footer>
 <script type="text/javascript">
 

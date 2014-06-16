@@ -14,11 +14,11 @@ writers and parsers for the Browser and [Node.js](http://nodejs.org/).
 
 <table>
 <tbody><tr>
-<td><a href="https://raw.github.com/ghillairet/ecore.js/master/dist/ecore.js">Development Version (0.3.1)</a></td>
+<td><a href="https://raw.github.com/ghillairet/ecore.js/master/dist/ecore.js">Development Version (0.4.1)</a></td>
 <td><i>78 kb, Uncompressed with comments</i></td>
 </tr>
 <tr>
-<td><a href="https://raw.github.com/ghillairet/ecore.js/master/dist/ecore.min.js">Production Version (0.3.1)</a></td>
+<td><a href="https://raw.github.com/ghillairet/ecore.js/master/dist/ecore.min.js">Production Version (0.4.1)</a></td>
 <td><i>29 kb Minified</i></td>
 </tr>
 </tbody>
