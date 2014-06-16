@@ -2,19 +2,33 @@
 
 ## Install
 
-Browser:
-Download ecore.js from dist/ folder, and include it in your html along with underscore.js.
+### Browser:
+
+Download Ecore.js from dist/ folder, and include it in your html along with underscore.js.
 
 ```
 <script src="underscore.js"></script>
 <script src="ecore.js"></script>
 ```
 
-Node:
+Alternatively you can use the dependency manager [Bower](http://bower.io/) to install Ecore.js in your project.
+
+```
+bower install ecore
+```
+
+### Node:
+
+Ecore.js is available on npm and can be use as a Node module. To install it simply use the following command from your terminal:
 
 ```
 npm install ecore
+```
 
+Importing Ecore.js in a Node module is done as follow:
+
+
+```
 var Ecore = require('ecore');
 ```
 
@@ -175,6 +189,39 @@ resource.to(Ecore.XMI, true); // returns the XMI string
  - contains(iterator, [context])
  - indexOf(iterator, [context])
 
+
+## Contributing
+
+If you want to contribute to this project or simply build from the source, you first need to clone the project by executing the following command in your terminal.
+
+
+```
+> git clone https://github.com/ghillairet/ecore.js.git
+```
+
+To build the project or run the tests you first need to install [Node](http://nodejs.org/), [npm](https://www.npmjs.org/) (distributed with Node) and [Grunt](http://gruntjs.com).
+
+Once these are installed, go back to your terminal and enter the ecore.js directory.
+
+```
+> cd ecore.js
+```
+
+The tests are written using the [mocha](http://visionmedia.github.io/mocha/) library. To run them, execute the following command:
+
+```
+> grunt test
+```
+
+Running a build will create a new distribution in the folder dist. This is done by executing the command:
+
+```
+> grunt build
+```
+
+That's it, you are now ready to contribute to the project.
+
+
 ## History
 
 ### 0.3.0
@@ -193,6 +240,7 @@ resource.to(Ecore.XMI, true); // returns the XMI string
 ### 0.1.1
  - initial version
  - bootstraps ecore model
+
 
 ## License
 This software is distributed under the terms of the Eclipse Public License 1.0 - http://www.eclipse.org/legal/epl-v10.html.
