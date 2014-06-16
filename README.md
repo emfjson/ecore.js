@@ -5,8 +5,6 @@
 * [Install](#installl)
 * [Usage](#usage)
 * [API](#api)
-* [JSON](#json)
-* [XMI](#xmi)
 * [Contributing](#contributing)
 * [History](#history)
 * [License](#license)
@@ -14,7 +12,7 @@
 
 ## Install
 
-### Browser:
+### Browser
 
 Download Ecore.js from dist/ folder, and include it in your html along with underscore.js.
 
@@ -29,7 +27,7 @@ Alternatively you can use the dependency manager [Bower](http://bower.io/) to in
 bower install ecore
 ```
 
-### Node:
+### Node
 
 Ecore.js is available on npm and can be use as a Node module. To install it simply use the following command from your terminal:
 
@@ -46,7 +44,7 @@ var Ecore = require('ecore');
 
 ## Usage
 
-Defining a Model:
+### Create a model
 
 ```javascript
 
@@ -114,7 +112,7 @@ User.get('eStructuralFeatures').add(User_name);
 User.get('eStructuralFeatures').add(User_friends);
 ```
 
-EObject creation:
+### Create instances
 
 ```javascript
 var u1 = User.create({ name: 'u1' });
@@ -124,7 +122,7 @@ u1.get('friends').add(u2);
 u1.get('friends').each(function(friend) { console.log(friend) });
 ```
 
-## JSON
+### JSON Support
 
 JSON is the default serialization format supported by ecore.js. The JSON format is
 described [here](https://github.com/ghillairet/emfjson) and looks like this:
@@ -140,7 +138,7 @@ described [here](https://github.com/ghillairet/emfjson) and looks like this:
 }
 ```
 
-## XMI
+### XMI Support
 
 Support for XMI has been added in version 0.3.0. This support requires [sax.js](https://github.com/isaacs/sax-js).
 
