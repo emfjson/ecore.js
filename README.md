@@ -1,5 +1,16 @@
 [Ecore](http://www.eclipse.org/modeling/emf/?project=emf) ([EMOF](http://en.wikipedia.org/wiki/Meta-Object_Facility)) implementation in JavaScript.
 
+## Content
+
+* [Install](#installl)
+* [Usage](#usage)
+* [API](#api)
+* [JSON](#json)
+* [XMI](#xmi)
+* [Contributing](#contributing)
+* [History](#history)
+
+
 ## Install
 
 ### Browser:
