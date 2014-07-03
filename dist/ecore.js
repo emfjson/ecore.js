@@ -78,7 +78,7 @@ var Ecore = {
 };
 
 // Current version
-Ecore.version = '0.4.1';
+Ecore.version = '0.4.2';
 
 // Export Ecore
 if (typeof exports !== 'undefined') {
