@@ -131,11 +131,15 @@ Ecore.JSON = {
             return eObject;
         }
 
-        var parsed = parseObject(data);
-        if (parsed) {
-            model.add(parsed);
-            resolveReferences();
+        if (_.isArray(data)) {
+            _.each(data, function (object) {
+                model.add(parseObject(object));
+            });
+        } else {
+            model.add(parseObject(data));
         }
+
+        resolveReferences();
     },
 
     to: function(model) {
