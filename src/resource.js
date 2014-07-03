@@ -136,8 +136,9 @@ Ecore.JSON = {
                 model.add(parseObject(object));
             });
         } else {
-       	    model.add(parseObject(data));
+            model.add(parseObject(data));
         }
+
         resolveReferences();
     },
 

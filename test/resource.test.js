@@ -114,6 +114,64 @@ describe('Resource', function() {
 
     });
 
+    describe('read model from json', function() {
+
+        it('should read model made of single object', function(done) {
+            var model = { eClass: "http://www.eclipse.org/emf/2002/Ecore#//EPackage", name: "foo"};
+
+            var resource = Ecore.Resource.create({ uri: 'simple.json' });
+                resource.load(function(result) {
+                assert.ok(result);
+                assert.equal(1, result.get('contents').size());
+
+                var root = result.get('contents').at(0);
+                assert.ok(root);
+                assert.equal('EPackage', root.eClass.get('name'));
+                assert.equal('foo', root.get('name'));
+
+                done();
+            }, function(err) {
+                assert.fail(err, null);
+                done();
+            }, { data: model });
+        });
+
+        it('should read model made of array of objects', function(done) {
+            var model = [
+                { eClass: "http://www.eclipse.org/emf/2002/Ecore#//EPackage", name: "foo"},
+                { eClass: "http://www.eclipse.org/emf/2002/Ecore#//EPackage", name: "bar"},
+                { eClass: "http://www.eclipse.org/emf/2002/Ecore#//EPackage", name: "acme"}
+            ];
+
+            var resource = Ecore.Resource.create({ uri: 'simple.json' });
+                resource.load(function(result) {
+                assert.ok(result);
+                assert.equal(3, result.get('contents').size());
+
+                var r1 = result.get('contents').at(0);
+                assert.ok(r1);
+                assert.equal('EPackage', r1.eClass.get('name'));
+                assert.equal('foo', r1.get('name'));
+
+                var r2 = result.get('contents').at(1);
+                assert.ok(r2);
+                assert.equal('EPackage', r2.eClass.get('name'));
+                assert.equal('bar', r2.get('name'));
+
+                var r3 = result.get('contents').at(2);
+                assert.ok(r3);
+                assert.equal('EPackage', r3.eClass.get('name'));
+                assert.equal('acme', r3.get('name'));
+
+                done();
+            }, function(err) {
+                assert.fail(err, null);
+                done();
+            }, { data: model });
+        });
+
+    });
+
     describe('load model from filesystem', function() {
 
         it('should build the model', function(done) {
