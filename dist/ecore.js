@@ -23,6 +23,9 @@ if (!_ && (typeof require !== 'undefined')) _ = require('underscore');
 
 var Ecore = {
 
+    // Current version
+    version: '0.4.3',
+
     // Returns an instance of the given EClass.
     //
     // The resulting object is an EObject having it's properties
@@ -76,9 +79,6 @@ var Ecore = {
     }
 
 };
-
-// Current version
-Ecore.version = '0.4.2';
 
 // Export Ecore
 if (typeof exports !== 'undefined') {
@@ -1797,6 +1797,11 @@ Ecore.JSON = {
         if (contents.length === 1) {
             var eObject = contents[0];
             data = jsonObject(eObject);
+        } else {
+            data = [];
+            for (var i = 0; i < contents.length; i++) {
+                data.push(jsonObject(contents[i]));
+            }
         }
         return data;
     }

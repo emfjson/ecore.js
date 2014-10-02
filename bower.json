@@ -1,7 +1,7 @@
 {
   "name": "ecore.js",
   "main": "dist/ecore.js",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "homepage": "https://github.com/ghillairet/ecore.js",
   "authors": [
     "ghillairet <g.hillairet@gmail.com>"
@@ -13,6 +13,7 @@
   "license": "EPL",
   "ignore": [
     "**/.*",
+    "*.log",
     "node_modules",
     "bower_components",
     "test",
