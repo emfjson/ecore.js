@@ -144,7 +144,8 @@ describe('Resource', function() {
             ];
 
             var resource = Ecore.Resource.create({ uri: 'simple.json' });
-                resource.load(function(result) {
+
+            resource.load(function(result) {
                 assert.ok(result);
                 assert.equal(3, result.get('contents').size());
 
@@ -170,6 +171,28 @@ describe('Resource', function() {
             }, { data: model });
         });
 
+        it('should write model made of more than one root element into an array', function(done) {
+            var model = [
+                { eClass: "http://www.eclipse.org/emf/2002/Ecore#//EPackage", name: "foo"},
+                { eClass: "http://www.eclipse.org/emf/2002/Ecore#//EPackage", name: "bar"},
+                { eClass: "http://www.eclipse.org/emf/2002/Ecore#//EPackage", name: "acme"}
+            ];
+
+            var rs = Ecore.ResourceSet.create();
+            var resource = rs.create({ uri: 'simple.json' });
+
+            resource.load(function(resource) {
+                assert.equal(3, resource.get('contents').size());
+                var json = resource.to();
+                assert.ok(json);
+                assert.ok(_.isArray(json));
+                assert.equal(3, json.length);
+                done();
+            }, function(err) {
+                assert.fail(err, null);
+                done();
+            }, { data: model });
+       });
     });
 
     describe('load model from filesystem', function() {

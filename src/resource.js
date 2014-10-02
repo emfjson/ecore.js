@@ -219,6 +219,11 @@ Ecore.JSON = {
         if (contents.length === 1) {
             var eObject = contents[0];
             data = jsonObject(eObject);
+        } else {
+            data = [];
+            for (var i = 0; i < contents.length; i++) {
+                data.push(jsonObject(contents[i]));
+            }
         }
         return data;
     }
