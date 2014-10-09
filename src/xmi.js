@@ -362,4 +362,3 @@ function formatXml(xml) {
     return formatted;
 }
 
-})();

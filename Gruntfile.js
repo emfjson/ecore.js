@@ -4,8 +4,25 @@ module.exports = function(grunt) {
 
         concat: {
             dist: {
-                src: ['src/ecore.js', 'src/resource.js', 'src/xmi.js'],
+                src: [
+                    'build/head.js',
+                    'src/ecore.js',
+                    'src/resource.js',
+                    'src/edit.js',
+                    'build/tail.js'
+                ],
                 dest: 'dist/ecore.js'
+            },
+            dist_xmi: {
+                src: [
+                    'build/head.js',
+                    'src/ecore.js',
+                    'src/resource.js',
+                    'src/edit.js',
+                    'src/xmi.js',
+                    'build/tail.js'
+                ],
+                dest: 'dist/ecore.xmi.js'
             }
         },
 
@@ -37,6 +54,11 @@ module.exports = function(grunt) {
             dist: {
                 files: {
                     'dist/ecore.min.js': ['dist/ecore.js']
+                }
+            },
+            dist_xmi: {
+                files: {
+                    'dist/ecore.xmi.min.js': ['dist/ecore.xmi.js']
                 }
             }
         }

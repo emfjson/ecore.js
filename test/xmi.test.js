@@ -1,6 +1,6 @@
 _ = require('underscore');
 fs = require('fs');
-var Ecore = require('../dist/ecore.js');
+var Ecore = require('../dist/ecore.xmi.js');
 var assert = require("assert");
 
 
