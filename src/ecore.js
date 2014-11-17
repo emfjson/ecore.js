@@ -500,6 +500,8 @@ Ecore.EObjectPrototype = {
         // Use ID has fragment
         if (iD) return this.get(iD.get('name'));
 
+        if (this._id) return this._id;
+
         // ModelElement uses names except for roots
         if (this.isKindOf('EModelElement')) {
             if (!eContainer) {

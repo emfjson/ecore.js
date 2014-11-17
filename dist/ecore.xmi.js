@@ -517,6 +517,8 @@ Ecore.EObjectPrototype = {
         // Use ID has fragment
         if (iD) return this.get(iD.get('name'));
 
+        if (this._id) return this._id;
+
         // ModelElement uses names except for roots
         if (this.isKindOf('EModelElement')) {
             if (!eContainer) {
@@ -1625,10 +1627,10 @@ Ecore.JSON = {
 
         function processFeature(object, eObject) {
             if (!object || !eObject)
-                return function( feature ) {};
+                return function() {};
 
             return function( feature ) {
-                if (feature.get('derived')) return;
+                if (!feature || feature.get('derived')) return;
 
                 var featureName = feature.get('name'),
                     value = object[featureName];
@@ -1651,20 +1653,14 @@ Ecore.JSON = {
             };
         }
 
-        function isLocal(uri) {
-            return uri.substring(0, 1) === '/';
-        }
-
         function resolveReferences() {
             var index = buildIndex(model);
 
             function setReference(parent, feature, value, isMany) {
-                var ref = value.$ref,
-                    resolved;
+                var ref = value.$ref;
+                var resolved = index[ref];
 
-                if (isLocal(ref)) {
-                    resolved = index[ref];
-                } else {
+                if (!resolved) {
                     resolved = resourceSet.getEObject(ref);
                 }
 
@@ -1693,18 +1689,26 @@ Ecore.JSON = {
         }
 
         function parseObject(object) {
-            var eObject;
+            var eClass, features, child;
 
             if (object && object.eClass) {
-                var eClass = resourceSet.getEObject(object.eClass),
+                eClass = resourceSet.getEObject(object.eClass);
+                if (eClass) {
                     features = eClass.get('eAllStructuralFeatures');
+                    child = eClass ? Ecore.create(eClass) : null;
 
-                eObject = Ecore.create(eClass);
-
-                _.each( features, processFeature(object, eObject) );
+                    if (child) {
+                        if (object._id) {
+                            child._id = object._id;
+                        }
+                        _.each( features, processFeature(object, child) );
+                    }
+                } else {
+                    throw new Error('Cannot find EClass from href ' + JSON.stringify(object.eClass));
+                }
             }
 
-            return eObject;
+            return child;
         }
 
         if (_.isArray(data)) {
@@ -1877,7 +1881,11 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             _: function(fragment) {
                 if (!fragment) return null;
 
-                return buildIndex(this)[fragment];
+                if (this.__index == null) {
+                    this.__index = buildIndex(this);
+                }
+
+                return this.__index[fragment];
             }
         },
         {
@@ -2043,8 +2051,9 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
             upperBound: 1,
             name: 'create',
             _: function(uri) {
-                var attrs = _.isObject(uri) ? uri : { uri: uri },
-                    ePackage, resource;
+                var attrs = _.isObject(uri) ? uri : { uri: uri };
+                var ePackage;
+                var resource;
 
                 if (!attrs.uri)
                     throw new Error('Cannot create Resource, missing URI parameter');
@@ -2054,27 +2063,29 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                 });
 
                 if (resource) return resource;
+//                else {
 
-                ePackage = Ecore.EPackage.Registry.getEPackage(attrs.uri);
-                if (ePackage) {
-                    if (ePackage.eResource()) {
-                        resource = ePackage.eResource();
-                        resource.set('resourceSet', this);
-                        this.get('resources').add(resource);
-                    } else {
-                        resource = Ecore.Resource.create(attrs);
-                        resource.add(ePackage);
-                        resource.set('resourceSet', this);
-                        this.get('resources').add(resource);
-                    }
+                //ePackage = Ecore.EPackage.Registry.getEPackage(attrs.uri);
 
-                    return resource;
-                }
+                //if (ePackage) {
+                //    if (ePackage.eResource()) {
+                //        resource = ePackage.eResource();
+                //        resource.set('resourceSet', this);
+                //        this.get('resources').add(resource);
+                //    } else {
+
+//                resource = Ecore.Resource.create(attrs);
+//                        resource.add(ePackage);
+//                resource.set('resourceSet', this);
+//                this.get('resources').add(resource);
+            //     }
+
+//                    return resource;
+//                }
 
                 resource = Ecore.Resource.create(attrs);
                 resource.set('resourceSet', this);
                 this.get('resources').add(resource);
-
                 this.trigger('add', resource);
 
                 return resource;
@@ -2093,25 +2104,36 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
 
                 if (!fragment) return null;
 
+                var ePackage = Ecore.EPackage.Registry.getEPackage(base);
+
+                if (ePackage) {
+
+                    resource = ePackage.eResource();
+
+                    if (!resource) {
+                        resource = this.create({ uri: base });
+                        resource.add(ePackage);
+                        this.get('resources').add(resource);
+                        resource.set('resourceSet', this);
+                    }
+                }
+
+                if (resource) {
+                    return resource.getEObject(fragment);
+                }
+
+//                console.log('resources', this.get('resources'));
+
                 resource = this.get('resources').find(function(e) {
                     return e.get('uri') === base;
                 });
 
-                if (!resource) {
-                    var ePackage = Ecore.EPackage.Registry.getEPackage(base);
-                    if (ePackage) {
-                        if (!ePackage.eResource()) {
-                            var ePackageResource = this.create({ uri: base });
-                            ePackageResource.add(ePackage);
-                        }
-                        ePackage.eResource().set('resourceSet', this);
-                        this.get('resources').add(ePackage.eResource());
-                        return this.getEObject(uri);
-                    } else {
-                        return null;
-                    }
-                } else {
+//                console.log('found', resource);
+
+                if (resource) {
                     return resource.getEObject(fragment);
+                } else {
+                    return null;
                 }
             }
         },
@@ -2237,20 +2259,29 @@ function buildIndex(model) {
         var root, iD;
         if (contents.length === 1) {
             root = contents[0];
-            iD = root.eClass.get('eIDAttribute') || null;
-            if (iD) {
-                build(root, root.get(iD.name));
+            if (root._id) {
+                console.log(root._id);
+                build(root, root._id);
             } else {
-                build(root, '/');
-            }
-        } else {
-            for (var i = 0; i < contents.length; i++) {
-                root = contents[i];
                 iD = root.eClass.get('eIDAttribute') || null;
                 if (iD) {
                     build(root, root.get(iD.name));
                 } else {
-                    build(root, '/' + i);
+                    build(root, '/');
+                }
+            }
+        } else {
+            for (var i = 0; i < contents.length; i++) {
+                root = contents[i];
+                if (root._id) {
+                    build(root, root._id);
+                } else {
+                    iD = root.eClass.get('eIDAttribute') || null;
+                    if (iD) {
+                        build(root, root.get(iD.name));
+                    } else {
+                        build(root, '/' + i);
+                    }
                 }
             }
         }
