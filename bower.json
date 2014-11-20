@@ -1,7 +1,7 @@
 {
   "name": "ecore.js",
   "main": "dist/ecore.js",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "homepage": "https://github.com/ghillairet/ecore.js",
   "authors": [
     "ghillairet <g.hillairet@gmail.com>"

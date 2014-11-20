@@ -368,6 +368,10 @@ Ecore.EObjectPrototype = {
         var attr, key, val, eve;
         if (attrs === null) return this;
 
+        if (attrs.eClass) {
+            attrs = attrs.get('name');
+        }
+
         // Handle attrs is a hash or attrs is
         // property and options the value to be set.
         if (!_.isObject(attrs)) {
@@ -377,6 +381,8 @@ Ecore.EObjectPrototype = {
         }
 
         var eResource = this.eResource();
+        var featureName;
+
         for (attr in attrs) {
             val = attrs[attr];
             if (typeof val !== 'undefined' && this.has(attr)) {
@@ -786,9 +792,14 @@ EClass.values = {
         return this._eAllSuperTypes;
     },
     eAllSubTypes: function() {
-        var eClasses, subTypes;
+        var eClasses, subTypes, resourceSet;
 
-        eClasses = Ecore.EPackage.Registry.elements('EClass');
+        resourceSet = this.eResource().get('resourceSet');
+        if (resourceSet) {
+            eClasses = resourceSet.elements('EClass');
+        } else {
+            eClasses = Ecore.EPackage.Registry.elements('EClass');
+        }
         subTypes = _.filter(eClasses, function(c) {
             return _.contains(c.get('eAllSuperTypes'), this);
         }, this);
@@ -1790,6 +1801,8 @@ Ecore.JSON = {
                 values = object.values,
                 data = { eClass: eClass.eURI() };
 
+            if (object._id) { data._id = object._id; }
+
             _.each( values, processFeature(object, data) );
 
             return data;
@@ -2260,7 +2273,6 @@ function buildIndex(model) {
         if (contents.length === 1) {
             root = contents[0];
             if (root._id) {
-                console.log(root._id);
                 build(root, root._id);
             } else {
                 iD = root.eClass.get('eIDAttribute') || null;
