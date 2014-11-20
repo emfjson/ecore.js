@@ -212,6 +212,8 @@ Ecore.JSON = {
                 values = object.values,
                 data = { eClass: eClass.eURI() };
 
+            if (object._id) { data._id = object._id; }
+
             _.each( values, processFeature(object, data) );
 
             return data;
@@ -682,7 +684,6 @@ function buildIndex(model) {
         if (contents.length === 1) {
             root = contents[0];
             if (root._id) {
-                console.log(root._id);
                 build(root, root._id);
             } else {
                 iD = root.eClass.get('eIDAttribute') || null;

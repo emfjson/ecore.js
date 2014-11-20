@@ -467,6 +467,32 @@ describe('Instance creation', function() {
             assert.ok(u1.has('friends'));
         });
 
+        it('should set feature using feature name', function() {
+            var u1 = Ecore.create(User);
+            u1.set('name', 'Paul');
+
+            assert.strictEqual('Paul', u1.get('name'));
+        });
+
+        it('should set feature using feature object', function() {
+            var u1 = Ecore.create(User);
+            var feature = User.getEStructuralFeature('name');
+
+            assert.ok(feature);
+
+            u1.set(feature, 'Paul');
+
+            assert.strictEqual('Paul', u1.get('name'));
+        });
+
+        it('should set feature using hash parameters', function() {
+            var u1 = Ecore.create(User);
+
+            u1.set({ name: 'Paul' });
+
+            assert.strictEqual('Paul', u1.get('name'));
+        });
+
     });
 
 });

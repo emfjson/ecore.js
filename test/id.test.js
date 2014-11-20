@@ -90,4 +90,14 @@ describe('ids', function() {
         assert.equal(a, b.get('eSuperTypes').at(0));
     })
 
+    it('should serialize id', function() {
+        var data = r.to();
+
+        assert.ok(data._id);
+        assert.equal('1', data._id);
+        assert.equal(2, data.eClassifiers.length);
+        assert.equal('2', data.eClassifiers[0]._id);
+        assert.equal('3', data.eClassifiers[1]._id);
+    })
+
 })
