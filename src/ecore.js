@@ -459,17 +459,36 @@ Ecore.EObjectPrototype = {
     eContents: function() {
         if (!this.eClass) return [];
 
-        var eAllFeatures = this.eClass.get('eAllStructuralFeatures'),
-            eContainments = _.filter(eAllFeatures, function(feature) {
+        if (_.isUndefined(this.__updateContents)) {
+            this.__updateContents = true;
+
+            var resource = this.eResource();
+            if (resource) {
+                var me = this;
+                resource.on('add remove', function() {
+                    me.__updateContents = true;
+                })
+            }
+        }
+
+        if (this.__updateContents) {
+            var eAllFeatures    = this.eClass.get('eAllStructuralFeatures');
+            var eContainments   = _.filter(eAllFeatures, function(feature) {
                 return feature.isTypeOf('EReference') &&
                     feature.get('containment') &&
                     this.isSet(feature.get('name'));
             }, this);
 
-        return _.flatten(_.map(eContainments, function(c) {
-            var value = this.get(c.get('name'));
-            return value instanceof Ecore.EList ? value.array() : value;
-        }, this));
+            var value = null;
+            this.__eContents = _.flatten(_.map(eContainments, function(c) {
+                value = this.get(c.get('name'));
+                return value ? (value.array ? value.array() : value) : [];
+            }, this));
+
+            this.__updateContents = false;
+        }
+
+        return this.__eContents;
     },
 
     // Returns the URI of the EObject.
