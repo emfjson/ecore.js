@@ -2,6 +2,16 @@ module.exports = function(grunt) {
 
     grunt.initConfig({
 
+        watch: {
+            scripts: {
+                files: [ 'src/**.js', 'test/*.js' ],
+                tasks: [ 'test' ],
+                options: {
+                    spawn: false,
+                },
+            },
+        },
+
         concat: {
             dist: {
                 src: [
@@ -26,17 +36,19 @@ module.exports = function(grunt) {
             }
         },
 
-        lint: {
-            all: ['grunt.js', 'dist/ecore.js', 'test/*.js']
-        },
-
         jshint: {
+            beforeconcat: [ 'src/*.js' ],
+            afterconcat: [ 'dist/ecore.js', 'dist/ecore.xmi.js' ],
             options: {
+                curly: true,
+                eqeqeq: true,
+                eqnull: true,
                 browser: true
             }
         },
 
-        mochaTestConfig: {
+        mochaTest: {
+            files: ['test/*.test.js'],
             options: {
                 globals: ['should'],
                 timeout: 3000,
@@ -44,10 +56,6 @@ module.exports = function(grunt) {
                 ui: 'bdd',
                 reporter: 'nyan'
             }
-        },
-
-        mochaTest: {
-            files: ['test/*.test.js']
         },
 
         uglify: {
@@ -69,6 +77,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-mocha-test');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
 
     grunt.registerTask('test', ['concat', 'mochaTest']);
     grunt.registerTask('build', ['concat', 'mochaTest', 'uglify']);

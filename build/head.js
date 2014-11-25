@@ -6,6 +6,8 @@
 
 (function() {
 
+"use strict";
+
 // The root object, `window` in the browser, or `global` on the server.
 var root = this;
 
