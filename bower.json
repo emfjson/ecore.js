@@ -1,7 +1,7 @@
 {
   "name": "ecore.js",
   "main": "dist/ecore.js",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "homepage": "https://github.com/ghillairet/ecore.js",
   "authors": [
     "ghillairet <g.hillairet@gmail.com>"
@@ -20,6 +20,6 @@
     "tests"
   ],
   "dependencies": {
-    "underscore": "~1.5.2"
+    "underscore": "~1.7.0"
   }
 }

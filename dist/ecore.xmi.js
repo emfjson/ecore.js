@@ -6,6 +6,8 @@
 
 (function() {
 
+"use strict";
+
 // The root object, `window` in the browser, or `global` on the server.
 var root = this;
 
@@ -476,17 +478,36 @@ Ecore.EObjectPrototype = {
     eContents: function() {
         if (!this.eClass) return [];
 
-        var eAllFeatures = this.eClass.get('eAllStructuralFeatures'),
-            eContainments = _.filter(eAllFeatures, function(feature) {
+        if (_.isUndefined(this.__updateContents)) {
+            this.__updateContents = true;
+
+            var resource = this.eResource();
+            if (resource) {
+                var me = this;
+                resource.on('add remove', function() {
+                    me.__updateContents = true;
+                })
+            }
+        }
+
+        if (this.__updateContents) {
+            var eAllFeatures    = this.eClass.get('eAllStructuralFeatures');
+            var eContainments   = _.filter(eAllFeatures, function(feature) {
                 return feature.isTypeOf('EReference') &&
                     feature.get('containment') &&
                     this.isSet(feature.get('name'));
             }, this);
 
-        return _.flatten(_.map(eContainments, function(c) {
-            var value = this.get(c.get('name'));
-            return value instanceof Ecore.EList ? value.array() : value;
-        }, this));
+            var value = null;
+            this.__eContents = _.flatten(_.map(eContainments, function(c) {
+                value = this.get(c.get('name'));
+                return value ? (value.array ? value.array() : value) : [];
+            }, this));
+
+            this.__updateContents = false;
+        }
+
+        return this.__eContents;
     },
 
     // Returns the URI of the EObject.
@@ -1894,11 +1915,7 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             _: function(fragment) {
                 if (!fragment) return null;
 
-                if (this.__index == null) {
-                    this.__index = buildIndex(this);
-                }
-
-                return this.__index[fragment];
+                return this._index()[fragment];
             }
         },
         {
@@ -1992,7 +2009,20 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             name: '_index',
             eType: JSObject,
             _: function() {
-                return buildIndex(this);
+                if (_.isUndefined(this.__updateIndex)) {
+                    var res = this;
+                    res.__updateIndex = true;
+                    res.on('add remove', function() {
+                        res.__updateIndex = true;
+                    })
+                }
+
+                if (this.__updateIndex) {
+                    this.__index = buildIndex(this);
+                    this.__updateIndex = false;
+                }
+
+                return this.__index;
             }
         }
     ]
@@ -2864,5 +2894,5 @@ function formatXml(xml) {
 }
 
 
-})();
+}.call(this));
 
