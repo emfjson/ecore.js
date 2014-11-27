@@ -6,7 +6,7 @@
 * [Usage](#usage)
 * [API](#api)
 * [Contributing](#contributing)
-* [History](#history)
+* [History](https://github.com/ghillairet/ecore.js/releases/)
 * [License](#license)
 
 
@@ -230,27 +230,6 @@ Running a build will create a new distribution in the folder dist. This is done 
 ```
 
 That's it, you are now ready to contribute to the project.
-
-
-## History
-
-### 0.3.0
- - add events
- - add XMI support
- - add support for derived features
- - add support for eOperations
- - add ResourceSet
-
-### 0.2.0
- - add Resource support
- - add JSON parsing serialization
- - add new syntax to define EModelElements
- - move create methods to Ecore
-
-### 0.1.1
- - initial version
- - bootstraps ecore model
-
 
 ## License
 This software is distributed under the terms of the Eclipse Public License 1.0 - http://www.eclipse.org/legal/epl-v10.html.
