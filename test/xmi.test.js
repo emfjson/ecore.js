@@ -152,6 +152,24 @@ describe('#XMI', function() {
         
       });
 
+      it('should unset correctly b1', function() {
+        
+        var r = resourceSet.create({uri:'test4.xmi'}),
+            a = A.create({}),
+            b1 = B.create({}),
+            b2 = B.create({});
+      
+        a.set('b', b1);
+        a.set('b', b2);
+        
+        assert.ok(b1.eContainer === undefined, 
+          "eContainer of b1 should be undefined"
+        );
+        assert.ok(b1.eContainingFeature === undefined,
+          "eContainingFeature of b1 should be undefined"
+        );
+      });
+
     });
 
 });
