@@ -388,7 +388,15 @@ Ecore.EObjectPrototype = {
         for (attr in attrs) {
             val = attrs[attr];
             if (typeof val !== 'undefined' && this.has(attr)) {
+
+                var feature = getEStructuralFeature(this.eClass, attr),
+                    isContainment = Boolean(feature.get('containment')) === true;
                 this.values[attr] = val;
+
+                if (isContainment) {
+                  val.eContainingFeature = feature;
+                  val.eContainer = this;
+                }
                 eve = 'change:' + attr;
                 this.trigger('change ' + eve, attr);
                 if (eResource) eResource.trigger('change', this);
