@@ -6,7 +6,7 @@
   "authors": [
     "ghillairet <g.hillairet@gmail.com>"
   ],
-  "description": "Ecore for Javascript",
+  "description": "Ecore (EMOF) JavaScript Implementation",
   "keywords": [
     "Ecore"
   ],
