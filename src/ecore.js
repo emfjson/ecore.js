@@ -271,10 +271,9 @@ function setValues(eObject, attributes) {
 function eAllOperations(eClass) {
     var eOperations = eClass.get('eOperations').array();
     var superTypes = eClass.get('eAllSuperTypes');
-    var all = _.flatten(_.union(eOperations || [], _.map(superTypes || [],
-                    function(s) { return eAllOperations(s); })));
-
-    return all;
+    return _.flatten(_.union(eOperations || [], _.map(superTypes || [], function(s) {
+        return eAllOperations(s);
+    })));
 }
 
 function initOperations(eObject) {
@@ -360,11 +359,9 @@ Ecore.EObjectPrototype = {
         if (!_.isObject(attrs)) {
             key = attrs;
             (attrs = {})[key] = options;
-            options = arguments[2];
         }
 
         var eResource = this.eResource();
-        var featureName;
 
         for (attr in attrs) {
             val = attrs[attr];
@@ -501,10 +498,9 @@ Ecore.EObjectPrototype = {
     //
 
     eURI: function() {
-        var eModel = this.eResource(),
-            current = this;
+        var eModel = this.eResource();
 
-        return eModel.get('uri') + '#' + this.fragment();
+        return (eModel? eModel.get('uri') : '') + '#' + this.fragment();
     },
 
     // Returns the fragment identifier of the EObject.
