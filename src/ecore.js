@@ -366,7 +366,17 @@ Ecore.EObjectPrototype = {
         for (attr in attrs) {
             val = attrs[attr];
             if (typeof val !== 'undefined' && this.has(attr)) {
+
+              if (this.isSet(attr)) this.unset(attr);
+
+                var feature = getEStructuralFeature(this.eClass, attr),
+                    isContainment = Boolean(feature.get('containment')) === true;
                 this.values[attr] = val;
+
+                if (isContainment) {
+                  val.eContainingFeature = feature;
+                  val.eContainer = this;
+                }
                 eve = 'change:' + attr;
                 this.trigger('change ' + eve, attr);
                 if (eResource) eResource.trigger('change', this);
@@ -375,6 +385,53 @@ Ecore.EObjectPrototype = {
 
         return this;
     },
+
+    // Unset for the property identified by the first parameter.
+    //
+    //      @method unset
+    //      @param {String} name
+    //      @return {EObject}
+    unset: function(attrs, options) {
+
+        var attr, key, eve;
+        if (attrs === null) return this;
+
+        if (attrs.eClass) {
+            attrs = attrs.get('name');
+        }
+
+        // Handle attrs is a hash or attrs is
+        // property and options the value to be set.
+        if (!_.isObject(attrs)) {
+            key = attrs;
+            (attrs = {})[key] = undefined;
+        }
+
+        var eResource = this.eResource();
+
+        for (attr in attrs) {
+            if (this.has(attr) && this.isSet(attr)) {
+              // unset
+
+              var feature = getEStructuralFeature(this.eClass, attr),
+                  isContainment = Boolean(feature.get('containment')) === true;
+              var value = this.values[attr];
+
+                if (isContainment) {
+                  value.eContainingFeature = undefined;
+                  value.eContainer = undefined;
+                }
+              this.values[attr] = undefined;
+              eve = 'unset:' + attr;
+              this.trigger('unset ' + eve, attr);
+              if (eResource) eResource.trigger('change', this);
+            }
+        }
+
+        return this;
+    },
+
+
 
     // Getter for the property identified by the first parameter.
     //
