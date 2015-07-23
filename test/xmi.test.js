@@ -94,6 +94,84 @@ describe('#XMI', function() {
 
     });
 
+    describe('Containment feature with upper bound equal to 1:', function() {
+
+      var resourceSet,
+          resource,
+          A,
+          B;
+
+      before(function() {
+
+        resourceSet = Ecore.ResourceSet.create();
+        
+        var P = Ecore.EPackage.create({
+          name: 'sample',
+          nsPrefix: 'sample',
+          nsURI: 'http://www.example.org/sample'
+        });
+        
+        A = Ecore.EClass.create({name: 'A' });
+        B = Ecore.EClass.create({ name: 'B' });
+
+        var A_B = Ecore.EReference.create({
+            name: 'b',
+            upperBound: 1,
+            containment: true,
+            eType: function() { return B; }
+        });
+        
+        A.get('eStructuralFeatures').add(A_B);
+
+        P.get('eClassifiers')
+            .add(A)
+            .add(B);
+
+        resource = resourceSet.create('model');
+        resource.add(P);
+
+      });
+
+      it('should serialize test3 correctly', function() {
+
+        var r = resourceSet.create({uri:'test3.xmi'}),
+            a = A.create({}),
+            b = B.create({});
+
+        a.set('b', b);
+        
+        r.get('contents').add(a);
+
+        var expected =  '<?xml version="1.0" encoding="UTF-8"?>' + 
+          '\n' +
+          '<sample:A xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sample="http://www.example.org/sample">' +
+            '<b/>' +
+          '</sample:A>';
+
+        assert.strictEqual(r.to(Ecore.XMI), expected);
+        
+      });
+
+      it('should unset correctly b1', function() {
+        
+        var r = resourceSet.create({uri:'test4.xmi'}),
+            a = A.create({}),
+            b1 = B.create({}),
+            b2 = B.create({});
+      
+        a.set('b', b1);
+        a.set('b', b2);
+        
+        assert.ok(b1.eContainer === undefined, 
+          "eContainer of b1 should be undefined"
+        );
+        assert.ok(b1.eContainingFeature === undefined,
+          "eContainingFeature of b1 should be undefined"
+        );
+      });
+
+    });
+
 });
 
 
