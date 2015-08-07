@@ -1,12 +1,12 @@
 {
   "name": "node",
-  "version": "0.4.1",
-  "description": "node example",
+  "version": "0.5.0",
+  "description": "node ecorejs example",
   "main": "main.js",
   "author": "ghillairet",
   "license": "EPL",
   "dependencies": {
     "underscore": "~1.5.2",
-    "ecore": "~0.4.1"
+    "ecore": "~0.5.0"
   }
 }

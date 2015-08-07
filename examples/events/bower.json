@@ -1,6 +1,6 @@
 {
   "name": "events",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "homepage": "https://github.com/ghillairet/ecore.js",
   "authors": [
     "ghillairet <g.hillairet@gmail.com>"
@@ -17,7 +17,6 @@
     "tests"
   ],
   "dependencies": {
-    "ecore.js": "~0.4.1",
-    "underscore": "~1.5.2"
+    "ecore.js": "~0.5.0"
   }
 }
