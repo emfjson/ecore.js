@@ -15,9 +15,12 @@ describe('#XMI', function() {
             fs.readFile('./test/models/test1.xmi', 'utf8', function (err, data) {
                 if (err) return console.log(err);
 
-                var validate = function(model) {
+                model.load(data, function(model, err) {
+                    assert.equal(err, null);
+
                     var contents = model.get('contents');
                     assert.equal(1, contents.size());
+
                     var root = contents.at(0);
                     assert.strictEqual(Ecore.EPackage, root.eClass);
                     assert.strictEqual('test', root.get('name'));
@@ -26,6 +29,7 @@ describe('#XMI', function() {
 
                     var eClassifiers = root.get('eClassifiers');
                     assert.equal(1, eClassifiers.size());
+
                     var rootClass = eClassifiers.at(0);
                     assert.strictEqual(Ecore.EClass, rootClass.eClass);
                     assert.strictEqual('Root', rootClass.get('name'));
@@ -35,15 +39,9 @@ describe('#XMI', function() {
                     assert.strictEqual(Ecore.EAttribute, rootClassLabel.eClass);
 
                     assert.strictEqual(Ecore.EString, rootClassLabel.get('eType'));
-                };
-                var success = function(model) {
-                    validate(model);
+
                     done();
-                };
-                var error = function() {
-                    done();
-                };
-                model.load(success, error, { data: data, format: Ecore.XMI });
+                }, { format: Ecore.XMI });
             });
 
         });
@@ -55,9 +53,12 @@ describe('#XMI', function() {
             fs.readFile('./test/models/test2.xmi', 'utf8', function (err, data) {
                 if (err) return console.log(err);
 
-                var validate = function(model) {
+                model.load(data, function(model, err) {
+                    assert.equal(err, null);
+
                     var contents = model.get('contents');
                     assert.equal(1, contents.size());
+
                     var root = contents.at(0);
                     assert.strictEqual(Ecore.EPackage, root.eClass);
                     assert.strictEqual('test', root.get('name'));
@@ -66,6 +67,7 @@ describe('#XMI', function() {
 
                     var eClassifiers = root.get('eClassifiers');
                     assert.equal(1, eClassifiers.size());
+
                     var rootClass = eClassifiers.at(0);
                     assert.strictEqual(Ecore.EClass, rootClass.eClass);
                     assert.strictEqual('Root', rootClass.get('name'));
@@ -80,15 +82,9 @@ describe('#XMI', function() {
                     assert.strictEqual(Ecore.EAttribute, rootClassNumber.eClass);
                     assert.equal('number', rootClassNumber.get('name'));
                     assert.strictEqual(Ecore.EInt, rootClassNumber.get('eType'));
-                };
-                var success = function(model) {
-                    validate(model);
+
                     done();
-                };
-                var error = function() {
-                    done();
-                };
-                model.load(success, error, { data: data, format: Ecore.XMI });
+                }, { format: Ecore.XMI });
             });
         });
 

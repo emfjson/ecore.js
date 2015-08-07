@@ -1,8 +1,13 @@
 fs = require('fs');
 var Ecore = require('ecore');
 
-var onSuccess = function(result) {
-    var ePackage = result.get('contents').first();
+var callback = function(model, err) {
+    if (err) {
+        console.log('fail loading model', err);
+        return;
+    }
+
+    var ePackage = model.get('contents').first();
 
     console.log('loaded ePackage', ePackage.get('name'));
     console.log('eClassifiers', ePackage.get('eClassifiers').map(function(c) {
@@ -14,23 +19,15 @@ var onSuccess = function(result) {
     }));
 };
 
-var onError = function(err) {
-    console.log('fail loading model', err);
-};
-
 fs.readFile('./model.json', 'utf8', function (err,data) {
     if (err) return console.log(err);
 
-    var model = Ecore.Resource.create({ uri: 'model.json' });
-
-    model.load(onSuccess, onError, { data: JSON.parse(data) });
+    Ecore.Resource.create({ uri: 'model.json' }).load(data, callback);
 });
 
 fs.readFile('./model.xmi', 'utf8', function (err,data) {
     if (err) return console.log(err);
 
-    var model = Ecore.Resource.create({ uri: 'model.json' });
-
-    model.load(onSuccess, onError, { data: data, format: Ecore.XMI });
+    Ecore.Resource.create({ uri: 'model.json' }).load(data, callback);
 });
 

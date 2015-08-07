@@ -65,7 +65,7 @@ describe('Resource', function() {
             Container.get('eStructuralFeatures').add(Container_child);
             var Child = Ecore.EClass.create({ name: 'Child' });
             testPackage.get('eClassifiers').add(Child);
-            Child_manyRefs = Ecore.EReference.create({
+            var Child_manyRefs = Ecore.EReference.create({
                 name: 'manyRefs',
                 upperBound: -1
             });
@@ -114,14 +114,15 @@ describe('Resource', function() {
 
     });
 
-    describe('read model from json', function() {
+    describe('#load', function() {
 
         it('should read model made of single object', function(done) {
             var model = { eClass: "http://www.eclipse.org/emf/2002/Ecore#//EPackage", name: "foo"};
 
-            var resource = Ecore.Resource.create({ uri: 'simple.json' });
-                resource.load(function(result) {
+            Ecore.Resource.create({ uri: 'simple.json' }).load(model, function(result, err) {
                 assert.ok(result);
+                assert.equal(err, null);
+
                 assert.equal(1, result.get('contents').size());
 
                 var root = result.get('contents').at(0);
@@ -130,10 +131,7 @@ describe('Resource', function() {
                 assert.equal('foo', root.get('name'));
 
                 done();
-            }, function(err) {
-                assert.fail(err, null);
-                done();
-            }, { data: model });
+            });
         });
 
         it('should read model made of array of objects', function(done) {
@@ -143,10 +141,9 @@ describe('Resource', function() {
                 { eClass: "http://www.eclipse.org/emf/2002/Ecore#//EPackage", name: "acme"}
             ];
 
-            var resource = Ecore.Resource.create({ uri: 'simple.json' });
-
-            resource.load(function(result) {
+            Ecore.Resource.create({ uri: 'simple.json' }).load(model, function(result, err) {
                 assert.ok(result);
+                assert.equal(err, null);
                 assert.equal(3, result.get('contents').size());
 
                 var r1 = result.get('contents').at(0);
@@ -165,10 +162,7 @@ describe('Resource', function() {
                 assert.equal('acme', r3.get('name'));
 
                 done();
-            }, function(err) {
-                assert.fail(err, null);
-                done();
-            }, { data: model });
+            });
         });
 
         it('should write model made of more than one root element into an array', function(done) {
@@ -179,19 +173,15 @@ describe('Resource', function() {
             ];
 
             var rs = Ecore.ResourceSet.create();
-            var resource = rs.create({ uri: 'simple.json' });
-
-            resource.load(function(resource) {
+            rs.create({ uri: 'simple.json' }).load(model, function(resource, err) {
+                assert.equal(err, null);
                 assert.equal(3, resource.get('contents').size());
                 var json = resource.to();
                 assert.ok(json);
                 assert.ok(_.isArray(json));
                 assert.equal(3, json.length);
                 done();
-            }, function(err) {
-                assert.fail(err, null);
-                done();
-            }, { data: model });
+            });
        });
     });
 
@@ -206,7 +196,7 @@ describe('Resource', function() {
                     return console.log(err);
                 }
 
-                model.load(function(model) {
+                model.load(data, function(model, err) {
                     var contents = model.get('contents').array();
                     assert.ok(contents);
                     assert.equal(contents.length, 1);
@@ -241,7 +231,7 @@ describe('Resource', function() {
                     assert.strictEqual(eClassB.get('eSuperTypes').at(0), eClassA);
 
                     done();
-                }, function(){}, { data: JSON.parse(data) });
+                });
             });
 
         });
@@ -258,7 +248,7 @@ describe('Resource', function() {
                     return console.log(err);
                 }
 
-                model.load(function(model) {
+                model.load(data, function(model, err) {
 
                     var json = model.to(Ecore.JSON);
 
@@ -290,7 +280,7 @@ describe('Resource', function() {
                     assert.equal(second.eStructuralFeatures, undefined);
 
                     done();
-                }, function(){}, { data: JSON.parse(data) });
+                });
             });
         });
     }); // end toJSON
