@@ -1662,38 +1662,6 @@ Ecore.EPackage.Registry.register(Ecore.EcorePackage);
 
 
 
-Ecore.$ = root.jQuery || root.Zepto || root.ender || null;
-
-// Ajax interface
-
-var Ajax = {
-
-    get: function(url, type, success, error) {
-        if (!Ecore.$) return;
-
-        return Ecore.$.ajax({
-            url: url,
-            dataType: type,
-            success: success,
-            error: error
-        });
-    },
-
-    post: function(url, data, type, success, error) {
-        if (!Ecore.$) return;
-
-        return Ecore.$.ajax({
-           type: 'POST',
-           url: url,
-           dataType: type,
-           data: data,
-           success: success,
-           error: error
-        });
-    }
-
-};
-
 // JSON serializer and parser for EMF.
 //
 // See https://github.com/ghillairet/emfjson for details
@@ -1707,6 +1675,10 @@ Ecore.JSON = {
     contentType: 'application/json',
 
     parse: function(model, data) {
+        if (_.isString(data)) {
+            data = JSON.parse(data);
+        }
+
         var toResolve = [],
             resourceSet = model.get('resourceSet') || Ecore.ResourceSet.create();
 
@@ -2002,47 +1974,38 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
         {
             eClass: Ecore.EOperation,
             name: 'save',
-            _: function(success, error, options) {
+            _: function(callback, options) {
                 options || (options = {});
 
                 var formatter = options.format ? options.format : Ecore.JSON;
-                var data = this.to(formatter);
-                var dataType = formatter.dataType;
-                var set = this.get('resourceSet');
-                var converter = set ? set.uriConverter() : null;
-                var uri = this.get('uri');
-                uri = converter ? converter.normalize(uri) : uri;
+                var data;
+                try {
+                    data = this.to(formatter);
+                } catch (e) {
+                    callback(null, e);
+                }
 
-                Ajax.post(uri, data, dataType, success, error);
+                callback(data, null);
             }
         },
         {
             eClass: Ecore.EOperation,
             name: 'load',
-            _: function(success, error, options) {
+            _: function(data, callback, options) {
                 options || (options = {});
 
-                var model = this;
                 var loader = options.format || Ecore.JSON;
-                var set = this.get('resourceSet');
-                var converter = set ? set.uriConverter() : null;
-                var uri = this.get('uri');
-                var loadSuccess = function(data) {
-                    model.parse(data, loader);
-                    model.trigger('change');
+                var resourceSet = this.get('resourceSet');
 
-                    if (typeof success === 'function')
-                        return success(model);
-                };
+                try {
+                    this.parse(data, loader);
+                } catch (e) {
+                    callback(null, e);
+                }
 
-                if (options.data) {
-                    return loadSuccess(options.data);
-                } else {
-                    if (set && set.isSet('uri')) {
-                        uri = set.get('uri') + '/' + uri;
-                    }
-                    uri = converter ? converter.normalize(uri) : uri;
-                    return Ajax.get(uri, loader.dataType, loadSuccess, error);
+                this.trigger('change');
+                if (typeof callback === 'function') {
+                    callback(this, null);
                 }
             }
         },
@@ -2148,36 +2111,16 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
             name: 'create',
             _: function(uri) {
                 var attrs = _.isObject(uri) ? uri : { uri: uri };
-                var ePackage;
-                var resource;
 
-                if (!attrs.uri)
+                if (!attrs.uri) {
                     throw new Error('Cannot create Resource, missing URI parameter');
+                }
 
-                resource = this.get('resources').find(function(e) {
+                var resource = this.get('resources').find(function(e) {
                     return e.get('uri') === attrs.uri;
                 });
 
                 if (resource) return resource;
-//                else {
-
-                //ePackage = Ecore.EPackage.Registry.getEPackage(attrs.uri);
-
-                //if (ePackage) {
-                //    if (ePackage.eResource()) {
-                //        resource = ePackage.eResource();
-                //        resource.set('resourceSet', this);
-                //        this.get('resources').add(resource);
-                //    } else {
-
-//                resource = Ecore.Resource.create(attrs);
-//                        resource.add(ePackage);
-//                resource.set('resourceSet', this);
-//                this.get('resources').add(resource);
-            //     }
-
-//                    return resource;
-//                }
 
                 resource = Ecore.Resource.create(attrs);
                 resource.set('resourceSet', this);
@@ -2218,19 +2161,11 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                     return resource.getEObject(fragment);
                 }
 
-//                console.log('resources', this.get('resources'));
-
                 resource = this.get('resources').find(function(e) {
                     return e.get('uri') === base;
                 });
 
-//                console.log('found', resource);
-
-                if (resource) {
-                    return resource.getEObject(fragment);
-                } else {
-                    return null;
-                }
+                return resource ? resource.getEObject(fragment) : null;
             }
         },
         {
@@ -2293,23 +2228,6 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                         resourceSet.create({ uri: resource.uri });
                     }
                 }, this);
-            }
-        },
-        {
-            eClass: Ecore.EOperation,
-            name: 'fetch',
-            _: function(success, error) {
-                var uri = this.get('uri');
-                if (!uri) return;
-                var set = this;
-                var loadSuccess = function(data) {
-                    set.parse(data);
-                    set.trigger('change');
-
-                    if (typeof success === 'function')
-                        return success(set);
-                };
-                Ajax.get(uri, Ecore.JSON.dataType, loadSuccess, error);
             }
         }
     ]
