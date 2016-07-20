@@ -1,7 +1,7 @@
 {
   "name": "ecore",
   "description": "Ecore (EMOF) JavaScript Implementation",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": "Guillaume Hillairet <g.hillairet@gmail.com>",
   "repository": {
     "type": "git",
@@ -17,17 +17,17 @@
     "node": ">= 0.8.0"
   },
   "dependencies": {
-    "sax": "^0.6.1",
-    "underscore": "^1.7.0"
+    "sax": "^1.2.1",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "grunt": "~0.4.5",
-    "grunt-contrib-concat": "^0.4.0",
-    "grunt-contrib-jshint": "^0.10.0",
-    "grunt-contrib-uglify": "^0.4.0",
-    "grunt-contrib-watch": "^0.4.0",
-    "grunt-mocha-test": "^0.12.4",
-    "mocha": "^2.0.1"
+    "grunt": "~1.0.1",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-mocha-test": "^0.12.7",
+    "mocha": "^2.5.3"
   },
   "directories": {
     "doc": "docs",
