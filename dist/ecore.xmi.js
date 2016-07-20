@@ -1738,7 +1738,7 @@ Ecore.JSON = {
                 if (feature.get('upperBound') === 1) {
                     setReference(parent, feature, value, false);
                 } else {
-                    _.each(value, function(val) {
+                    _.each(_.isArray(value) ? value : [value], function(val) {
                         setReference(parent, feature, val, true);
                     });
                 }
