@@ -67,10 +67,12 @@ Ecore.XMI = {
 
                  if (eFeature && eFeature.get) {
                       eType = eFeature.get('eType');
-                      if (eType.get('abstract')) {
+                      if (eType.get('hasSubTypes')) {
                           var aType = node.attributes['xsi:type'];
                           if (aType) {
                               eClass = resourceSet.getEObject(getClassURIFromPrefix(aType));
+                          } else {
+                              eClass = eType;
                           }
                       } else {
                           eClass = eType;
@@ -211,15 +213,20 @@ Ecore.XMI = {
             }
             docRoot += element;
 
+            var isResource = false;
+            
             if (root.eContainer.isKindOf('Resource')) {
                 docRoot += ' xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"';
                 docRoot += ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"';
                 docRoot += ' xmlns:' + nsPrefix + '="' + nsURI + '"';
+                isResource = true;
             }
 
-            if (root.eContainingFeature.get('eType').get('abstract')) {
-                docRoot += ' xsi:type="';
-                docRoot += nsPrefix + ':' + root.eClass.get('name') + '"';
+            if (!isResource && root.eContainingFeature.get('eType').get('hasSubTypes')) {
+                if(root.eContainingFeature.get('eType') !== root.eClass) {
+                  docRoot += ' xsi:type="';
+                  docRoot += nsPrefix + ':' + root.eClass.get('name') + '"';                  
+                }
             }
 
             var features = root.eClass.get('eAllStructuralFeatures'),

@@ -880,6 +880,9 @@ EClass.values = {
 
         return _.isArray(subTypes) ? subTypes : [];
     },
+    hasSubTypes: function () {
+      return this.get('abstract') ||  this.get('eAllSubTypes');
+    },
     eReferences: function() {
         var eFeatures, eReferences;
 
@@ -1030,6 +1033,15 @@ EClass_eAllSubTypes.values = {
     containment: false,
     _: EClass.values.eAllSubTypes
 };
+var EClass_hasSubTypes = new EObject();
+EClass_hasSubTypes.values = {
+    name: 'hasSubTypes',
+    lowerBound: 0,
+    upperBound: -1,
+    derived: true,
+    containment: false,
+    _: EClass.values.hasSubTypes
+};
 var EClass_eAllAttributes = new EObject();
 EClass_eAllAttributes.values = {
     name: 'eAllAttributes',
@@ -1089,6 +1101,7 @@ EClass.get('eStructuralFeatures')
     .add(EClass_eAllStructuralFeatures)
     .add(EClass_eAllSuperTypes)
     .add(EClass_eAllSubTypes)
+    .add(EClass_hasSubTypes)
     .add(EClass_eAllAttributes)
     .add(EClass_eAllReferences)
     .add(EClass_eAllContainments)
@@ -1163,9 +1176,12 @@ EClass_eAllStructuralFeatures.values.eType = EStructuralFeature;
 // eAllSuperTypes
 EClass_eAllSuperTypes.eClass = EReference;
 EClass_eAllSuperTypes.values.eType = EClass;
-// eAllSubTypes
+//eAllSubTypes
 EClass_eAllSubTypes.eClass = EReference;
 EClass_eAllSubTypes.values.eType = EClass;
+//eAllSubTypes
+EClass_hasSubTypes.eClass = EReference;
+EClass_hasSubTypes.values.eType = EClass;
 // eAllAttributes
 EClass_eAllAttributes.eClass = EReference;
 EClass_eAllAttributes.values.eType = EAttribute;
@@ -2569,10 +2585,12 @@ Ecore.XMI = {
 
                  if (eFeature && eFeature.get) {
                       eType = eFeature.get('eType');
-                      if (eType.get('abstract')) {
+                      if (eType.get('hasSubTypes')) {
                           var aType = node.attributes['xsi:type'];
                           if (aType) {
                               eClass = resourceSet.getEObject(getClassURIFromPrefix(aType));
+                          } else {
+                              eClass = eType;
                           }
                       } else {
                           eClass = eType;
@@ -2713,15 +2731,20 @@ Ecore.XMI = {
             }
             docRoot += element;
 
+            var isResource = false;
+            
             if (root.eContainer.isKindOf('Resource')) {
                 docRoot += ' xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"';
                 docRoot += ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"';
                 docRoot += ' xmlns:' + nsPrefix + '="' + nsURI + '"';
+                isResource = true;
             }
 
-            if (root.eContainingFeature.get('eType').get('abstract')) {
-                docRoot += ' xsi:type="';
-                docRoot += nsPrefix + ':' + root.eClass.get('name') + '"';
+            if (!isResource && root.eContainingFeature.get('eType').get('hasSubTypes')) {
+                if(root.eContainingFeature.get('eType') !== root.eClass) {
+                  docRoot += ' xsi:type="';
+                  docRoot += nsPrefix + ':' + root.eClass.get('name') + '"';                  
+                }
             }
 
             var features = root.eClass.get('eAllStructuralFeatures'),
