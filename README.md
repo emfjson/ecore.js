@@ -143,6 +143,8 @@ described [here](https://github.com/ghillairet/emfjson) and looks like this:
 Support for XMI has been added in version 0.3.0. This support requires [sax.js](https://github.com/isaacs/sax-js).
 
 ```javascript
+var Ecore = require('ecore/dist/ecore.xmi');
+
 var resourceSet = Ecore.ResourceSet.create();
 var resource = resourceSet.create({ uri: 'test2.xmi' });
 

@@ -1,5 +1,5 @@
 fs = require('fs');
-var Ecore = require('ecore');
+var Ecore = require('../../dist/ecore.xmi');
 
 var callback = function(model, err) {
     if (err) {
@@ -28,6 +28,6 @@ fs.readFile('./model.json', 'utf8', function (err,data) {
 fs.readFile('./model.xmi', 'utf8', function (err,data) {
     if (err) return console.log(err);
 
-    Ecore.Resource.create({ uri: 'model.json' }).load(data, callback);
+    Ecore.Resource.create({ uri: 'model.xmi' }).load(data, callback, {format: Ecore.XMI});
 });
 
