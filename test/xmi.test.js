@@ -87,6 +87,24 @@ describe('#XMI', function() {
                 }, { format: Ecore.XMI });
             });
         });
+        
+        it('should parse instances of test5 correctly', function() {
+    		//Read, parse then register the model test5.xmi
+    		var modelSet = Ecore.ResourceSet.create();
+    		var model = modelSet.create({uri : 'test5.xmi'});
+    		var modelFile = fs.readFileSync('./test/models/test5.xmi', 'utf8');
+    		model.parse(modelFile, Ecore.XMI);
+    		var firstElement = model.get('contents').first();
+    		Ecore.EPackage.Registry.register(firstElement);
+
+    		//Read and parse the instance of test5.xmi
+    		var instanceSet = Ecore.ResourceSet.create();
+    		var instance = instanceSet.create({uri : 'test5-instance1.xmi'});
+    		var instanceFile = fs.readFileSync('./test/models/test5-instance1.xmi', 'utf8');
+    		instance.parse(instanceFile, Ecore.XMI);
+    		
+    		assert.equal(instance.to(Ecore.XMI, true), instanceFile); 
+    	});
 
     });
 
@@ -167,6 +185,7 @@ describe('#XMI', function() {
       });
 
     });
+    
 
 });
 

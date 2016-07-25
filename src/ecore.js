@@ -1157,10 +1157,10 @@ EClass_eAllStructuralFeatures.values.eType = EStructuralFeature;
 // eAllSuperTypes
 EClass_eAllSuperTypes.eClass = EReference;
 EClass_eAllSuperTypes.values.eType = EClass;
-//eAllSubTypes
+// eAllSubTypes
 EClass_eAllSubTypes.eClass = EReference;
 EClass_eAllSubTypes.values.eType = EClass;
-//eAllSubTypes
+// hasSubTypes
 EClass_hasSubTypes.eClass = EReference;
 EClass_hasSubTypes.values.eType = EClass;
 // eAllAttributes
