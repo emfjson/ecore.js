@@ -14,7 +14,7 @@ node simpleTest.js TestModel.ecore
 
 ## To run with the ecore and the first test model type: 
 
-node simpleTest.js TestModel.ecore test1.testmodel test2.testmodel 
+node simpleTest.js TestModel.ecore test1.testmodel
 
 ## To run with the ecore and the second test model type: 
 
