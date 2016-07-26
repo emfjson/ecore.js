@@ -7,6 +7,8 @@ util = require('util');
 //Ecore = require('ecore/dist/ecore.xmi');
 Ecore = require('../../dist/ecore.xmi');
 
+var resourceSet = Ecore.ResourceSet.create();
+
 //////////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////////////////////////////////////////////
@@ -31,8 +33,8 @@ function displayModelInfo(model) {
 //
 //////////////////////////////////////////////////////////////////////////
 function processFile(file) {
-  var resourceSet = Ecore.ResourceSet.create();
-  var resource = resourceSet.create({uri : 'uri-' + file});
+  
+  var resource = resourceSet.create({uri : file});
 
   var fileContents = fs.readFileSync(file, 'utf8');
 
