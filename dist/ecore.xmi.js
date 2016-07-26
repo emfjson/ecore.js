@@ -1843,6 +1843,20 @@ Ecore.JSON = {
                     isMany = feature.get('upperBound') !== 1,
                     isContainment = feature.get('containment');
 
+                if (isContainment && (typeof(isContainment) !== "boolean")){
+                  // Note: This is a hack to resolve some symptoms of Issue 11 regarding the
+                  //       'containment' value having a string value instead of an boolean
+                  // Issue:  https://github.com/emfjson/ecore.js/issues/11
+                  console.log("!!! isContainment is a " + typeof(isContainment) + ", expected a boolean");
+                  console.log("!!! --> Key:   " + key);
+                  if (isContainment === "true"){
+                    isContainment = true;
+                  }
+                  if (isContainment === "false"){
+                    isContainment = false;
+                  }
+                }
+                
                 if (feature.isTypeOf('EAttribute')) {
                     data[featureName] = value;
                 } else {
