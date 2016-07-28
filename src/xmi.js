@@ -139,7 +139,9 @@ Ecore.XMI = {
                         }
                     }
                 }
-            }
+            } else if (eClass === undefined) {
+            	throw new Error( node.attributes.name + " has undefined/invalid eClass.");
+            } //again, eClass may be null
         };
 
         parser.onclosetag = function(tagName) {
@@ -177,6 +179,9 @@ Ecore.XMI = {
                         } else {
                             parent.set(feature.get('name'), resolved);
                         }
+                    } else if (resolved === undefined) {
+                    	//Note: resolved is null in certain valid situations
+                    	throw new Error("Undefined reference: " + ref);
                     }
                 });
             }
