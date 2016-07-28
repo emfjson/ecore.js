@@ -387,9 +387,16 @@ Ecore.EObjectPrototype = {
             if (typeof val !== 'undefined' && this.has(attr)) {
 
               if (this.isSet(attr)) this.unset(attr);
-
+              
                 var feature = getEStructuralFeature(this.eClass, attr),
-                    isContainment = Boolean(feature.get('containment')) === true;
+                    isContainment = feature.get('containment');
+                
+                var settingContainmentAttribute = (attr === 'containment') && (typeof(val) === 'string') && (this.eClass.values.name === 'EReference');
+                if (settingContainmentAttribute) {
+                	// Convert string 'true' to boolean true
+                	val = (val.toLowerCase() === 'true');
+                }
+             
                 this.values[attr] = val;
 
                 if (isContainment) {
@@ -1842,21 +1849,7 @@ Ecore.JSON = {
                     featureName = feature.get('name'),
                     isMany = feature.get('upperBound') !== 1,
                     isContainment = feature.get('containment');
-
-                if (isContainment && (typeof(isContainment) !== "boolean")){
-                  // Note: This is a hack to resolve some symptoms of Issue 11 regarding the
-                  //       'containment' value having a string value instead of an boolean
-                  // Issue:  https://github.com/emfjson/ecore.js/issues/11
-                  console.log("!!! isContainment is a " + typeof(isContainment) + ", expected a boolean");
-                  console.log("!!! --> Key:   " + key);
-                  if (isContainment === "true"){
-                    isContainment = true;
-                  }
-                  if (isContainment === "false"){
-                    isContainment = false;
-                  }
-                }
-                
+            
                 if (feature.isTypeOf('EAttribute')) {
                     data[featureName] = value;
                 } else {

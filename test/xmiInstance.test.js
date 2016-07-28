@@ -3,6 +3,7 @@
  */
 
 fs = require('fs');
+util = require('util');
 var Ecore = require('../dist/ecore.xmi.js');
 var assert = require("assert");
 
@@ -32,6 +33,24 @@ describe('XMI Instances of complex model (test5.xmi)', function(){
 		var instanceFile = fs.readFileSync('./test/models/test5-instance2.xmi', 'utf8');
 		instance.parse(instanceFile, Ecore.XMI);
 		
+		var instanceJSON = instance.to(Ecore.JSON, false);
+		var expectedJSON = { 
+				eClass: 'test5.xmi#//Simple',
+				name: 'SimpleTest',
+				info: 
+					[ { eClass: 'test5.xmi#//Info', value: '1', name: 'Info 1' },
+					  { eClass: 'test5.xmi#//Info',
+						value: '2',
+						subInfo: 
+							[ { eClass: 'test5.xmi#//SubordinateInfo', name: 'Sub 2-1' },
+							  { eClass: 'test5.xmi#//SubordinateInfo',
+								test: 'true',
+								name: 'Sub 2-2' },
+								{ eClass: 'test5.xmi#//SubordinateInfo', name: 'Sub 2-3' } ],
+								name: 'Info 2' },
+								{ eClass: 'test5.xmi#//Info', value: '3', name: 'Info 3' } ] };
+		//console.log(util.inspect(instanceJSON, false, null));
+		assert.equal(JSON.stringify(instanceJSON), JSON.stringify(expectedJSON));
 		assert.equal(instance.to(Ecore.XMI, true), instanceFile); 
 	});
 	
