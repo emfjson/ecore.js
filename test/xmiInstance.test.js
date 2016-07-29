@@ -73,4 +73,14 @@ describe('XMI Instances of complex model (test5.xmi)', function(){
 		assert.equal(instance3b.to(Ecore.XMI, true), i3bFile); 
 		assert.equal(instance3c.to(Ecore.XMI, true), i3cFile); 
 	});
+	
+	it('should parse attributes which are XMI elements (instance-5b)', function() {
+		var instanceSet = Ecore.ResourceSet.create();
+		var instance = instanceSet.create({uri : 'test5-instance5b.xmi'});
+		var instanceFile = fs.readFileSync('./test/models/test5-instance5b.xmi', 'utf8');
+		instance.parse(instanceFile,Ecore.XMI);
+		
+		assert.equal(instance.eContents()[0].values['newString'], 'A string.');
+		//equivalent: assert.equal(instance.values.contents._internal[0].values.newString, 'A String.');
+	});
 });

@@ -22,4 +22,13 @@ node simpleTest.js TestModel.ecore test2.testmodel
 
 ## To run with the ecore and both test models type: 
 
-node simpleTest.js TestModel.ecore test1.testmodel test2.testmodel 
+node simpleTest.js TestModel.ecore test1.testmodel test2.testmodel
+
+## To run with the ecore and instances with references in a common resource set type:
+
+node simpleTest.js TestModel.ecore test3a.testmodel test3b.testmodel test3c.testmodel 
+
+## To run with with attributes as an XMI element type:
+
+node simpleTest.js TestModel.ecore test4a.testmodel test4b.testmodel
+
