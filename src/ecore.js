@@ -868,9 +868,6 @@ EClass.values = {
 
         return _.isArray(subTypes) ? subTypes : [];
     },
-    hasSubTypes: function () {
-      return this.get('abstract') ||  this.get('eAllSubTypes');
-    },
     eReferences: function() {
         var eFeatures, eReferences;
 
@@ -1021,15 +1018,6 @@ EClass_eAllSubTypes.values = {
     containment: false,
     _: EClass.values.eAllSubTypes
 };
-var EClass_hasSubTypes = new EObject();
-EClass_hasSubTypes.values = {
-    name: 'hasSubTypes',
-    lowerBound: 0,
-    upperBound: -1,
-    derived: true,
-    containment: false,
-    _: EClass.values.hasSubTypes
-};
 var EClass_eAllAttributes = new EObject();
 EClass_eAllAttributes.values = {
     name: 'eAllAttributes',
@@ -1089,7 +1077,6 @@ EClass.get('eStructuralFeatures')
     .add(EClass_eAllStructuralFeatures)
     .add(EClass_eAllSuperTypes)
     .add(EClass_eAllSubTypes)
-    .add(EClass_hasSubTypes)
     .add(EClass_eAllAttributes)
     .add(EClass_eAllReferences)
     .add(EClass_eAllContainments)
@@ -1167,9 +1154,6 @@ EClass_eAllSuperTypes.values.eType = EClass;
 // eAllSubTypes
 EClass_eAllSubTypes.eClass = EReference;
 EClass_eAllSubTypes.values.eType = EClass;
-// hasSubTypes
-EClass_hasSubTypes.eClass = EReference;
-EClass_hasSubTypes.values.eType = EClass;
 // eAllAttributes
 EClass_eAllAttributes.eClass = EReference;
 EClass_eAllAttributes.values.eType = EAttribute;

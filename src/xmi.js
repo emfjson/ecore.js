@@ -67,13 +67,9 @@ Ecore.XMI = {
 
                  if (eFeature && eFeature.get) {
                       eType = eFeature.get('eType');
-                      if (eType.get('hasSubTypes')) {
-                          var aType = node.attributes['xsi:type'];
-                          if (aType) {
-                              eClass = resourceSet.getEObject(getClassURIFromPrefix(aType));
-                          } else {
-                              eClass = eType;
-                          }
+                      var aType = node.attributes['xsi:type'];
+                      if (aType) {
+                          eClass = resourceSet.getEObject(getClassURIFromPrefix(aType));
                       } else {
                           eClass = eType;
                       }
@@ -241,7 +237,7 @@ Ecore.XMI = {
                 isResource = true;
             }
 
-            if (!isResource && root.eContainingFeature.get('eType').get('hasSubTypes')) {
+            if (!isResource) {
                 if(root.eContainingFeature.get('eType') !== root.eClass) {
                   docRoot += ' xsi:type="';
                   docRoot += nsPrefix + ':' + root.eClass.get('name') + '"';                  
