@@ -366,11 +366,19 @@ Ecore.EObjectPrototype = {
         for (attr in attrs) {
             val = attrs[attr];
             if (typeof val !== 'undefined' && this.has(attr)) {
-
-              if (this.isSet(attr)) this.unset(attr);
+                if (this.isSet(attr)) {
+                    this.unset(attr);
+                }
 
                 var feature = getEStructuralFeature(this.eClass, attr),
-                    isContainment = Boolean(feature.get('containment')) === true;
+                    isContainment = feature.get('containment');
+
+                var settingContainmentAttribute = (attr === 'containment') && (typeof(val) === 'string') && (this.eClass.values.name === 'EReference');
+                if (settingContainmentAttribute) {
+                    // Convert string 'true' to boolean true
+                    val = (val.toLowerCase() === 'true');
+                }
+
                 this.values[attr] = val;
 
                 if (isContainment) {

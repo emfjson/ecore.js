@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test5:Simple xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:test5="http://www.example.org/test5" name="SimpleTest">
+    <info value="1" name="Info 1"/>
+    <info value="2" name="Info 2">
+        <subInfo name="Sub 2-1"/>
+        <subInfo test="true" name="Sub 2-2"/>
+        <subInfo name="Sub 2-3"/>
+    </info>
+    <info value="3" name="Info 3"/>
+</test5:Simple>

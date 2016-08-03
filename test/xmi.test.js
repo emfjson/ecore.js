@@ -87,7 +87,6 @@ describe('#XMI', function() {
                 }, { format: Ecore.XMI });
             });
         });
-
     });
 
     describe('Containment feature with upper bound equal to 1:', function() {
@@ -167,6 +166,7 @@ describe('#XMI', function() {
       });
 
     });
+    
 
 });
 

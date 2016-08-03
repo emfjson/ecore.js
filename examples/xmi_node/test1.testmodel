@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestModel:Item xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:TestModel="http://www.example.org/TestModel" name="Parent">
+  <child name="Child 1"/>
+  <child xsi:type="TestModel:SpecialItem" name="Child 2" value="2">
+    <child name="Child 2-1"/>
+    <child xsi:type="TestModel:SpecialItem" name="Child 2-2" value="22"/>
+  </child>
+  <child name="Child 3"/>
+  <child xsi:type="TestModel:AnotherItem" name="Child 4" test="true"/>
+</TestModel:Item>

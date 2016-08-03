@@ -385,11 +385,19 @@ Ecore.EObjectPrototype = {
         for (attr in attrs) {
             val = attrs[attr];
             if (typeof val !== 'undefined' && this.has(attr)) {
-
-              if (this.isSet(attr)) this.unset(attr);
+                if (this.isSet(attr)) {
+                    this.unset(attr);
+                }
 
                 var feature = getEStructuralFeature(this.eClass, attr),
-                    isContainment = Boolean(feature.get('containment')) === true;
+                    isContainment = feature.get('containment');
+
+                var settingContainmentAttribute = (attr === 'containment') && (typeof(val) === 'string') && (this.eClass.values.name === 'EReference');
+                if (settingContainmentAttribute) {
+                    // Convert string 'true' to boolean true
+                    val = (val.toLowerCase() === 'true');
+                }
+
                 this.values[attr] = val;
 
                 if (isContainment) {
@@ -2569,11 +2577,9 @@ Ecore.XMI = {
 
                  if (eFeature && eFeature.get) {
                       eType = eFeature.get('eType');
-                      if (eType.get('abstract')) {
-                          var aType = node.attributes['xsi:type'];
-                          if (aType) {
-                              eClass = resourceSet.getEObject(getClassURIFromPrefix(aType));
-                          }
+                      var aType = node.attributes['xsi:type'];
+                      if (aType) {
+                          eClass = resourceSet.getEObject(getClassURIFromPrefix(aType));
                       } else {
                           eClass = eType;
                       }
@@ -2593,6 +2599,14 @@ Ecore.XMI = {
 
         var currentNode, rootObject, toResolve = [];
 
+        parser.ontext = function(text) {
+        	if(currentNode && currentNode.waitingForAttributeText) {
+        		// The attribute was provided as an XMI element,
+        		// so store it to the parent node as an attribute.
+        		currentNode.parent.eObject.set(currentNode.name, text);
+        	}
+        };
+
         parser.onopentag = function(node) {
             var eClass, eObject, eFeature, parentObject;
 
@@ -2605,41 +2619,52 @@ Ecore.XMI = {
 
             eClass = findEClass(node);
             if (eClass) {
-                eObject = currentNode.eObject = Ecore.create(eClass);
-                if (!rootObject) rootObject = eObject;
+                var nodeIsAnAttribute = currentNode.parent && currentNode.parent.eObject.eClass.getEStructuralFeature(node.name).isTypeOf('EAttribute');
+                if (nodeIsAnAttribute) {
+                    // Set flag for parser.ontext to process and store attribute text
+                    node.waitingForAttributeText = true;
+                } else {
+                    eObject = currentNode.eObject = Ecore.create(eClass);
 
-                _.each(node.attributes, function(num, key) {
-                    if (eObject.has(key)) {
-                        eFeature = eObject.eClass.getEStructuralFeature(key);
-                        if (eFeature.isTypeOf('EAttribute')) {
-                            eObject.set(key, num);
-                        } else {
-                            toResolve.push({ parent: eObject, feature: eFeature, value: num });
-                        }
+                    if (!rootObject) {
+                        rootObject = eObject;
                     }
-                });
 
-                if (node.parent) {
-                    parentObject = node.parent.eObject;
-                    if (parentObject.has(node.name)) {
-                        eFeature = parentObject.eClass.getEStructuralFeature(node.name);
-                        if (eFeature.get('containment')) {
-                            if (eFeature.get('upperBound') === 1) {
-                                parentObject.set(node.name, eObject);
+                    _.each(node.attributes, function(num, key) {
+                        if (eObject.has(key)) {
+                            eFeature = eObject.eClass.getEStructuralFeature(key);
+                            if (eFeature.isTypeOf('EAttribute')) {
+                                eObject.set(key, num);
                             } else {
-                                parentObject.get(node.name).add(eObject);
+                                toResolve.push({ parent: eObject, feature: eFeature, value: num });
                             }
-                        } else {
-                            // resolve proxy element from href
-                            var attrs = node.attributes;
-                            var href = attrs ? attrs.href : null;
-                            if (href) {
-                                toResolve.push({ parent: parentObject, feature: eFeature, value: href });
+                        }
+                    });
+
+                    if (node.parent) {
+                        parentObject = node.parent.eObject;
+                        if (parentObject.has(node.name)) {
+                            eFeature = parentObject.eClass.getEStructuralFeature(node.name);
+                            if (eFeature.get('containment')) {
+                                if (eFeature.get('upperBound') === 1) {
+                                    parentObject.set(node.name, eObject);
+                                } else {
+                                    parentObject.get(node.name).add(eObject);
+                                }
+                            } else {
+                                // resolve proxy element from href
+                                var attrs = node.attributes;
+                                var href = attrs ? attrs.href : null;
+                                if (href) {
+                                    toResolve.push({ parent: parentObject, feature: eFeature, value: href });
+                                }
                             }
                         }
                     }
                 }
-            }
+            } else if (eClass === undefined) {
+                throw new Error( node.attributes.name + " has undefined/invalid eClass.");
+            } //again, eClass may be null
         };
 
         parser.onclosetag = function(tagName) {
@@ -2677,6 +2702,9 @@ Ecore.XMI = {
                         } else {
                             parent.set(feature.get('name'), resolved);
                         }
+                    } else if (resolved === undefined) {
+                        // Note: resolved is null in certain valid situations
+                        throw new Error("Undefined reference: " + ref);
                     }
                 });
             }
@@ -2713,15 +2741,20 @@ Ecore.XMI = {
             }
             docRoot += element;
 
+            var isResource = false;
+
             if (root.eContainer.isKindOf('Resource')) {
                 docRoot += ' xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"';
                 docRoot += ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"';
                 docRoot += ' xmlns:' + nsPrefix + '="' + nsURI + '"';
+                isResource = true;
             }
 
-            if (root.eContainingFeature.get('eType').get('abstract')) {
-                docRoot += ' xsi:type="';
-                docRoot += nsPrefix + ':' + root.eClass.get('name') + '"';
+            if (!isResource) {
+                if(root.eContainingFeature.get('eType') !== root.eClass) {
+                  docRoot += ' xsi:type="';
+                  docRoot += nsPrefix + ':' + root.eClass.get('name') + '"';
+                }
             }
 
             var features = root.eClass.get('eAllStructuralFeatures'),

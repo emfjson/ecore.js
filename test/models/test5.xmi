@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    name="test5"
+    nsURI="http://www.example.org/test5"
+    nsPrefix="test5">
+  <eClassifiers
+      xsi:type="ecore:EClass"
+      name="Item">
+    <eStructuralFeatures
+        xsi:type="ecore:EReference"
+        name="child"
+        upperBound="-1"
+        eType="#//Item"
+        containment="true"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="name"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EReference"
+        name="childByRef"
+        upperBound="-1"
+        eType="#//Item">
+      <eAnnotations
+          source="http:///org/eclipse/emf/ecore/util/ExtendedMetaData">
+        <details
+            key="name"
+            value="childByRef"/>
+        <details
+            key="namespace"
+            value=""/>
+      </eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers
+      xsi:type="ecore:EClass"
+      name="SpecialItem"
+      eSuperTypes="#//Item">
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="value"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers
+      xsi:type="ecore:EClass"
+      name="AnotherItem"
+      eSuperTypes="#//Item">
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="test"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+  <eClassifiers
+      xsi:type="ecore:EClass"
+      name="Simple">
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="name"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EReference"
+        name="info"
+        upperBound="-1"
+        eType="#//Info"
+        containment="true"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="newString"
+        ordered="false"
+        eType="#//String">
+      <eAnnotations
+          source="http:///org/eclipse/emf/ecore/util/ExtendedMetaData">
+        <details
+            key="kind"
+            value="element"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers
+      xsi:type="ecore:EClass"
+      name="Info">
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="value"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EReference"
+        name="subInfo"
+        upperBound="-1"
+        eType="#//SubordinateInfo"
+        containment="true"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="name"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers
+      xsi:type="ecore:EClass"
+      name="SubordinateInfo">
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="test"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="name"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers
+      xsi:type="ecore:EDataType"
+      name="String"
+      instanceClassName="java.lang.String"/>
+</ecore:EPackage>
