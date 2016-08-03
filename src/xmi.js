@@ -88,10 +88,10 @@ Ecore.XMI = {
         }
 
         var currentNode, rootObject, toResolve = [];
-        
+
         parser.ontext = function(text) {
         	if(currentNode && currentNode.waitingForAttributeText) {
-        		// The attribute was provided as an XMI element, 
+        		// The attribute was provided as an XMI element,
         		// so store it to the parent node as an attribute.
         		currentNode.parent.eObject.set(currentNode.name, text);
         	}
@@ -109,13 +109,16 @@ Ecore.XMI = {
 
             eClass = findEClass(node);
             if (eClass) {
-            	var nodeIsAnAttribute = currentNode.parent && currentNode.parent.eObject.eClass.getEStructuralFeature(node.name).isTypeOf('EAttribute');
-            	if (nodeIsAnAttribute) {
-            		// Set flag for parser.ontext to process and store attribute text
-            		node.waitingForAttributeText = true;
-            	} else {
-            		eObject = currentNode.eObject = Ecore.create(eClass);
-                    if (!rootObject) rootObject = eObject;
+                var nodeIsAnAttribute = currentNode.parent && currentNode.parent.eObject.eClass.getEStructuralFeature(node.name).isTypeOf('EAttribute');
+                if (nodeIsAnAttribute) {
+                    // Set flag for parser.ontext to process and store attribute text
+                    node.waitingForAttributeText = true;
+                } else {
+                    eObject = currentNode.eObject = Ecore.create(eClass);
+
+                    if (!rootObject) {
+                        rootObject = eObject;
+                    }
 
                     _.each(node.attributes, function(num, key) {
                         if (eObject.has(key)) {
@@ -148,9 +151,9 @@ Ecore.XMI = {
                             }
                         }
                     }
-            	}
+                }
             } else if (eClass === undefined) {
-            	throw new Error( node.attributes.name + " has undefined/invalid eClass.");
+                throw new Error( node.attributes.name + " has undefined/invalid eClass.");
             } //again, eClass may be null
         };
 
@@ -190,8 +193,8 @@ Ecore.XMI = {
                             parent.set(feature.get('name'), resolved);
                         }
                     } else if (resolved === undefined) {
-                    	//Note: resolved is null in certain valid situations
-                    	throw new Error("Undefined reference: " + ref);
+                        // Note: resolved is null in certain valid situations
+                        throw new Error("Undefined reference: " + ref);
                     }
                 });
             }
@@ -229,7 +232,7 @@ Ecore.XMI = {
             docRoot += element;
 
             var isResource = false;
-            
+
             if (root.eContainer.isKindOf('Resource')) {
                 docRoot += ' xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"';
                 docRoot += ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"';
@@ -240,7 +243,7 @@ Ecore.XMI = {
             if (!isResource) {
                 if(root.eContainingFeature.get('eType') !== root.eClass) {
                   docRoot += ' xsi:type="';
-                  docRoot += nsPrefix + ':' + root.eClass.get('name') + '"';                  
+                  docRoot += nsPrefix + ':' + root.eClass.get('name') + '"';
                 }
             }
 
