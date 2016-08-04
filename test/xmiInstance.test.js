@@ -83,4 +83,20 @@ describe('XMI Instances of complex model (test5.xmi)', function(){
 		assert.equal(instance.eContents()[0].values['newString'], 'A string.');
 		//equivalent: assert.equal(instance.values.contents._internal[0].values.newString, 'A String.');
 	});
+	
+	it('should parse an XMI file with multiple instances and namespaces', function() {
+		var newmodelSet = Ecore.ResourceSet.create();
+		var newmodel = newmodelSet.create({uri : 'test1.xmi'});
+		var newmodelFile = fs.readFileSync('./test/models/test1.xmi', 'utf8');
+		newmodel.parse(newmodelFile, Ecore.XMI);
+		var newfirstElement = newmodel.get('contents').first();
+		Ecore.EPackage.Registry.register(newfirstElement);
+		
+		var multiInstanceSet = Ecore.ResourceSet.create();
+		var multiInstance = multiInstanceSet.create({uri : 'test5-multipleinstances.xmi'});
+		var multiInstanceFile = fs.readFileSync('./test/models/test5-multipleinstances.xmi', 'utf8');
+		multiInstance.parse(multiInstanceFile,Ecore.XMI);
+			
+		assert.equal(multiInstance.to(Ecore.XMI, true), multiInstanceFile);
+	})
 });

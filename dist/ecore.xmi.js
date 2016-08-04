@@ -2618,7 +2618,7 @@ Ecore.XMI = {
 
             eClass = findEClass(node);
             if (eClass) {
-            	var nodeIsAnAttribute = currentNode.parent && currentNode.parent.eObject.eClass.getEStructuralFeature(node.name).isTypeOf('EAttribute');
+            	var nodeIsAnAttribute = currentNode.parent && currentNode.parent.eObject && currentNode.parent.eObject.eClass.getEStructuralFeature(node.name).isTypeOf('EAttribute');
             	if (nodeIsAnAttribute) {
             		// Set flag for parser.ontext to process and store attribute text
             		node.waitingForAttributeText = true;
@@ -2639,7 +2639,7 @@ Ecore.XMI = {
 
                     if (node.parent) {
                         parentObject = node.parent.eObject;
-                        if (parentObject.has(node.name)) {
+                        if (parentObject && parentObject.has(node.name)) {
                             eFeature = parentObject.eClass.getEStructuralFeature(node.name);
                             if (eFeature.get('containment')) {
                                 if (eFeature.get('upperBound') === 1) {
@@ -2655,6 +2655,13 @@ Ecore.XMI = {
                                     toResolve.push({ parent: parentObject, feature: eFeature, value: href });
                                 }
                             }
+                        } else {
+                        	// There are multiple rootObjects.
+                        	if(rootObject && (rootObject !== eObject)) {
+                        		// There is already a rootObject that has been processed.
+                        		model.add(rootObject);
+                        		rootObject = eObject;
+                        	}
                         }
                     }
             	}
@@ -2721,12 +2728,12 @@ Ecore.XMI = {
 
     to: function(model, indent) {
         var docRoot = '',
-            root = model.get('contents').first(),
-            nsPrefix = root.eClass.eContainer.get('nsPrefix'),
-            nsURI = root.eClass.eContainer.get('nsURI'),
+        	contents = model.get('contents').array(),
+            nsPrefix,
+            nsURI,
             contentsFeature = Ecore.Resource.getEStructuralFeature('contents');
 
-        function processElement(root) {
+        function processElement(root, isSingleInstance) {
             docRoot += '<';
 
             var element;
@@ -2736,20 +2743,20 @@ Ecore.XMI = {
                 element = nsPrefix + ':' + root.eClass.get('name');
             }
             docRoot += element;
-
-            var isResource = false;
             
             if (root.eContainer.isKindOf('Resource')) {
-                docRoot += ' xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"';
-                docRoot += ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"';
-                docRoot += ' xmlns:' + nsPrefix + '="' + nsURI + '"';
-                isResource = true;
-            }
-
-            if (!isResource) {
-                if(root.eContainingFeature.get('eType') !== root.eClass) {
-                  docRoot += ' xsi:type="';
-                  docRoot += nsPrefix + ':' + root.eClass.get('name') + '"';                  
+                // This is an instance at the top level of the resource
+            	if (isSingleInstance) {
+            	    // This is the only instance in the resource
+            		docRoot += ' xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"';
+                    docRoot += ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"';
+                    docRoot += ' xmlns:' + nsPrefix + '="' + nsURI + '"';
+            	}
+            } else {
+                // This is a nested element, need to check if subtype is needed
+                if (root.eContainingFeature.get('eType') !== root.eClass) {
+                  	docRoot += ' xsi:type="';
+                  	docRoot += nsPrefix + ':' + root.eClass.get('name') + '"';                  
                 }
             }
 
@@ -2830,11 +2837,39 @@ Ecore.XMI = {
             return docRoot;
         }
 
-        processElement(root);
-
+        // Process the instance(s) in the resource
+        if(contents.length === 1) {
+            // There is only one instance in this resource
+        	nsPrefix = contents[0].eClass.eContainer.get('nsPrefix');
+            nsURI = contents[0].eClass.eContainer.get('nsURI');
+        	processElement(contents[0], true);
+        	
+        } else {
+            // There are multiple instances in this resource
+        	var namespaces = {}; // Used to store unique namespaces
+        	
+            for (var i in contents) {
+        		nsPrefix = contents[i].eClass.eContainer.get('nsPrefix');
+                nsURI = contents[i].eClass.eContainer.get('nsURI');
+                namespaces[nsPrefix] = nsURI;       
+            	processElement(contents[i]);
+            }
+            
+            // Construct the namespace portion of the XMI element 
+        	var nsString = '';
+        	for (var nsKey in namespaces) {
+        		nsString += ' xmlns:' + nsKey + '="' + namespaces[nsKey] + '"';
+        	}
+        	
+        	// Wrap the processed elements with the XMI element
+        	docRoot = '<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' + nsString + '>' + docRoot + '</xmi:XMI>';
+        	
+        }
+        
+        // Format the final result
         docRoot = indent ? formatXml(docRoot) : docRoot;
         docRoot = '<?xml version="1.0" encoding="UTF-8"?>\n' + docRoot;
-
+        
         return docRoot;
     }
 };
