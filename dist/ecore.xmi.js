@@ -2666,7 +2666,7 @@ Ecore.XMI = {
                     }
             	}
             } else if (eClass === undefined) {
-            	throw new Error( node.attributes.name + " has undefined/invalid eClass.");
+            	throw new Error( node.name + " has undefined/invalid eClass.");
             } //again, eClass may be null
         };
 
