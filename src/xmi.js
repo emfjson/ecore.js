@@ -116,18 +116,18 @@ Ecore.XMI = {
             	} else {
             		eObject = currentNode.eObject = Ecore.create(eClass);
                     if (!rootObject) rootObject = eObject;
-
+                    
                     _.each(node.attributes, function(num, key) {
-                        if (eObject.has(key)) {
-                            eFeature = eObject.eClass.getEStructuralFeature(key);
-                            if (eFeature.isTypeOf('EAttribute')) {
-                                eObject.set(key, num);
-                            } else {
-                                toResolve.push({ parent: eObject, feature: eFeature, value: num });
-                            }
-                        }
+                    	if (eObject.has(key)) {
+                    		eFeature = eObject.eClass.getEStructuralFeature(key);
+                    		if (eFeature.isTypeOf('EAttribute')) {
+                    			eObject.set(key, num);
+                    		} else {
+                    			toResolve.push({ parent: eObject, feature: eFeature, value: num });
+                    		}
+                    	}
                     });
-
+                    
                     if (node.parent) {
                         parentObject = node.parent.eObject;
                         if (parentObject && parentObject.has(node.name)) {
@@ -223,6 +223,18 @@ Ecore.XMI = {
             nsPrefix,
             nsURI,
             contentsFeature = Ecore.Resource.getEStructuralFeature('contents');
+        
+        function escapeXML(text) {
+        	  var map = {
+        	    '&': '&amp;',
+        	    '<': '&lt;',
+        	    '>': '&gt;',
+        	    '"': '&quot;',
+        	    "'": '&#039;'
+        	  };
+        	  
+        	  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        	}
 
         function processElement(root, isSingleInstance) {
             docRoot += '<';
@@ -266,7 +278,14 @@ Ecore.XMI = {
                     value = root.get(featureName);
 
                 if (value !== undefined && value !== 'false') {
-                    docRoot += ' '  + featureName + '="' + value + '"';
+                	docRoot += ' '  + featureName + '="';
+                	if (typeof(value) === 'string') {
+                		docRoot += escapeXML(value);
+                	}
+                	else {
+                		docRoot += value;
+                	}
+                    docRoot += '"';
                 }
             });
 
@@ -367,11 +386,11 @@ Ecore.XMI = {
 
 function formatXml(xml) {
     var reg = /(>)(<)(\/*)/g,
-        wsexp = / *(.*) +\n/g,
+        wsexp = / *([^ ].*[^ ]) *\n/g,
         contexp = /(<.+>)(.+\n)/g;
 
     xml = xml.replace(reg, '$1\n$2$3').replace(wsexp, '$1\n').replace(contexp, '$1\n$2');
-
+    
     var pad = 0,
         formatted = '',
         lines = xml.split('\n'),

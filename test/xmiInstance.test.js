@@ -98,5 +98,14 @@ describe('XMI Instances of complex model (test5.xmi)', function(){
 		multiInstance.parse(multiInstanceFile,Ecore.XMI);
 			
 		assert.equal(multiInstance.to(Ecore.XMI, true), multiInstanceFile);
-	})
+	});
+	it('should escape invalid characters in attributes when printing', function() {
+		
+		var instanceSet = Ecore.ResourceSet.create();
+		var instance = instanceSet.create({uri : 'test5-instance6.xmi'});
+		var instanceFile = fs.readFileSync('./test/models/test5-instance6.xmi', 'utf8');
+		instance.parse(instanceFile, Ecore.XMI);
+		
+		assert.equal(instance.to(Ecore.XMI, true), instanceFile);
+	});
 });
