@@ -13,7 +13,7 @@ var resourceSet = Ecore.ResourceSet.create();
 //
 //////////////////////////////////////////////////////////////////////////
 function processFile(file) {
-  
+
   var resource = resourceSet.create({uri : file});
 
   var fileContents = fs.readFileSync(file, 'utf8');
@@ -36,7 +36,6 @@ function processFile(file) {
     console.log("::: Adding to registry: " + firstElement.get('name'));
     Ecore.EPackage.Registry.register(firstElement);
   }
-	
 
   if (showJSON) {
     console.log("::: JSON Dump of " + file);
@@ -47,6 +46,7 @@ function processFile(file) {
     console.log("::: XMI Dump of " + file);
     console.log(resource.to(Ecore.XMI, true));
   }
+
 }
 
 //////////////////////////////////////////////////////////////////////////

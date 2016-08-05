@@ -385,18 +385,19 @@ Ecore.EObjectPrototype = {
         for (attr in attrs) {
             val = attrs[attr];
             if (typeof val !== 'undefined' && this.has(attr)) {
+                if (this.isSet(attr)) {
+                    this.unset(attr);
+                }
 
-              if (this.isSet(attr)) this.unset(attr);
-              
                 var feature = getEStructuralFeature(this.eClass, attr),
                     isContainment = feature.get('containment');
-                
+
                 var settingContainmentAttribute = (attr === 'containment') && (typeof(val) === 'string') && (this.eClass.values.name === 'EReference');
                 if (settingContainmentAttribute) {
-                	// Convert string 'true' to boolean true
-                	val = (val.toLowerCase() === 'true');
+                    // Convert string 'true' to boolean true
+                    val = (val.toLowerCase() === 'true');
                 }
-             
+
                 this.values[attr] = val;
 
                 if (isContainment) {
@@ -1833,7 +1834,7 @@ Ecore.JSON = {
                     featureName = feature.get('name'),
                     isMany = feature.get('upperBound') !== 1,
                     isContainment = feature.get('containment');
-            
+
                 if (feature.isTypeOf('EAttribute')) {
                     data[featureName] = value;
                 } else {

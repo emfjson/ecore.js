@@ -115,7 +115,10 @@ Ecore.XMI = {
             		node.waitingForAttributeText = true;
             	} else {
             		eObject = currentNode.eObject = Ecore.create(eClass);
-                    if (!rootObject) rootObject = eObject;
+
+                    if (!rootObject) {
+                        rootObject = eObject;
+                    }
                     
                     _.each(node.attributes, function(num, key) {
                     	if (eObject.has(key)) {

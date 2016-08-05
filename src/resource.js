@@ -163,7 +163,7 @@ Ecore.JSON = {
                     featureName = feature.get('name'),
                     isMany = feature.get('upperBound') !== 1,
                     isContainment = feature.get('containment');
-            
+
                 if (feature.isTypeOf('EAttribute')) {
                     data[featureName] = value;
                 } else {
