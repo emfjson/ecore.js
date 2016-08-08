@@ -99,6 +99,7 @@ describe('XMI Instances of complex model (test5.xmi)', function(){
 			
 		assert.equal(multiInstance.to(Ecore.XMI, true), multiInstanceFile);
 	});
+	
 	it('should escape invalid characters in attributes when printing', function() {
 		
 		var instanceSet = Ecore.ResourceSet.create();
@@ -107,5 +108,27 @@ describe('XMI Instances of complex model (test5.xmi)', function(){
 		instance.parse(instanceFile, Ecore.XMI);
 		
 		assert.equal(instance.to(Ecore.XMI, true), instanceFile);
+	});
+	
+	it.skip('should parse instances with xmi:id', function() {
+		var instanceSet = Ecore.ResourceSet.create();
+		var instance = instanceSet.create({uri : 'test5-idtest1.xmi'});
+		var instanceFile = fs.readFileSync('./test/models/test5-idtest1.xmi', 'utf8');
+		instance.parse(instanceFile, Ecore.XMI);
+		
+		assert.equal(instance.to(Ecore.XMI, true), instanceFile);
+	});
+	
+	it.skip('should parse references via xmi:id and href', function() {
+		var instanceSet = Ecore.ResourceSet.create();
+		var instance1 = instanceSet.create({uri : 'test5-idtest1.xmi'});
+		var instance1File = fs.readFileSync('./test/models/test5-idtest1.xmi', 'utf8');
+		instance1.parse(instance1File, Ecore.XMI);
+		
+		var instance2 = instanceSet.create({uri : 'test5-idtest2.xmi'});
+		var instance2File = fs.readFileSync('./test/models/test5-idtest2.xmi', 'utf8');
+		instance2.parse(instance2File, Ecore.XMI);
+		
+		assert.equal(instance2.to(Ecore.XMI, true), instance2File);
 	});
 });
