@@ -582,9 +582,20 @@ Ecore.EObjectPrototype = {
     //
 
     eURI: function() {
+    	
+    	// It's possible the adjustments for the id map need to made 
+    	// in the fragment function as the fragment should be the xmi id.
         var eModel = this.eResource();
 
+        if (Ecore.XMI && Ecore.XMI.xmiIDMap.length > 0) {
+        	for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
+        		if (this === Ecore.XMI.xmiIDMap[i].eObject)
+        			return eModel.get('uri') + '#' + Ecore.XMI.xmiIDMap[i].id;
+        	}
+        }
+        
         return (eModel? eModel.get('uri') : '') + '#' + this.fragment();
+        
     },
 
     // Returns the fragment identifier of the EObject.
@@ -915,8 +926,9 @@ EClass.values = {
         eID = _.filter(eAttributes, function(a) {
             return a.get('iD') === true;
         });
-
-        return _.isArray(eID) ? null : eID;
+        
+        // Return the first reference with a true iD flag
+        return _.isArray(eID) ? eID[0] : null;
     },
     eAllStructuralFeatures: function() {
         var compute = function(eClass) {
@@ -1805,6 +1817,14 @@ Ecore.JSON = {
             var index = indexes[valueModel.get('uri')];
             for (var key in index) {
                 if (index[key] === value) {
+                    // The '/' may not be necessary as it means a better key was not found.
+                	if(key === '/' && Ecore.XMI && Ecore.XMI.xmiIDMap.length > 0) {
+                		for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
+                			if(value === Ecore.XMI.xmiIDMap[i].eObject) {
+                				return external ? valueModel.get('uri') + '#' + Ecore.XMI.xmiIDMap[i].id : Ecore.XMI.xmiIDMap[i].id;
+                			}
+                		}
+                	}
                     return external ? valueModel.get('uri') + '#' + key : key;
                 }
             }
@@ -1948,7 +1968,16 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             _: function(fragment) {
                 if (!fragment) return null;
 
-                return this._index()[fragment];
+                if (Ecore.XMI && Ecore.XMI.xmiIDMap.length > 0) {
+                	for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
+                		if (fragment === Ecore.XMI.xmiIDMap[i].id)
+                			return Ecore.XMI.xmiIDMap[i].eObject;
+                	}
+                }
+                
+                if(this._index()[fragment]) {
+                    return this._index()[fragment];
+                }
             }
         },
         {
@@ -2148,8 +2177,10 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                     base = split[0],
                     fragment = split[1],
                     resource;
-
-                if (!fragment) return null;
+                
+                if (!fragment) {
+                	return null;
+                }
 
                 var ePackage = Ecore.EPackage.Registry.getEPackage(base);
 
@@ -2286,7 +2317,7 @@ function buildIndex(model) {
             } else {
                 iD = root.eClass.get('eIDAttribute') || null;
                 if (iD) {
-                    build(root, root.get(iD.name));
+                    build(root, root.get(iD.get('name')));
                 } else {
                     build(root, '/');
                 }
@@ -2299,7 +2330,7 @@ function buildIndex(model) {
                 } else {
                     iD = root.eClass.get('eIDAttribute') || null;
                     if (iD) {
-                        build(root, root.get(iD.name));
+                        build(root, root.get(iD.get('name')));
                     } else {
                         build(root, '/' + i);
                     }
@@ -2519,6 +2550,9 @@ Ecore.XMI = {
 
     dataType: 'xml',
     contentType: 'application/xml',
+    
+    // Currently the map is an array. Will be converted to a hash using a JSON object.
+    xmiIDMap: [],
 
     parse: function(model, data) {
         if (!Ecore.sax) throw new Error('Sax is missing.');
@@ -2639,6 +2673,10 @@ Ecore.XMI = {
                     			toResolve.push({ parent: eObject, feature: eFeature, value: num });
                     		}
                     	}
+                    	// Special processing for xmi:id's
+                    	if (key === 'xmi:id') {
+                    		Ecore.XMI.xmiIDMap.push({id: num, eObject: eObject});
+                    	}
                     });
                     
                     if (node.parent) {
@@ -2694,6 +2732,12 @@ Ecore.XMI = {
                 var refs = value.split(/\s/),
                     isMany = feature.get('upperBound') !== 1,
                     resolved;
+                
+                if (refs[0] === 'ecore:EDataType') {
+                	// Throw out first part as it will resolve to a null reference.
+                    // The second element contains the actual eType
+                	refs.shift();
+                }
 
                 _.each(refs, function(ref) {
                     if (ref[0] === '#') ref = ref.substring(1, ref.length);
@@ -2702,6 +2746,9 @@ Ecore.XMI = {
                         resolved = index[ref];
                     } else {
                         resolved = resourceSet.getEObject(ref);
+                        if (resolved === null) {
+                        	console.log('Warning: ' + ref + ' is an unresolved reference');
+                        }
                     }
                     if (resolved) {
                         if (isMany) {
@@ -2758,6 +2805,7 @@ Ecore.XMI = {
             } else {
                 element = nsPrefix + ':' + root.eClass.get('name');
             }
+            
             docRoot += element;
             
             if (root.eContainer.isKindOf('Resource')) {
@@ -2785,6 +2833,15 @@ Ecore.XMI = {
                     return !feature.get('derived') && feature.isTypeOf('EReference') &&
                         !feature.get('containment') && root.isSet(feature.get('name'));
                 });
+            
+            // Write the xmi:id if necessary
+            if (Ecore.XMI.xmiIDMap.length > 0) {
+            	for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
+            		if(root === Ecore.XMI.xmiIDMap[i].eObject) {
+            			docRoot += ' xmi:id="' + Ecore.XMI.xmiIDMap[i].id + '"';
+            		}
+            	}
+            }
 
             _.each(attributes, function(feature) {
                 var featureName = feature.get('name'),

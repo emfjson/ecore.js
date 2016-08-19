@@ -9,6 +9,9 @@ Ecore.XMI = {
 
     dataType: 'xml',
     contentType: 'application/xml',
+    
+    // Currently the map is an array. Will be converted to a hash using a JSON object.
+    xmiIDMap: [],
 
     parse: function(model, data) {
         if (!Ecore.sax) throw new Error('Sax is missing.');
@@ -129,6 +132,10 @@ Ecore.XMI = {
                     			toResolve.push({ parent: eObject, feature: eFeature, value: num });
                     		}
                     	}
+                    	// Special processing for xmi:id's
+                    	if (key === 'xmi:id') {
+                    		Ecore.XMI.xmiIDMap.push({id: num, eObject: eObject});
+                    	}
                     });
                     
                     if (node.parent) {
@@ -184,6 +191,12 @@ Ecore.XMI = {
                 var refs = value.split(/\s/),
                     isMany = feature.get('upperBound') !== 1,
                     resolved;
+                
+                if (refs[0] === 'ecore:EDataType') {
+                	// Throw out first part as it will resolve to a null reference.
+                    // The second element contains the actual eType
+                	refs.shift();
+                }
 
                 _.each(refs, function(ref) {
                     if (ref[0] === '#') ref = ref.substring(1, ref.length);
@@ -192,6 +205,9 @@ Ecore.XMI = {
                         resolved = index[ref];
                     } else {
                         resolved = resourceSet.getEObject(ref);
+                        if (resolved === null) {
+                        	console.log('Warning: ' + ref + ' is an unresolved reference');
+                        }
                     }
                     if (resolved) {
                         if (isMany) {
@@ -248,6 +264,7 @@ Ecore.XMI = {
             } else {
                 element = nsPrefix + ':' + root.eClass.get('name');
             }
+            
             docRoot += element;
             
             if (root.eContainer.isKindOf('Resource')) {
@@ -275,6 +292,15 @@ Ecore.XMI = {
                     return !feature.get('derived') && feature.isTypeOf('EReference') &&
                         !feature.get('containment') && root.isSet(feature.get('name'));
                 });
+            
+            // Write the xmi:id if necessary
+            if (Ecore.XMI.xmiIDMap.length > 0) {
+            	for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
+            		if(root === Ecore.XMI.xmiIDMap[i].eObject) {
+            			docRoot += ' xmi:id="' + Ecore.XMI.xmiIDMap[i].id + '"';
+            		}
+            	}
+            }
 
             _.each(attributes, function(feature) {
                 var featureName = feature.get('name'),

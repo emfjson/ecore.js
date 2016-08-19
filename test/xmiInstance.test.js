@@ -110,7 +110,7 @@ describe('XMI Instances of complex model (test5.xmi)', function(){
 		assert.equal(instance.to(Ecore.XMI, true), instanceFile);
 	});
 	
-	it.skip('should parse instances with xmi:id', function() {
+	it('should parse instances with xmi:id', function() {
 		var instanceSet = Ecore.ResourceSet.create();
 		var instance = instanceSet.create({uri : 'test5-idtest1.xmi'});
 		var instanceFile = fs.readFileSync('./test/models/test5-idtest1.xmi', 'utf8');
@@ -119,7 +119,7 @@ describe('XMI Instances of complex model (test5.xmi)', function(){
 		assert.equal(instance.to(Ecore.XMI, true), instanceFile);
 	});
 	
-	it.skip('should parse references via xmi:id and href', function() {
+	it('should parse references via xmi:id and href', function() {
 		var instanceSet = Ecore.ResourceSet.create();
 		var instance1 = instanceSet.create({uri : 'test5-idtest1.xmi'});
 		var instance1File = fs.readFileSync('./test/models/test5-idtest1.xmi', 'utf8');
