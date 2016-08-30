@@ -586,13 +586,6 @@ Ecore.EObjectPrototype = {
     	// It's possible the adjustments for the id map need to made 
     	// in the fragment function as the fragment should be the xmi id.
         var eModel = this.eResource();
-
-        if (Ecore.XMI && Ecore.XMI.xmiIDMap.length > 0) {
-        	for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
-        		if (this === Ecore.XMI.xmiIDMap[i].eObject)
-        			return eModel.get('uri') + '#' + Ecore.XMI.xmiIDMap[i].id;
-        	}
-        }
         
         return (eModel? eModel.get('uri') : '') + '#' + this.fragment();
         
@@ -1817,14 +1810,6 @@ Ecore.JSON = {
             var index = indexes[valueModel.get('uri')];
             for (var key in index) {
                 if (index[key] === value) {
-                    // The '/' may not be necessary as it means a better key was not found.
-                	if(key === '/' && Ecore.XMI && Ecore.XMI.xmiIDMap.length > 0) {
-                		for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
-                			if(value === Ecore.XMI.xmiIDMap[i].eObject) {
-                				return external ? valueModel.get('uri') + '#' + Ecore.XMI.xmiIDMap[i].id : Ecore.XMI.xmiIDMap[i].id;
-                			}
-                		}
-                	}
                     return external ? valueModel.get('uri') + '#' + key : key;
                 }
             }
@@ -1967,13 +1952,6 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             eType: Ecore.EObject,
             _: function(fragment) {
                 if (!fragment) return null;
-
-                if (Ecore.XMI && Ecore.XMI.xmiIDMap.length > 0) {
-                	for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
-                		if (fragment === Ecore.XMI.xmiIDMap[i].id)
-                			return Ecore.XMI.xmiIDMap[i].eObject;
-                	}
-                }
                 
                 if(this._index()[fragment]) {
                     return this._index()[fragment];
@@ -2550,9 +2528,6 @@ Ecore.XMI = {
 
     dataType: 'xml',
     contentType: 'application/xml',
-    
-    // Currently the map is an array. Will be converted to a hash using a JSON object.
-    xmiIDMap: [],
 
     parse: function(model, data) {
         if (!Ecore.sax) throw new Error('Sax is missing.');
@@ -2594,10 +2569,9 @@ Ecore.XMI = {
         function getClassURIFromPrefix(value) {
              var split = value.split(':'),
                  prefix = split[0],
-                 className = split[1],
-                 uri = getNamespace(prefix) + '#//' + className;
+                 className = split[1];
 
-             return uri;
+             return getNamespace(prefix) + '#//' + className;
         }
 
         function getClassURIFromFeatureType(node) {
@@ -2675,7 +2649,7 @@ Ecore.XMI = {
                     	}
                     	// Special processing for xmi:id's
                     	if (key === 'xmi:id') {
-                    		Ecore.XMI.xmiIDMap.push({id: num, eObject: eObject});
+                            eObject._id = num;
                     	}
                     });
                     
@@ -2835,12 +2809,8 @@ Ecore.XMI = {
                 });
             
             // Write the xmi:id if necessary
-            if (Ecore.XMI.xmiIDMap.length > 0) {
-            	for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
-            		if(root === Ecore.XMI.xmiIDMap[i].eObject) {
-            			docRoot += ' xmi:id="' + Ecore.XMI.xmiIDMap[i].id + '"';
-            		}
-            	}
+            if (root._id) {
+                docRoot += ' xmi:id="' + root._id + '"';
             }
 
             _.each(attributes, function(feature) {

@@ -567,13 +567,6 @@ Ecore.EObjectPrototype = {
     	// It's possible the adjustments for the id map need to made 
     	// in the fragment function as the fragment should be the xmi id.
         var eModel = this.eResource();
-
-        if (Ecore.XMI && Ecore.XMI.xmiIDMap.length > 0) {
-        	for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
-        		if (this === Ecore.XMI.xmiIDMap[i].eObject)
-        			return eModel.get('uri') + '#' + Ecore.XMI.xmiIDMap[i].id;
-        	}
-        }
         
         return (eModel? eModel.get('uri') : '') + '#' + this.fragment();
         

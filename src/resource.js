@@ -134,14 +134,6 @@ Ecore.JSON = {
             var index = indexes[valueModel.get('uri')];
             for (var key in index) {
                 if (index[key] === value) {
-                    // The '/' may not be necessary as it means a better key was not found.
-                	if(key === '/' && Ecore.XMI && Ecore.XMI.xmiIDMap.length > 0) {
-                		for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
-                			if(value === Ecore.XMI.xmiIDMap[i].eObject) {
-                				return external ? valueModel.get('uri') + '#' + Ecore.XMI.xmiIDMap[i].id : Ecore.XMI.xmiIDMap[i].id;
-                			}
-                		}
-                	}
                     return external ? valueModel.get('uri') + '#' + key : key;
                 }
             }
@@ -284,13 +276,6 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             eType: Ecore.EObject,
             _: function(fragment) {
                 if (!fragment) return null;
-
-                if (Ecore.XMI && Ecore.XMI.xmiIDMap.length > 0) {
-                	for (var i = 0; i < Ecore.XMI.xmiIDMap.length; i++) {
-                		if (fragment === Ecore.XMI.xmiIDMap[i].id)
-                			return Ecore.XMI.xmiIDMap[i].eObject;
-                	}
-                }
                 
                 if(this._index()[fragment]) {
                     return this._index()[fragment];
