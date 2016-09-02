@@ -563,9 +563,13 @@ Ecore.EObjectPrototype = {
     //
 
     eURI: function() {
+    	
+    	// It's possible the adjustments for the id map need to made 
+    	// in the fragment function as the fragment should be the xmi id.
         var eModel = this.eResource();
-
+        
         return (eModel? eModel.get('uri') : '') + '#' + this.fragment();
+        
     },
 
     // Returns the fragment identifier of the EObject.
@@ -896,8 +900,9 @@ EClass.values = {
         eID = _.filter(eAttributes, function(a) {
             return a.get('iD') === true;
         });
-
-        return _.isArray(eID) ? null : eID;
+        
+        // Return the first reference with a true iD flag
+        return _.isArray(eID) ? eID[0] : null;
     },
     eAllStructuralFeatures: function() {
         var compute = function(eClass) {

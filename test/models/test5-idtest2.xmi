@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test5:Item xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:test5="http://www.example.org/test5" xmi:id="_JaWSYF16EeaCUIjtt9MS7Q" name="ID Test2">
+    <childByRef href="test5-idtest1.xmi#_dnObYF16EeaCUIjtt9MS7Q" />
+</test5:Item>

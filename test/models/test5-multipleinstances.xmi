@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:test5="http://www.example.org/test5" xmlns:test="http:///www.eclipselabs.org/test">
+    <test5:Item name="item" childByRef="/1 /2">
+        <child name="containedChild"/>
+        <child xsi:type="test5:SpecialItem" name="specialItem" value="1001"/>
+    </test5:Item>
+    <test5:Item name="refChild"/>
+    <test5:AnotherItem name="refAnother" test="true"/>
+    <test5:Info value="2002" name="info">
+        <subInfo test="true" name="sub1"/>
+        <subInfo name="sub2"/>
+    </test5:Info>
+    <test:Root label="Root test"/>
+</xmi:XMI>

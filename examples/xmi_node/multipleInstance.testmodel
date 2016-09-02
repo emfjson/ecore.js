@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ASCII"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:TestModel="http://www.example.org/TestModel">
+  <TestModel:Item name="item" childByRef="/1 /2">
+    <child name="containedChild"/>
+    <child xsi:type="TestModel:SpecialItem" name="specialItem" value="1001"/>
+  </TestModel:Item>
+  <TestModel:Item name="refChild"/>
+  <TestModel:AnotherItem name="refAnother" test="true"/>
+  <TestModel:Info value="2002" name="info">
+    <subInfo test="true" name="sub1"/>
+    <subInfo name="sub2"/>
+  </TestModel:Info>
+</xmi:XMI>

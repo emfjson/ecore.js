@@ -582,9 +582,13 @@ Ecore.EObjectPrototype = {
     //
 
     eURI: function() {
+    	
+    	// It's possible the adjustments for the id map need to made 
+    	// in the fragment function as the fragment should be the xmi id.
         var eModel = this.eResource();
-
+        
         return (eModel? eModel.get('uri') : '') + '#' + this.fragment();
+        
     },
 
     // Returns the fragment identifier of the EObject.
@@ -915,8 +919,9 @@ EClass.values = {
         eID = _.filter(eAttributes, function(a) {
             return a.get('iD') === true;
         });
-
-        return _.isArray(eID) ? null : eID;
+        
+        // Return the first reference with a true iD flag
+        return _.isArray(eID) ? eID[0] : null;
     },
     eAllStructuralFeatures: function() {
         var compute = function(eClass) {
@@ -1947,8 +1952,10 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             eType: Ecore.EObject,
             _: function(fragment) {
                 if (!fragment) return null;
-
-                return this._index()[fragment];
+                
+                if(this._index()[fragment]) {
+                    return this._index()[fragment];
+                }
             }
         },
         {
@@ -2148,8 +2155,10 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                     base = split[0],
                     fragment = split[1],
                     resource;
-
-                if (!fragment) return null;
+                
+                if (!fragment) {
+                	return null;
+                }
 
                 var ePackage = Ecore.EPackage.Registry.getEPackage(base);
 
@@ -2286,7 +2295,7 @@ function buildIndex(model) {
             } else {
                 iD = root.eClass.get('eIDAttribute') || null;
                 if (iD) {
-                    build(root, root.get(iD.name));
+                    build(root, root.get(iD.get('name')));
                 } else {
                     build(root, '/');
                 }
@@ -2299,7 +2308,7 @@ function buildIndex(model) {
                 } else {
                     iD = root.eClass.get('eIDAttribute') || null;
                     if (iD) {
-                        build(root, root.get(iD.name));
+                        build(root, root.get(iD.get('name')));
                     } else {
                         build(root, '/' + i);
                     }

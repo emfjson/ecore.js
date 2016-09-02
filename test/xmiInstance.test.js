@@ -83,4 +83,52 @@ describe('XMI Instances of complex model (test5.xmi)', function(){
 		assert.equal(instance.eContents()[0].values['newString'], 'A string.');
 		//equivalent: assert.equal(instance.values.contents._internal[0].values.newString, 'A String.');
 	});
+	
+	it('should parse an XMI file with multiple instances and namespaces', function() {
+		var newmodelSet = Ecore.ResourceSet.create();
+		var newmodel = newmodelSet.create({uri : 'test1.xmi'});
+		var newmodelFile = fs.readFileSync('./test/models/test1.xmi', 'utf8');
+		newmodel.parse(newmodelFile, Ecore.XMI);
+		var newfirstElement = newmodel.get('contents').first();
+		Ecore.EPackage.Registry.register(newfirstElement);
+		
+		var multiInstanceSet = Ecore.ResourceSet.create();
+		var multiInstance = multiInstanceSet.create({uri : 'test5-multipleinstances.xmi'});
+		var multiInstanceFile = fs.readFileSync('./test/models/test5-multipleinstances.xmi', 'utf8');
+		multiInstance.parse(multiInstanceFile,Ecore.XMI);
+			
+		assert.equal(multiInstance.to(Ecore.XMI, true), multiInstanceFile);
+	});
+	
+	it('should escape invalid characters in attributes when printing', function() {
+		
+		var instanceSet = Ecore.ResourceSet.create();
+		var instance = instanceSet.create({uri : 'test5-instance6.xmi'});
+		var instanceFile = fs.readFileSync('./test/models/test5-instance6.xmi', 'utf8');
+		instance.parse(instanceFile, Ecore.XMI);
+		
+		assert.equal(instance.to(Ecore.XMI, true), instanceFile);
+	});
+	
+	it('should parse instances with xmi:id', function() {
+		var instanceSet = Ecore.ResourceSet.create();
+		var instance = instanceSet.create({uri : 'test5-idtest1.xmi'});
+		var instanceFile = fs.readFileSync('./test/models/test5-idtest1.xmi', 'utf8');
+		instance.parse(instanceFile, Ecore.XMI);
+		
+		assert.equal(instance.to(Ecore.XMI, true), instanceFile);
+	});
+	
+	it('should parse references via xmi:id and href', function() {
+		var instanceSet = Ecore.ResourceSet.create();
+		var instance1 = instanceSet.create({uri : 'test5-idtest1.xmi'});
+		var instance1File = fs.readFileSync('./test/models/test5-idtest1.xmi', 'utf8');
+		instance1.parse(instance1File, Ecore.XMI);
+		
+		var instance2 = instanceSet.create({uri : 'test5-idtest2.xmi'});
+		var instance2File = fs.readFileSync('./test/models/test5-idtest2.xmi', 'utf8');
+		instance2.parse(instance2File, Ecore.XMI);
+		
+		assert.equal(instance2.to(Ecore.XMI, true), instance2File);
+	});
 });

@@ -55,13 +55,11 @@ describe('Parsing of invalid model files', function() {
 		var instance = instanceSet.create({uri : 'test5-instance4.xmi'});
 		var instanceFile = fs.readFileSync('./test/models/test5-instance4.xmi', 'utf8');
 		
-		var passFlag = false;
 		try{
 			instance.parse(instanceFile, Ecore.XMI);
 		} catch(err) {
-			passFlag = true;
+			assert.equal(err.toString(), "Error: child has undefined/invalid eClass.");
 		}
-		assert.equal(passFlag, true);
 	});
 	
 });

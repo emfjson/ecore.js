@@ -276,8 +276,10 @@ var EClassResource = Ecore.Resource = Ecore.EClass.create({
             eType: Ecore.EObject,
             _: function(fragment) {
                 if (!fragment) return null;
-
-                return this._index()[fragment];
+                
+                if(this._index()[fragment]) {
+                    return this._index()[fragment];
+                }
             }
         },
         {
@@ -477,8 +479,10 @@ var EClassResourceSet = Ecore.ResourceSet = Ecore.EClass.create({
                     base = split[0],
                     fragment = split[1],
                     resource;
-
-                if (!fragment) return null;
+                
+                if (!fragment) {
+                	return null;
+                }
 
                 var ePackage = Ecore.EPackage.Registry.getEPackage(base);
 
@@ -615,7 +619,7 @@ function buildIndex(model) {
             } else {
                 iD = root.eClass.get('eIDAttribute') || null;
                 if (iD) {
-                    build(root, root.get(iD.name));
+                    build(root, root.get(iD.get('name')));
                 } else {
                     build(root, '/');
                 }
@@ -628,7 +632,7 @@ function buildIndex(model) {
                 } else {
                     iD = root.eClass.get('eIDAttribute') || null;
                     if (iD) {
-                        build(root, root.get(iD.name));
+                        build(root, root.get(iD.get('name')));
                     } else {
                         build(root, '/' + i);
                     }
