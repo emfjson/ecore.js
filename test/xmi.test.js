@@ -87,6 +87,73 @@ describe('#XMI', function() {
                 }, { format: Ecore.XMI });
             });
         });
+
+        it('should parse test3 correctly', function(done) {
+            var resourceSet = Ecore.ResourceSet.create();
+            var model = resourceSet.create({ uri: 'test3.xmi' });
+
+            fs.readFile('./test/models/test3.xmi', 'utf8', function (err, data) {
+                if (err) return console.log(err);
+
+                model.load(data, function(model, err) {
+                    assert.equal(err, null);
+
+                    var contents = model.get('contents');
+                    assert.equal(1, contents.size());
+
+                    var root = contents.at(0);
+                    assert.strictEqual(Ecore.EPackage, root.eClass);
+                    assert.strictEqual('test', root.get('name'));
+                    assert.strictEqual('test', root.get('nsPrefix'));
+                    assert.strictEqual('http:///www.eclipselabs.org/test', root.get('nsURI'));
+
+                    var eClassifiers = root.get('eClassifiers');
+                    assert.equal(1, eClassifiers.size());
+
+                    var rootClass = eClassifiers.at(0);
+                    assert.strictEqual(Ecore.EClass, rootClass.eClass);
+                    assert.strictEqual('Root', rootClass.get('name'));
+                    assert.equal(3, rootClass.get('eStructuralFeatures').size());
+                    assert.equal(1, rootClass.get('eOperations').size());
+
+                    var rootClassInteger = rootClass.get('eStructuralFeatures').at(0);
+                    assert.strictEqual(Ecore.EAttribute, rootClassInteger.eClass);
+                    assert.equal('integerObject', rootClassInteger.get('name'));
+                    assert.strictEqual(Ecore.EIntegerObject, rootClassInteger.get('eType'));
+
+                    var rootClassFloat = rootClass.get('eStructuralFeatures').at(1);
+                    assert.strictEqual(Ecore.EAttribute, rootClassFloat.eClass);
+                    assert.equal('floatObject', rootClassFloat.get('name'));
+                    assert.strictEqual(Ecore.EFloatObject, rootClassFloat.get('eType'));
+
+                    var rootClassLong = rootClass.get('eStructuralFeatures').at(2);
+                    assert.strictEqual(Ecore.EAttribute, rootClassLong.eClass);
+                    assert.equal('longObject', rootClassLong.get('name'));
+                    assert.strictEqual(Ecore.ELongObject, rootClassLong.get('eType'));
+
+                    var rootClassOperation = rootClass.get('eOperations').at(0);
+                    assert.strictEqual(Ecore.EOperation, rootClassOperation.eClass);
+                    assert.equal('validationOperation', rootClassOperation.get('name'));
+                    assert.equal(2, rootClassOperation.get('eParameters').size());
+
+                    var operationParameterDiagnostics = rootClassOperation.get('eParameters').at(0);
+                    assert.strictEqual(Ecore.EParameter, operationParameterDiagnostics.eClass);
+                    assert.equal('diagnostics', operationParameterDiagnostics.get('name'));
+                    assert.strictEqual(Ecore.EDiagnosticChain, operationParameterDiagnostics.get('eType'));
+
+                    var operationParameterContext = rootClassOperation.get('eParameters').at(1);
+                    assert.strictEqual(Ecore.EParameter, operationParameterContext.eClass);
+                    assert.equal('context', operationParameterContext.get('name'));
+
+                    var operationParameterContextType = operationParameterContext.get('eGenericType');
+                    assert.strictEqual(Ecore.EGenericType, operationParameterContextType.eClass);
+                    assert.equal(2, operationParameterContextType.get('eTypeArguments').size());
+                    assert.strictEqual(Ecore.EMap, operationParameterContextType.get('eClassifier'));
+
+                    done();
+                }, { format: Ecore.XMI });
+            });
+        });
     });
 
     describe('Containment feature with upper bound equal to 1:', function() {

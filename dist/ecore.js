@@ -825,6 +825,11 @@ var EClass = new EObject(),
     EBoolean = new EObject(),
     EDouble = new EObject(),
     EDate = new EObject(),
+    EIntegerObject = new EObject(),
+    EFloatObject = new EObject(),
+    ELongObject = new EObject(),
+    EMap = new EObject(),
+    EDiagnosticChain = new EObject(),
     JSObject = new EObject(),
     EClass_abstract = new EObject(),
     EClass_interface = new EObject(),
@@ -1153,6 +1158,7 @@ var EObjectClass = EClass.create(),
     EReference = EClass.create(),
     EOperation = EClass.create(),
     EParameter = EClass.create(),
+    EGenericType = EClass.create(),
     EEnumLiteral = EClass.create();
 
 // Set eClass and necessary values for EClass features.
@@ -1217,6 +1223,7 @@ EAttribute.get('eSuperTypes').add(EStructuralFeature);
 EReference.get('eSuperTypes').add(EStructuralFeature);
 EOperation.get('eSuperTypes').add(ETypedElement);
 EParameter.get('eSuperTypes').add(ETypedElement);
+EGenericType.get('eSuperTypes').add(EObjectClass);
 
 // ETypedElement
 //  - attributes:
@@ -1235,7 +1242,8 @@ var ETypedElement_eType = new EObject(),
     ETypedElement_lowerBound = new EObject(),
     ETypedElement_upperBound = new EObject(),
     ETypedElement_many = new EObject(),
-    ETypedElement_required = new EObject();
+    ETypedElement_required = new EObject(),
+    ETypedElement_eGenericType = new EObject();
 
 ETypedElement_eType.eClass = EReference;
 ETypedElement_eType.values = {
@@ -1303,6 +1311,14 @@ ETypedElement_required.values = {
         return this.get('lowerBound') === 1;
     }
 };
+ETypedElement_eGenericType.eClass = EReference;
+ETypedElement_eGenericType.values = {
+    name: 'eGenericType',
+    lowerBound: 0,
+    upperBound: 1,
+    containment: true,
+    eType: EGenericType
+};
 
 ETypedElement.get('eStructuralFeatures')
     .add(ETypedElement_eType)
@@ -1311,7 +1327,8 @@ ETypedElement.get('eStructuralFeatures')
     .add(ETypedElement_lowerBound)
     .add(ETypedElement_upperBound)
     .add(ETypedElement_many)
-    .add(ETypedElement_required);
+    .add(ETypedElement_required)
+    .add(ETypedElement_eGenericType);
 
 // EModelElement
 //  - references:
@@ -1421,6 +1438,7 @@ EAttribute.set({ name: 'EAttribute' });
 EReference.set({ name: 'EReference' });
 EOperation.set({ name: 'EOperation' });
 EParameter.set({ name: 'EParameter' });
+EGenericType.set({ name: 'EGenericType' });
 EEnumLiteral.set({ name: 'EEnumLiteral' });
 
 // EOperation
@@ -1501,6 +1519,30 @@ EAnnotation.get('eStructuralFeatures')
     .add(EAnnotation_source)
     .add(EAnnotation_details);
 
+// EGenericType
+// - references:
+//  - eTypeArguments[*]: EGenericType
+
+var EGenericType_eTypeArguments = EReference.create({
+    name: 'eTypeArguments',
+    upperBound: -1,
+    lowerBound: 0,
+    containment: true,
+    eType: EGenericType
+});
+
+var EGenericType_eClassifier = EReference.create({
+    name: 'eClassifier',
+    upperBound: 1,
+    lowerBound: 0,
+    containment: false,
+    eType: EClassifier
+});
+
+EGenericType.get('eStructuralFeatures')
+    .add(EGenericType_eTypeArguments)
+    .add(EGenericType_eClassifier);
+
 
 // Setting core datatypes values
 
@@ -1514,6 +1556,16 @@ EDate.eClass = EDataType;
 EDate.set({ name: 'EDate' });
 EDouble.eClass = EDataType;
 EDouble.set({ name: 'EDouble' });
+EIntegerObject.eClass = EDataType;
+EIntegerObject.set({ name: 'EIntegerObject' });
+EFloatObject.eClass = EDataType;
+EFloatObject.set({ name: 'EFloatObject'});
+ELongObject.eClass = EDataType;
+ELongObject.set({ name: 'ELongObject'});
+EMap.eClass = EDataType;
+EMap.set({ name: 'EMap' });
+EDiagnosticChain.eClass = EDataType;
+EDiagnosticChain.set({ name: 'EDiagnosticChain' });
 JSObject.eClass = EDataType;
 JSObject.set({ name: 'JSObject' });
 
@@ -1578,6 +1630,7 @@ Ecore.EcorePackage.get('eClassifiers')
     .add(EReference)
     .add(EOperation)
     .add(EParameter)
+    .add(EGenericType)
     .add(EEnum)
     .add(EEnumLiteral)
     .add(EStringToStringMapEntry)
@@ -1585,6 +1638,11 @@ Ecore.EcorePackage.get('eClassifiers')
     .add(EBoolean)
     .add(EInt)
     .add(EDouble)
+    .add(EIntegerObject)
+    .add(EFloatObject)
+    .add(ELongObject)
+    .add(EMap)
+    .add(EDiagnosticChain)
     .add(EDate)
     .add(Ecore.EShort)
     .add(Ecore.EFloat)
@@ -1608,10 +1666,16 @@ Ecore.EEnumLiteral = EEnumLiteral;
 Ecore.EDataType = EDataType;
 Ecore.EOperation = EOperation;
 Ecore.EParameter = EParameter;
+Ecore.EGenericType = EGenericType;
 Ecore.EString = EString;
 Ecore.EBoolean = EBoolean;
 Ecore.EInt = EInt;
 Ecore.EDouble = EDouble;
+Ecore.EIntegerObject = EIntegerObject;
+Ecore.EFloatObject = EFloatObject;
+Ecore.ELongObject = ELongObject;
+Ecore.EMap = EMap;
+Ecore.EDiagnosticChain = EDiagnosticChain;
 Ecore.EDate = EDate;
 Ecore.JSObject = JSObject;
 
