@@ -806,6 +806,11 @@ var EClass = new EObject(),
     EBoolean = new EObject(),
     EDouble = new EObject(),
     EDate = new EObject(),
+    EIntegerObject = new EObject(),
+    EFloatObject = new EObject(),
+    ELongObject = new EObject(),
+    EMap = new EObject(),
+    EDiagnosticChain = new EObject(),
     JSObject = new EObject(),
     EClass_abstract = new EObject(),
     EClass_interface = new EObject(),
@@ -1201,6 +1206,7 @@ EReference.get('eSuperTypes').add(EStructuralFeature);
 EOperation.get('eSuperTypes').add(ETypedElement);
 EParameter.get('eSuperTypes').add(ETypedElement);
 ETypeParameter.get('eSuperTypes').add(ENamedElement);
+EGenericType.get('eSuperTypes').add(EObjectClass);
 
 // ETypedElement
 //  - attributes:
@@ -1484,7 +1490,6 @@ EAnnotation.get('eStructuralFeatures')
     .add(EAnnotation_source)
     .add(EAnnotation_details);
 
-
 // EGenericType
 //
 
@@ -1616,6 +1621,16 @@ EDate.eClass = EDataType;
 EDate.set({ name: 'EDate' });
 EDouble.eClass = EDataType;
 EDouble.set({ name: 'EDouble' });
+EIntegerObject.eClass = EDataType;
+EIntegerObject.set({ name: 'EIntegerObject' });
+EFloatObject.eClass = EDataType;
+EFloatObject.set({ name: 'EFloatObject'});
+ELongObject.eClass = EDataType;
+ELongObject.set({ name: 'ELongObject'});
+EMap.eClass = EDataType;
+EMap.set({ name: 'EMap' });
+EDiagnosticChain.eClass = EDataType;
+EDiagnosticChain.set({ name: 'EDiagnosticChain' });
 JSObject.eClass = EDataType;
 JSObject.set({ name: 'JSObject' });
 
@@ -1689,6 +1704,11 @@ Ecore.EcorePackage.get('eClassifiers')
     .add(EBoolean)
     .add(EInt)
     .add(EDouble)
+    .add(EIntegerObject)
+    .add(EFloatObject)
+    .add(ELongObject)
+    .add(EMap)
+    .add(EDiagnosticChain)
     .add(EDate)
     .add(Ecore.EShort)
     .add(Ecore.EFloat)
@@ -1718,6 +1738,11 @@ Ecore.EString = EString;
 Ecore.EBoolean = EBoolean;
 Ecore.EInt = EInt;
 Ecore.EDouble = EDouble;
+Ecore.EIntegerObject = EIntegerObject;
+Ecore.EFloatObject = EFloatObject;
+Ecore.ELongObject = ELongObject;
+Ecore.EMap = EMap;
+Ecore.EDiagnosticChain = EDiagnosticChain;
 Ecore.EDate = EDate;
 Ecore.JSObject = JSObject;
 
