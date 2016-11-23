@@ -1,11 +1,11 @@
 var assert  = require('assert');
-var Ecore = require('../dist/ecore.js');
+var Ecore   = require('../dist/ecore.js');
 var _       = require('underscore');
 
 var createResource = function(name) {
     var resourceSet = Ecore.ResourceSet.create();
     return resourceSet.create(name);
-}
+};
 
 var Edit = Ecore.Edit;
 
@@ -36,7 +36,7 @@ describe('Edit', function() {
             assert.ok(_.include(names, 'EEnum'));
         });
 
-        it('should return the types EAttribute, EReference EOperation and EAnnotation from a EClass object', function() {
+        it('should return the correct child types from a EClass object', function() {
             var resource = createResource('model.json');
             var c = Ecore.EClass.create({ name: 'c' });
             resource.get('contents').add(c);
@@ -44,15 +44,17 @@ describe('Edit', function() {
             var types = Edit.childTypes(c);
 
             assert.ok(types);
-            assert.equal(4, types.length);
+            assert.equal(6, types.length);
 
             var names = types.map(function(e) { return e.get('name'); });
 
             assert.equal(false, _.include(names, null));
+            assert.ok(_.include(names, 'EAnnotation'));
             assert.ok(_.include(names, 'EAttribute'));
             assert.ok(_.include(names, 'EReference'));
-            assert.ok(_.include(names, 'EAnnotation'));
             assert.ok(_.include(names, 'EOperation'));
+            assert.ok(_.include(names, 'ETypeParameter'));
+            assert.ok(_.include(names, 'EGenericType'));
         });
 
     });

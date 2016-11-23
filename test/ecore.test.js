@@ -361,13 +361,26 @@ describe('Ecore', function() {
         });
 
         it('should contain EOperation references', function() {
-            var eOperation = Ecore.EOperation;
             var eParameters = Ecore.EOperation.getEStructuralFeature('eParameters');
+            assert.strictEqual(Ecore.EReference, eParameters.eClass);
+            assert.strictEqual(true, eParameters.get('containment'));
+            assert.strictEqual(eParameters.get('lowerBound'), 0);
+            assert.strictEqual(eParameters.get('upperBound'), -1);
+            assert.strictEqual(eParameters.get('eType'), Ecore.EParameter);
 
-            assert.ok(eParameters);
-            assert.equal(eParameters.get('lowerBound'), 0);
-            assert.equal(eParameters.get('upperBound'), -1);
-            assert.equal(eParameters.get('eType'), Ecore.EParameter);
+            var eTypeParameters = Ecore.EOperation.getEStructuralFeature('eTypeParameters');
+            assert.strictEqual(Ecore.EReference, eTypeParameters.eClass);
+            assert.strictEqual(true, eTypeParameters.get('containment'));
+            assert.strictEqual(eTypeParameters.get('lowerBound'), 0);
+            assert.strictEqual(eTypeParameters.get('upperBound'), -1);
+            assert.strictEqual(eTypeParameters.get('eType'), Ecore.ETypeParameter);
+
+            var eGenericExceptions = Ecore.EOperation.getEStructuralFeature('eGenericExceptions');
+            assert.strictEqual(Ecore.EReference, eGenericExceptions.eClass);
+            assert.strictEqual(true, eGenericExceptions.get('containment'));
+            assert.strictEqual(eGenericExceptions.get('lowerBound'), 0);
+            assert.strictEqual(eGenericExceptions.get('upperBound'), -1);
+            assert.strictEqual(eGenericExceptions.get('eType'), Ecore.EGenericType);
         });
 
     }); // end EOperation
@@ -422,6 +435,14 @@ describe('Ecore', function() {
             assert.ok(_.contains(allSuperTypes, Ecore.EModelElement));
         });
 
+        it('should have correct features', function() {
+            var eGenericType = ETypedElement.getEStructuralFeature("eGenericType");
+            assert.strictEqual(Ecore.EReference, eGenericType.eClass);
+            assert.strictEqual(Ecore.EGenericType, eGenericType.get('eType'));
+            assert.strictEqual(true, eGenericType.get('containment'));
+            assert.strictEqual(1, eGenericType.get('upperBound'));
+        });
+
     }); // end describe ETypedElement
 
     describe('#EClassifier', function() {
@@ -432,6 +453,14 @@ describe('Ecore', function() {
             assert.equal(EClassifier.get('eSuperTypes').size(), 1);
         });
 
+        it('should have correct features', function() {
+            var eTypeParameters = EClassifier.getEStructuralFeature("eTypeParameters");
+            assert.strictEqual(Ecore.EReference, eTypeParameters.eClass);
+            assert.strictEqual(Ecore.ETypeParameter, eTypeParameters.get('eType'));
+            assert.strictEqual(true, eTypeParameters.get('containment'));
+            assert.strictEqual(-1, eTypeParameters.get('upperBound'));
+        });
+
     }); // end describe EClassifier
 
     describe('#EClass', function() {
@@ -440,14 +469,41 @@ describe('Ecore', function() {
         it('should have correct attributes', function() {
             assert.strictEqual(EClass, EClass.eClass);
 
-            var eFeatures = EClass.get('eAllStructuralFeatures');
+            var abstract = EClass.getEStructuralFeature("abstract");
+            assert.strictEqual(Ecore.EAttribute, abstract.eClass);
+            assert.strictEqual(Ecore.EBoolean, abstract.get('eType'));
+            assert.strictEqual(1, abstract.get('upperBound'));
 
-            var found = _.find(eFeatures, function(feature) {
-                return feature.get('name') === 'name';
-            });
+            var interface_ = EClass.getEStructuralFeature("interface");
+            assert.strictEqual(Ecore.EAttribute, interface_.eClass);
+            assert.strictEqual(Ecore.EBoolean, interface_.get('eType'));
+            assert.strictEqual(1, interface_.get('upperBound'));
+        });
 
-            assert.ok(found);
-            assert.strictEqual(found.eClass, Ecore.EAttribute);
+        it('should have correct references', function() {
+            var eSuperTypes = EClass.getEStructuralFeature("eSuperTypes");
+            assert.strictEqual(Ecore.EReference, eSuperTypes.eClass);
+            assert.strictEqual(Ecore.EClass, eSuperTypes.get('eType'));
+            assert.notEqual(true, eSuperTypes.get('containment'));
+            assert.strictEqual(-1, eSuperTypes.get('upperBound'));
+
+            var eStructuralFeatures = EClass.getEStructuralFeature("eStructuralFeatures");
+            assert.strictEqual(Ecore.EReference, eStructuralFeatures.eClass);
+            assert.strictEqual(Ecore.EStructuralFeature, eStructuralFeatures.get('eType'));
+            assert.strictEqual(true, eStructuralFeatures.get('containment'));
+            assert.strictEqual(-1, eStructuralFeatures.get('upperBound'));
+
+            var eOperations = EClass.getEStructuralFeature("eOperations");
+            assert.strictEqual(Ecore.EReference, eOperations.eClass);
+            assert.strictEqual(Ecore.EOperation, eOperations.get('eType'));
+            assert.strictEqual(true, eOperations.get('containment'));
+            assert.strictEqual(-1, eOperations.get('upperBound'));
+
+            var eGenericSuperTypes = EClass.getEStructuralFeature("eGenericSuperTypes");
+            assert.strictEqual(Ecore.EReference, eGenericSuperTypes.eClass);
+            assert.strictEqual(Ecore.EGenericType, eGenericSuperTypes.get('eType'));
+            assert.strictEqual(true, eGenericSuperTypes.get('containment'));
+            assert.strictEqual(-1, eGenericSuperTypes.get('upperBound'));
         });
 
         it('should have EClassifier has eSuperTypes', function() {
@@ -461,6 +517,70 @@ describe('Ecore', function() {
         });
 
     });  // end describe EClass.
+
+    describe('ETypeParameter', function() {
+        var ETypeParameter = Ecore.ETypeParameter;
+
+        it('should have correct attributes', function() {
+            assert.strictEqual(0, ETypeParameter.get('eAttributes').length);
+            assert.strictEqual(1, ETypeParameter.get('eSuperTypes').size());
+            assert.ok(ETypeParameter.get('eSuperTypes').contains(Ecore.ENamedElement));
+        });
+
+        it('should have correct references', function() {
+            var eReferences = ETypeParameter.get('eReferences');
+
+            assert.strictEqual(2, eReferences.length);
+
+            var eGenericTypes = ETypeParameter.getEStructuralFeature('eGenericTypes');
+            assert.strictEqual(Ecore.EGenericType, eGenericTypes.get('eType'));
+            assert.notEqual(true, eGenericTypes.get('containment'));
+            assert.strictEqual(-1, eGenericTypes.get('upperBound'));
+
+            var eBounds = ETypeParameter.getEStructuralFeature('eBounds');
+            assert.strictEqual(Ecore.EGenericType, eBounds.get('eType'));
+            assert.strictEqual(true, eBounds.get('containment'));
+            assert.strictEqual(-1, eBounds.get('upperBound'));
+        });
+    });
+
+    describe('EGenericType', function() {
+        var EGenericType = Ecore.EGenericType;
+
+        it('should have correct attributes', function() {
+            assert.strictEqual(0, EGenericType.get('eAttributes').length);
+            assert.strictEqual(0, EGenericType.get('eSuperTypes').size());
+        });
+
+        it('should have correct references', function() {
+            assert.strictEqual(5, EGenericType.get('eReferences').length);
+
+            var eUpperBound = EGenericType.getEStructuralFeature('eUpperBound');
+            assert.strictEqual(EGenericType, eUpperBound.get('eType'));
+            assert.strictEqual(1, eUpperBound.get('upperBound'));
+            assert.strictEqual(true, eUpperBound.get('containment'));
+
+            var eLowerBound = EGenericType.getEStructuralFeature('eLowerBound');
+            assert.strictEqual(EGenericType, eLowerBound.get('eType'));
+            assert.strictEqual(1, eLowerBound.get('upperBound'));
+            assert.strictEqual(true, eLowerBound.get('containment'));
+
+            var eTypeArguments = EGenericType.getEStructuralFeature('eTypeArguments');
+            assert.strictEqual(EGenericType, eTypeArguments.get('eType'));
+            assert.strictEqual(-1, eTypeArguments.get('upperBound'));
+            assert.strictEqual(true, eTypeArguments.get('containment'));
+
+            var eTypeParameter = EGenericType.getEStructuralFeature('eTypeParameter');
+            assert.strictEqual(Ecore.ETypeParameter, eTypeParameter.get('eType'));
+            assert.strictEqual(1, eTypeParameter.get('upperBound'));
+            assert.notEqual(true, eTypeParameter.get('containment'));
+
+            var eClassifier = EGenericType.getEStructuralFeature('eClassifier');
+            assert.strictEqual(Ecore.EClassifier, eClassifier.get('eType'));
+            assert.strictEqual(1, eClassifier.get('upperBound'));
+            assert.notEqual(true, eClassifier.get('containment'));
+        })
+    });
 
 }); // end describe Ecore.
 
