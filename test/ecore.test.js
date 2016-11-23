@@ -549,7 +549,7 @@ describe('Ecore', function() {
 
         it('should have correct attributes', function() {
             assert.strictEqual(0, EGenericType.get('eAttributes').length);
-            assert.strictEqual(0, EGenericType.get('eSuperTypes').size());
+            assert.strictEqual(1, EGenericType.get('eSuperTypes').size());
         });
 
         it('should have correct references', function() {
