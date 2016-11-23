@@ -1,7 +1,7 @@
 {
   "name": "ecore",
   "description": "Ecore (EMOF) JavaScript Implementation",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "author": "Guillaume Hillairet <g.hillairet@gmail.com>",
   "repository": {
     "type": "git",
