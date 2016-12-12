@@ -219,7 +219,7 @@ Once these are installed, go back to your terminal and enter the ecore.js direct
 > cd ecore.js
 ```
 
-The tests are written using the [mocha](http://visionmedia.github.io/mocha/) library. To run them, execute the following command:
+The tests are written using the [mocha](http://mochajs.org/) library. To run them, execute the following command:
 
 ```
 > grunt test
