@@ -33,11 +33,12 @@ Ecore.JSON = {
                     if ( feature.isTypeOf('EAttribute') ) {
                         eObject.set( featureName, value );
                     } else if (feature.get('containment')) {
+                        var eType = feature.get('eType');
                         if (feature.get('upperBound') === 1) {
-                            eObject.set( featureName, parseObject(value) );
+                            eObject.set( featureName, parseObject(value, eType) );
                         } else {
                             _.each(value || [], function(val) {
-                                eObject.get( featureName ).add( parseObject(val) );
+                                eObject.get( featureName ).add( parseObject(val, eType) );
                             });
                         }
                     } else {
@@ -82,11 +83,13 @@ Ecore.JSON = {
             });
         }
 
-        function parseObject(object) {
-            var eClass, features, child;
+        function parseObject(object, eClass) {
+            var features, child;
 
-            if (object && object.eClass) {
-                eClass = resourceSet.getEObject(object.eClass);
+            if (object && (eClass || object.eClass)) {
+                if (object.eClass) {
+	                eClass = resourceSet.getEObject(object.eClass);
+                }
                 if (eClass) {
                     features = eClass.get('eAllStructuralFeatures');
                     child = eClass ? Ecore.create(eClass) : null;
