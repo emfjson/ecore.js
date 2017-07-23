@@ -6,7 +6,7 @@ fs = require('fs');
 var Ecore = require('../dist/ecore.xmi.js');
 var assert = require("assert");
 
-describe.only('JSON Instances of complex model (test5.xmi)', function () {
+describe('JSON Instances of complex model (test5.xmi)', function () {
 	//Read and parse the model file
 	var modelSet = Ecore.ResourceSet.create();
 	var model = modelSet.create({uri: 'test5.xmi'});

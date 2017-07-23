@@ -84,24 +84,25 @@ Ecore.JSON = {
         }
 
         function parseObject(object, eClass) {
-            var features, child;
+            var child;
 
             if (object && (eClass || object.eClass)) {
                 if (object.eClass) {
 	                eClass = resourceSet.getEObject(object.eClass);
                 }
-                if (eClass) {
-                    features = eClass.get('eAllStructuralFeatures');
-                    child = eClass ? Ecore.create(eClass) : null;
 
-                    if (child) {
-                        if (object._id) {
-                            child._id = object._id;
-                        }
-                        _.each( features, processFeature(object, child) );
+                try {
+                    child = Ecore.create(eClass);
+                } catch (e) {
+                    throw new Error('Cannot parse or cannot find EClass for object' + JSON.stringify(object));
+                }
+
+                if (child) {
+                    if (object._id) {
+                        child._id = object._id;
                     }
-                } else {
-                    throw new Error('Cannot find EClass from href ' + JSON.stringify(object.eClass));
+
+                    _.each(eClass.get('eAllStructuralFeatures'), processFeature(object, child));
                 }
             }
 
