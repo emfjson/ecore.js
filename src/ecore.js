@@ -1645,6 +1645,9 @@ Ecore.EFloat = EDataType.create({
 Ecore.EShort = EDataType.create({
     name: 'EShort'
 });
+Ecore.EDoubleObject = EDataType.create({
+    name: 'EDoubleObject'
+});
 
 // EPackage
 //  - references
@@ -1713,6 +1716,7 @@ Ecore.EcorePackage.get('eClassifiers')
     .add(Ecore.EShort)
     .add(Ecore.EFloat)
     .add(Ecore.ELong)
+    .add(Ecore.EDoubleObject)
     .add(JSObject);
 
 Ecore.EObject = EObjectClass;
