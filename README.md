@@ -16,7 +16,7 @@
 
 Download Ecore.js from dist/ folder, and include it in your html along with underscore.js.
 
-```
+```html
 <script src="underscore.js"></script>
 <script src="ecore.js"></script>
 ```
@@ -38,7 +38,7 @@ npm install ecore
 Importing Ecore.js in a Node module is done as follow:
 
 
-```
+```javascript
 var Ecore = require('ecore');
 ```
 
@@ -132,8 +132,8 @@ described [here](https://github.com/ghillairet/emfjson) and looks like this:
     "eClass" : "/model.json#//User",
     "name" : "u1",
     "friends" : [
-        { "$ref" : '/u2.json#/', eClass: '/model.json#//User' },
-        { "$ref" : '/u3.json#/', eClass: '/model.json#//User' }
+        { "$ref" : "/u2.json#/", "eClass": "/model.json#//User" },
+        { "$ref" : "/u3.json#/", "eClass": "/model.json#//User" }
     ]
 }
 ```
