@@ -66,9 +66,9 @@ var User = Ecore.EClass.create({
             upperBound: 1,
             eType: Ecore.EString
         }),
-        // EReferences are used to define links between domain
+        // EReference are used to define links between domain
         // elements.
-        Ecore.EReferences.create({
+        Ecore.EReference.create({
             name: 'friends',
             upperBound: -1,
             containment: false,
