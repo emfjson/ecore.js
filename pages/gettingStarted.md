@@ -57,7 +57,7 @@ The following code shows how to create the EClass Library.
 var Library = Ecore.EClass.create({
     name: 'Library',
     eStructuralFeatures: [
-        Ecore.EAttribute.create({ name: 'name', eType: Ecore.EString });
+        Ecore.EAttribute.create({ name: 'name', eType: Ecore.EString })
     ]
 });
 ```
@@ -81,6 +81,8 @@ Library.get('name'); // -> Foo
 Note that features with an upper bound > 1 return an EList and cannot be set.
 
 ```javascript
+var aFeature = Ecore.EAttribute.create({name:'otherAttr', eType:Ecore.EString});
+
 Library.get('eStructuralFeatures'); // -> EList([ EAttribute(name) ])
 Library.get('eStructuralFeatures').add(aFeature);
 Library.get('eStructuralFeatures').at(0); // -> EAttribute(name)
@@ -95,7 +97,7 @@ We can now create the remaining classes of our model.
 
 ```javascript
 var Item = Ecore.EClass.create({
-    name: 'Item'
+    name: 'Item',
     abstract: true,
     eStructuralFeatures: [
         { eClass: Ecore.EAttribute, name: 'publicationDate', eType: Ecore.EDate }
