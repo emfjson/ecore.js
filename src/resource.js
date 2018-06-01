@@ -48,6 +48,23 @@ Ecore.JSON = {
             };
         }
 
+        function processAnnotation(node, eObject) {
+            if (node.source) {
+                eObject.set('source', node.source);
+            }
+
+            if (node.details) {
+                if (_.isArray(node.details)) {
+
+                } else {
+                    var details = eObject.get('details');
+                    _.each(node.details, function(v, k) {
+                        details.add(Ecore.EStringToStringMapEntry.create({ 'key': k, 'value': v }));
+                    });
+                }
+            }
+        }
+
         function resolveReferences() {
             var index = buildIndex(model);
 
@@ -102,7 +119,11 @@ Ecore.JSON = {
                         child._id = object._id;
                     }
 
-                    _.each(eClass.get('eAllStructuralFeatures'), processFeature(object, child));
+                    if (eClass === Ecore.EAnnotation) {
+                        processAnnotation(object, child);
+                    } else {
+                        _.each(eClass.get('eAllStructuralFeatures'), processFeature(object, child));
+                    }
                 }
             }
 
@@ -183,6 +204,23 @@ Ecore.JSON = {
             };
         }
 
+        function processAnnotation(object, data) {
+            if (object.values.source) {
+                data.source = object.values.source;
+            }
+
+            if (object.values.details && object.values.details.size() > 0) {
+                data.details = {};
+                object.values.details.each(function (e) {
+                    var key = e.get("key");
+                    var value = e.get("value");
+                    if (key) {
+                        data.details[key] = value;
+                    }
+                });
+            }
+        }
+
         function jsonObject(object) {
             var eClass = object.eClass,
                 values = object.values,
@@ -190,7 +228,11 @@ Ecore.JSON = {
 
             if (object._id) { data._id = object._id; }
 
-            _.each( values, processFeature(object, data) );
+            if (eClass === Ecore.EAnnotation) {
+                processAnnotation(object, data);
+            } else {
+                _.each(values, processFeature(object, data));
+            }
 
             return data;
         }
