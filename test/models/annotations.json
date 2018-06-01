@@ -1,0 +1,21 @@
+{
+  "eClass": "http://www.eclipse.org/emf/2002/Ecore#//EPackage",
+  "name": "example",
+  "nsURI": "http://www.example.org/example",
+  "nsPrefix": "example",
+  "eClassifiers": [
+    {
+      "eClass": "http://www.eclipse.org/emf/2002/Ecore#//EClass",
+      "name": "Foo",
+      "eAnnotations": [
+        {
+          "source": "source",
+          "details": {
+            "displayName": "value",
+            "otherName": "otherValue"
+          }
+        }
+      ]
+    }
+  ]
+}
